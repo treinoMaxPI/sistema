@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Email - TreinoMax</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .success {
+            color: #059669;
+        }
+        .error {
+            color: #dc2626;
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .redirect-info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #dc2626;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div th:if="${success}" class="success">
+            <div class="icon">✓</div>
+            <h1>Email Verificado!</h1>
+            <div class="message" th:text="${message}">
+                Seu email foi verificado com sucesso.
+            </div>
+        </div>
+        
+        <div th:unless="${success}" class="error">
+            <div class="icon">✗</div>
+            <h1>Erro na Verificação</h1>
+            <div class="message" th:text="${message}">
+                Ocorreu um erro ao verificar seu email.
+            </div>
+        </div>
+        
+        <div class="spinner" id="spinner"></div>
+        
+        <div class="redirect-info">
+            <span th:if="${success}">Redirecionando para o aplicativo...</span>
+            <span th:unless="${success}">Você será redirecionado para o aplicativo...</span>
+            <br>
+            <span id="countdown">5</span> segundos
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const redirectUrl = /*[[${redirectUrl}]]*/ 'http://localhost:4200';
+        const success = /*[[${success}]]*/ false;
+        let countdown = 5;
+        
+        const countdownElement = document.getElementById('countdown');
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+        
+        // Redirect immediately if there's an error and no need to wait
+        if (!success) {
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 5000);
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

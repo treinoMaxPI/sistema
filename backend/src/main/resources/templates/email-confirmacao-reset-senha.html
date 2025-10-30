@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senha Alterada - TreinoMax</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #16a34a;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            padding: 30px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        .success-icon {
+            text-align: center;
+            font-size: 48px;
+            color: #16a34a;
+            margin: 20px 0;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Senha Alterada com Sucesso</h1>
+            <p>TreinoMax - Sua Academia Digital</p>
+        </div>
+        
+        <div class="content">
+            <div class="success-icon">✓</div>
+            
+            <p>Olá, <strong th:text="${nome}">Usuário</strong>!</p>
+            
+            <p>Sua senha foi alterada com sucesso no TreinoMax.</p>
+            
+            <p>Agora você pode continuar acompanhando seus treinos e progresso na academia!</p>
+            
+            <div class="info-box">
+                <p><strong>Informações importantes:</strong></p>
+                <ul>
+                    <li>Sua senha foi atualizada com segurança</li>
+                    <li>Você já pode fazer login com sua nova senha</li>
+                    <li>Esta alteração foi realizada em: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">data atual</span></li>
+                </ul>
+            </div>
+            
+            <p>Se você não realizou esta alteração, entre em contato imediatamente com nosso suporte para proteger sua conta.</p>
+            
+            <p>Caso tenha alguma dúvida ou precise de ajuda, nossa equipe de suporte está à disposição.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 TreinoMax - Sua Academia Digital. Todos os direitos reservados.</p>
+            <p>Este é um email automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
