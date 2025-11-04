@@ -3,4 +3,5 @@ postgres/
 
 # Docker Compose override files (for local development)
 docker-compose.override.yml
+.env
 .env.local
