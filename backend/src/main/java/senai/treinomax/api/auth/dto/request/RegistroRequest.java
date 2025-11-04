@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import senai.treinomax.api.auth.model.Role;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -28,4 +32,6 @@ public class RegistroRequest {
         message = "Senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial"
     )
     private String senha;
+
+    private Set<Role> roles = new HashSet<>();
 }

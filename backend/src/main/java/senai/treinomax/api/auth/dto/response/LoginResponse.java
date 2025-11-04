@@ -3,6 +3,9 @@ package senai.treinomax.api.auth.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import senai.treinomax.api.auth.model.Role;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -14,4 +17,5 @@ public class LoginResponse {
     private String nome;
     private String email;
     private Boolean emailVerificado;
+    private Set<Role> roles;
 }

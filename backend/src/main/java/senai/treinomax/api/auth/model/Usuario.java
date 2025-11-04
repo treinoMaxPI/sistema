@@ -11,6 +11,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -52,14 +54,52 @@ public class Usuario {
     @Column(name = "data_atualizacao", nullable = false)
     private LocalDateTime dataAtualizacao;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "usuario_id"))
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles = new HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         dataCriacao = LocalDateTime.now();
         dataAtualizacao = LocalDateTime.now();
+        
+        // Set default role as CUSTOMER if no roles are provided
+        if (roles == null || roles.isEmpty()) {
+            roles = new HashSet<>();
+            roles.add(Role.CUSTOMER);
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         dataAtualizacao = LocalDateTime.now();
+    }
+
+    // Convenience methods for role management
+    public void addRole(Role role) {
+        if (roles == null) {
+            roles = new HashSet<>();
+        }
+        roles.add(role);
+    }
+
+    public void removeRole(Role role) {
+        if (roles != null) {
+            roles.remove(role);
+        }
+    }
+
+    public boolean hasRole(Role role) {
+        return roles != null && roles.contains(role);
+    }
+
+    public boolean hasAnyRole(Role... rolesToCheck) {
+        if (roles == null) return false;
+        for (Role role : rolesToCheck) {
+            if (roles.contains(role)) return true;
+        }
+        return false;
     }
 }

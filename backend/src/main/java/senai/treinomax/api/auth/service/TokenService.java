@@ -55,6 +55,7 @@ public class TokenService {
                 .claim("id", usuario.getId().toString())
                 .claim("nome", usuario.getNome())
                 .claim("emailVerificado", usuario.getEmailVerificado())
+                .claim("roles", usuario.getRoles())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

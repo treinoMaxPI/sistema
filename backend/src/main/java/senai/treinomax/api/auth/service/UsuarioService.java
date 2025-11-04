@@ -40,6 +40,11 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(registroRequest.getSenha()));
         usuario.setAtivo(true);
         usuario.setEmailVerificado(false);
+        
+        // Set roles from request, if provided
+        if (registroRequest.getRoles() != null && !registroRequest.getRoles().isEmpty()) {
+            usuario.setRoles(registroRequest.getRoles());
+        }
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         log.info("Usuário registrado com sucesso: {}", usuarioSalvo.getEmail());

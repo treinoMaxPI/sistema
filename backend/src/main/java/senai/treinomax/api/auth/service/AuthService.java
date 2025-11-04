@@ -72,6 +72,7 @@ public class AuthService {
         response.setNome(usuario.getNome());
         response.setEmail(usuario.getEmail());
         response.setEmailVerificado(usuario.getEmailVerificado());
+        response.setRoles(usuario.getRoles());
 
         log.info("Autenticação bem-sucedida para: {}", loginRequest.getEmail());
         return response;
