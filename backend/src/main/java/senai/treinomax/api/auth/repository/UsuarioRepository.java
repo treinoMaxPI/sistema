@@ -33,4 +33,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
     List<Usuario> findByPlanoId(UUID planoId);
 
     List<Usuario> findByPlanoIsNull();
+
+    long countByPlanoId(UUID planoId);
+
 }

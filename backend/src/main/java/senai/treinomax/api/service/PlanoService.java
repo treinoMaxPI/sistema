@@ -27,16 +27,13 @@ public class PlanoService {
     public Plano criarPlano(CriarPlanoRequest request, UUID criadoPorId) {
         log.info("Criando novo plano: {}", request.getNome());
 
-        // Verificar se já existe plano com mesmo nome
         if (planoRepository.existsByNome(request.getNome())) {
             log.warn("Tentativa de criar plano com nome já existente: {}", request.getNome());
             throw new IllegalArgumentException("Já existe um plano com o nome: " + request.getNome());
         }
 
-        // Buscar usuário criador
         Usuario criador = usuarioService.buscarPorId(criadoPorId);
 
-        // Criar entidade Plano a partir do DTO
         Plano plano = new Plano();
         plano.setNome(request.getNome());
         plano.setDescricao(request.getDescricao());
@@ -94,14 +91,12 @@ public class PlanoService {
 
         Plano planoExistente = buscarPorId(id);
 
-        // Verificar se o nome foi alterado e se já existe outro plano com o novo nome
         if (!planoExistente.getNome().equals(request.getNome()) &&
             planoRepository.existsByNome(request.getNome())) {
             log.warn("Tentativa de atualizar plano para nome já existente: {}", request.getNome());
             throw new IllegalArgumentException("Já existe um plano com o nome: " + request.getNome());
         }
 
-        // Atualizar campos permitidos
         planoExistente.setNome(request.getNome());
         planoExistente.setDescricao(request.getDescricao());
 
