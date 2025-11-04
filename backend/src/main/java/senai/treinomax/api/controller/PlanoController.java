@@ -42,6 +42,7 @@ public class PlanoController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
     public ResponseEntity<List<Plano>> listarPlanos(@RequestParam(defaultValue = "true") Boolean ativos) {
         log.info("Recebida solicitação para listar planos (ativos: {})", ativos);
         
@@ -56,6 +57,7 @@ public class PlanoController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
     public ResponseEntity<Plano> buscarPlanoPorId(@PathVariable UUID id) {
         log.info("Recebida solicitação para buscar plano por ID: {}", id);
         
@@ -64,6 +66,7 @@ public class PlanoController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Plano> atualizarPlano(
             @PathVariable UUID id,
             @Valid @RequestBody AtualizarPlanoRequest request) {
@@ -74,6 +77,7 @@ public class PlanoController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> alterarStatusPlano(
             @PathVariable UUID id,
             @RequestParam boolean ativo) {
@@ -88,6 +92,7 @@ public class PlanoController {
     }
 
     @PatchMapping("/{id}/preco")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> atualizarPrecoPlano(
             @PathVariable UUID id,
             @RequestParam Integer precoCentavos) {
