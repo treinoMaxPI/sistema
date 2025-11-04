@@ -12,11 +12,13 @@ import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.CriarPlanoRequest;
 import senai.treinomax.api.dto.request.AtualizarPlanoRequest;
+import senai.treinomax.api.dto.response.PlanoResponse;
 import senai.treinomax.api.model.Plano;
 import senai.treinomax.api.service.PlanoService;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/planos")
@@ -27,9 +29,19 @@ public class PlanoController {
     private final PlanoService planoService;
     private final UsuarioService usuarioService;
 
+    private PlanoResponse toPlanoResponse(Plano plano) {
+        return new PlanoResponse(
+            plano.getId(),
+            plano.getNome(),
+            plano.getDescricao(),
+            plano.getAtivo(),
+            plano.getPrecoCentavos()
+        );
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Plano> criarPlano(@Valid @RequestBody CriarPlanoRequest request) {
+    public ResponseEntity<PlanoResponse> criarPlano(@Valid @RequestBody CriarPlanoRequest request) {
         log.info("Recebida solicitação para criar plano: {}", request.getNome());
         
         String userEmail = SecurityUtils.getCurrentUserEmail();
@@ -37,13 +49,14 @@ public class PlanoController {
         UUID usuarioId = usuario.getId();
         
         Plano plano = planoService.criarPlano(request, usuarioId);
+        PlanoResponse response = toPlanoResponse(plano);
         
-        return ResponseEntity.status(HttpStatus.CREATED).body(plano);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
-    public ResponseEntity<List<Plano>> listarPlanos(@RequestParam(defaultValue = "true") Boolean ativos) {
+    public ResponseEntity<List<PlanoResponse>> listarPlanos(@RequestParam(defaultValue = "true") Boolean ativos) {
         log.info("Recebida solicitação para listar planos (ativos: {})", ativos);
         
         List<Plano> planos;
@@ -53,27 +66,33 @@ public class PlanoController {
             planos = planoService.listarTodosPlanos();
         }
         
-        return ResponseEntity.ok(planos);
+        List<PlanoResponse> response = planos.stream()
+                .map(this::toPlanoResponse)
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
-    public ResponseEntity<Plano> buscarPlanoPorId(@PathVariable UUID id) {
+    public ResponseEntity<PlanoResponse> buscarPlanoPorId(@PathVariable UUID id) {
         log.info("Recebida solicitação para buscar plano por ID: {}", id);
         
         Plano plano = planoService.buscarPorId(id);
-        return ResponseEntity.ok(plano);
+        PlanoResponse response = toPlanoResponse(plano);
+        return ResponseEntity.ok(response);
     }
     
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Plano> atualizarPlano(
+    public ResponseEntity<PlanoResponse> atualizarPlano(
             @PathVariable UUID id,
             @Valid @RequestBody AtualizarPlanoRequest request) {
         log.info("Recebida solicitação para atualizar plano: {}", id);
         
         Plano plano = planoService.atualizarPlano(id, request);
-        return ResponseEntity.ok(plano);
+        PlanoResponse response = toPlanoResponse(plano);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/status")
