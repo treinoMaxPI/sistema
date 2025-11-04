@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import senai.treinomax.api.model.Plano;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -59,6 +60,10 @@ public class Usuario {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "plano_id")
+    private Plano plano;
 
     @PrePersist
     protected void onCreate() {

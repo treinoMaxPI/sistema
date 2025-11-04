@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,4 +29,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
     @Modifying
     @Query("UPDATE Usuario u SET u.ativo = :ativo WHERE u.id = :usuarioId")
     void atualizarStatusAtivo(@Param("usuarioId") UUID usuarioId, @Param("ativo") Boolean ativo);
+
+    List<Usuario> findByPlanoId(UUID planoId);
+
+    List<Usuario> findByPlanoIsNull();
 }
