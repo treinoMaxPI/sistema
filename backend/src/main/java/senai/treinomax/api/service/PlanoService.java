@@ -104,8 +104,6 @@ public class PlanoService {
         // Atualizar campos permitidos
         planoExistente.setNome(request.getNome());
         planoExistente.setDescricao(request.getDescricao());
-        planoExistente.setPrecoCentavos(request.getPrecoCentavos());
-        planoExistente.setAtivo(request.getAtivo());
 
         Plano planoAtualizadoSalvo = planoRepository.save(planoExistente);
         log.info("Plano atualizado com sucesso: {} (ID: {})", planoAtualizadoSalvo.getNome(), planoAtualizadoSalvo.getId());

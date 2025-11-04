@@ -20,11 +20,4 @@ public class AtualizarPlanoRequest {
     @NotBlank(message = "Descrição é obrigatória")
     @Size(min = 10, max = 1000, message = "Descrição deve ter entre 10 e 1000 caracteres")
     private String descricao;
-
-    @NotNull(message = "Preço é obrigatório")
-    @PositiveOrZero(message = "Preço não pode ser negativo")
-    private Integer precoCentavos;
-
-    @NotNull(message = "Status ativo é obrigatório")
-    private Boolean ativo;
 }
