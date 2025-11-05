@@ -80,7 +80,7 @@ public class PlanoUsuarioEventosService {
 
         PlanoCobranca cobranca = cobrancaOpt.get();
         log.debug("Estado atual da cobrança antes do pagamento: id={}, pago={}, dataPagamento={}",
-                cobranca.getId(), cobranca.isPago(), cobranca.getDataPagamento());
+                cobranca.getId(), cobranca.getPago(), cobranca.getDataPagamento());
 
         LocalDate pagamentoDate = DateUtils.getCurrentBrazilianLocalDate();
         String usuario = SecurityUtils.getCurrentUserEmail();
@@ -91,7 +91,7 @@ public class PlanoUsuarioEventosService {
         cobranca.setPago(true);
 
         log.debug("Atualizando cobrança id {} com dataPagamento={} observacoes={} pago={}",
-                cobranca.getId(), pagamentoDate, observacoes, cobranca.isPago());
+                cobranca.getId(), pagamentoDate, observacoes, cobranca.getPago());
 
         try {
             this.planoCobrancaRepository.save(cobranca);
