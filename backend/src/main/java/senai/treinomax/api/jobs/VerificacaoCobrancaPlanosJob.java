@@ -3,6 +3,7 @@ package senai.treinomax.api.jobs;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,7 +26,7 @@ public class VerificacaoCobrancaPlanosJob {
     private TarefasExecutadasRepository tarefasExecutadasRepository;
 
     @Scheduled(fixedDelay = 1 * 60 * 1000)
-    public void tarefaComIntervaloFixo() {
+    protected void tarefaComIntervaloFixo() {
         LocalDateTime diaHoraExecucao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         LocalDate diaExecucao = diaHoraExecucao.toLocalDate();
 
@@ -56,6 +57,18 @@ public class VerificacaoCobrancaPlanosJob {
         } finally {
             this.tarefasExecutadasRepository.save(tarefa);
         }
+    }
+
+    public void forcarVerificacaoCobranca() {
+        Optional<TarefaExecutada> tarefaSucedida = this.tarefasExecutadasRepository.findFirstByTipoAndSucessoTrueOrderByDataHoraExecucaoDesc(TarefaTipo.MENSAL_VERIFICAR_PLANOS);
+        if (tarefaSucedida.isEmpty()) {
+            tarefaComIntervaloFixo();
+            return;
+        }
+        tarefaSucedida.get().setSucesso(false);
+        tarefaSucedida.get().setMensagemErro("Foi bem sucedida, porém marcada como nao sucedida para executar outra verificação forçada");
+        tarefasExecutadasRepository.save(tarefaSucedida.get());
+        this.forcarVerificacaoCobranca();
     }
 
 }

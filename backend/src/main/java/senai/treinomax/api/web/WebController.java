@@ -2,6 +2,7 @@ package senai.treinomax.api.web;
 
 import senai.treinomax.api.auth.service.AuthService;
 import senai.treinomax.api.dto.response.PlanoCobrancaAdminResponse;
+import senai.treinomax.api.jobs.VerificacaoCobrancaPlanosJob;
 import senai.treinomax.api.repository.PlanoCobrancaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,43 +25,37 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WebController {
 
+    private final VerificacaoCobrancaPlanosJob cobrancaPlanosJob; 
     private final AuthService authService;
     private final PlanoCobrancaRepository planoCobrancaRepository;
 
-
     @Value("${cors.allowed-origins:http://localhost:4200}")
     private String allowedOrigins;
-    
+
     @GetMapping("/verify-email")
     public String verifyEmail(@RequestParam String token, Model model) {
         log.info("Recebida solicitação de verificação de email via web: {}", token);
-        
+
         try {
-            
             authService.verificarEmail(token);
-            
-            
             model.addAttribute("success", true);
-            model.addAttribute("message", "Seu email foi verificado com sucesso! Agora você pode fazer login no aplicativo.");
+            model.addAttribute("message",
+                    "Seu email foi verificado com sucesso! Agora você pode fazer login no aplicativo.");
             log.info("Email verificado com sucesso via web para token: {}", token);
-            
+
         } catch (Exception e) {
-            
+
             model.addAttribute("success", false);
             model.addAttribute("message", "Erro ao verificar email: " + e.getMessage());
             log.warn("Erro ao verificar email via web para token {}: {}", token, e.getMessage());
         }
-        
-        
         String redirectUrl = allowedOrigins.split(",")[0].trim();
         model.addAttribute("redirectUrl", redirectUrl);
-        
         return "email-verification-result";
     }
 
     @GetMapping("/admin-login")
     public String adminLoginPage() {
-        
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             return "redirect:/admin/planos-cobrancas";
@@ -71,24 +66,22 @@ public class WebController {
     @GetMapping("/admin/planos-cobrancas")
     @PreAuthorize("hasRole('ADMIN')")
     public String listarPlanosCobrancas(Model model) {
-        System.out.println("teste 123");
-        
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        
+
         try {
             List<PlanoCobrancaAdminResponse> cobrancas = planoCobrancaRepository
-                .findAllWithUsuarioAndPlano()
-                .stream()
-                .map(PlanoCobrancaAdminResponse::fromEntity)
-                .collect(Collectors.toList());
-            
+                    .findAllWithUsuarioAndPlano()
+                    .stream()
+                    .map(PlanoCobrancaAdminResponse::fromEntity)
+                    .collect(Collectors.toList());
+
             model.addAttribute("cobrancas", cobrancas);
             model.addAttribute("totalCobrancas", cobrancas.size());
             model.addAttribute("adminUsername", username);
-            
+
             return "admin-planos-cobrancas";
-            
+
         } catch (Exception e) {
             log.error("Erro ao buscar planos de cobrança", e);
             model.addAttribute("error", "Erro ao carregar dados");
@@ -101,7 +94,7 @@ public class WebController {
     public ResponseEntity<?> pagarCobranca(@RequestParam String cobrancaId, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        
+
         try {
             System.out.println("Ação: Pagar cobrança - ID: " + cobrancaId + " por usuário: " + username);
             return ResponseEntity.ok().build();
@@ -115,13 +108,12 @@ public class WebController {
     @PostMapping("/admin/forcar-verificacao")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> forcarVerificacaoCobranca(Model model) {
-        
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        
+
         try {
             System.out.println("Ação: Forçar verificação de cobranças por usuário: " + username);
-            
+            cobrancaPlanosJob.forcarVerificacaoCobranca();
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Erro ao forçar verificação de cobranças", e);
