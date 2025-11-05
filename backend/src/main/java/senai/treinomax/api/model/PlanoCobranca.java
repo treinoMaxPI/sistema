@@ -60,6 +60,10 @@ public class PlanoCobranca {
     @Builder.Default
     private Boolean inadimplenciaProcessada = false;
 
+    @Column(name = "proxima_cobranca_gerada", nullable = false)
+    @Builder.Default
+    private Boolean proximaCobrancaGerada = false;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean pago = false;

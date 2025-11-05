@@ -25,7 +25,6 @@ import java.util.UUID;
 public class PlanoUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-
     private final UsuarioService usuarioService;
     private final PlanoService planoService;
     private final PlanoCobrancaRepository planoCobrancaRepository;
@@ -47,14 +46,20 @@ public class PlanoUsuarioService {
         }
         
         YearMonth mesAtual = YearMonth.from(horarioNow);
-        LocalDate dataVencimento = horarioNow.toLocalDate();
-
-        Optional<PlanoCobranca> cobrancaExistente = planoCobrancaRepository
-            .findByUsuarioIdAndMesReferencia(usuarioId, mesAtual);
         
+        Optional<PlanoCobranca> cobrancaExistente = planoCobrancaRepository.findByUsuarioIdAndMesReferencia(usuarioId, mesAtual);
+        Optional<PlanoCobranca> proximaCobrancaOpt;
+
+        if (cobrancaExistente.isPresent() && cobrancaExistente.get().getProximaCobrancaGerada()) {
+            proximaCobrancaOpt = planoCobrancaRepository.findByUsuarioIdAndMesReferencia(usuarioId, mesAtual.plusMonths(1));
+        } else {
+            proximaCobrancaOpt = Optional.empty();
+        }
+
         if (cobrancaExistente.isEmpty()) {
+            LocalDate dataVencimento = DateUtils.calcularProximoVencimento(horarioNow.getDayOfMonth() + 1, mesAtual.minusMonths(1));
             PlanoCobranca planoCobranca = PlanoCobranca.builder()
-                .dataVencimento(horarioNow.toLocalDate())
+                .dataVencimento(dataVencimento)
                 .mesReferencia(mesAtual)
                 .plano(plano)
                 .usuario(usuario)
@@ -69,10 +74,22 @@ public class PlanoUsuarioService {
 
             log.info("Plano {} atribuído imediatamente ao usuário {} com vencimento em {}",
                     plano.getNome(), usuario.getEmail(), dataVencimento);
+        } else if (proximaCobrancaOpt.isPresent() && !proximaCobrancaOpt.get().getPago()) {
+            PlanoCobranca proximaCobranca = proximaCobrancaOpt.get();
+            proximaCobranca.setPlano(plano);
+            proximaCobranca.setValorCentavos(plano.getPrecoCentavos());
+
+            planoCobrancaRepository.save(proximaCobranca);
+
+            usuario.setProximoPlano(null);
+            usuario.setPlano(plano);
+            
+            log.info("Próxima cobrança do usuário {} (mês {}) atualizada para o plano {} com valor {} centavos",
+                    usuario.getEmail(), proximaCobranca.getMesReferencia(), plano.getNome(), plano.getPrecoCentavos());
         } else {
             usuario.setProximoPlano(plano);
 
-            log.info("Usuário {} já possui cobrança no mês {}. Plano {} será aplicado no próximo mês.",
+            log.info("Usuário {} já possui cobrança no mês {} (E a próxima cobrança em aberto não existe ou já foi paga). Plano {} será aplicado no próximo mês.",
              usuario.getEmail(), mesAtual, plano.getNome());
         }
 
@@ -235,6 +252,57 @@ public class PlanoUsuarioService {
         
         usuarioRepository.save(usuario);
         planoCobrancaRepository.save(cobranca);
+    }
+
+    @Transactional
+    public void gerarProximaCobranca(PlanoCobranca cobranca) {
+        log.debug("Tentando gerar próxima cobrança para cobrança {}", cobranca.getId());
+
+        if (!cobranca.getPago()) {
+            log.debug("Cobrança {} não está paga, não será gerada próxima cobrança", cobranca.getId());
+            return;
+        }
+
+        if (cobranca.getDataVencimento().isAfter(DateUtils.getCurrentBrazilianLocalDate())) {
+            log.debug("Cobrança {} ainda não venceu, não será gerada próxima cobrança", cobranca.getId());
+            return;
+        }
+
+        Usuario usuario = cobranca.getUsuario();
+
+        if (usuario.getProximoPlano() != null) {
+            log.info("Atualizando plano do usuário {} de {} para {}", 
+                usuario.getEmail(), 
+                usuario.getPlano() != null ? usuario.getPlano().getNome() : "nenhum",
+                usuario.getProximoPlano().getNome());
+            usuario.setPlano(usuario.getProximoPlano());
+            usuario.setProximoPlano(null);
+        }
+
+        if (usuario.getPlano() == null) {
+            log.debug("Usuário {} não possui plano ativo, não será gerada próxima cobrança", usuario.getEmail());
+            return;
+        }
+
+        PlanoCobranca novaCobranca = PlanoCobranca.builder()
+            .dataVencimento(DateUtils.calcularProximoVencimento(cobranca.getDataVencimento()))
+            .mesReferencia(cobranca.getMesReferencia().plusMonths(1))
+            .pago(false)
+            .plano(usuario.getPlano())
+            .proximaCobrancaGerada(false)
+            .inadimplenciaProcessada(false)
+            .usuario(usuario)
+            .valorCentavos(usuario.getPlano().getPrecoCentavos())
+        .build();
+     
+        cobranca.setProximaCobrancaGerada(true);
+        
+        this.usuarioRepository.save(usuario);
+        this.planoCobrancaRepository.save(cobranca);
+        this.planoCobrancaRepository.save(novaCobranca);
+        
+        log.info("Gerada próxima cobrança para usuário {} com vencimento em {} no valor de {} centavos", 
+            usuario.getEmail(), novaCobranca.getDataVencimento(), novaCobranca.getValorCentavos());
     }
 
 

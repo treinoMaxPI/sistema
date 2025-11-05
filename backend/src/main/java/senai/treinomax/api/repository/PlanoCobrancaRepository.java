@@ -65,4 +65,17 @@ public interface PlanoCobrancaRepository extends JpaRepository<PlanoCobranca, UU
         @Param("dataAtual") LocalDate dataAtual,
         Pageable pageable
     );
+
+    @Query("""
+        SELECT pc
+        FROM PlanoCobranca pc
+        WHERE pc.pago = true
+        AND pc.proximaCobrancaGerada = false
+        AND pc.dataVencimento < :dataAtual
+        ORDER BY pc.dataVencimento ASC
+    """)
+    Page<PlanoCobranca> findPagasComProximaNaoGerada(
+        @Param("dataAtual") LocalDate dataAtual,
+        Pageable pageable
+    );
 }

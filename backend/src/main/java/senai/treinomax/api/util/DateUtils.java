@@ -26,4 +26,8 @@ public class DateUtils {
         return proximoMes.atDay(dia);
     }
 
+    public static LocalDate calcularProximoVencimento(LocalDate vencimentoAnterior) {
+        return calcularProximoVencimento(vencimentoAnterior.getDayOfMonth(), YearMonth.from(vencimentoAnterior));
+    }
+
 }
