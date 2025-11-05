@@ -72,7 +72,6 @@ public class Usuario {
         dataCriacao = DateUtils.getCurrentBrazilianLocalDateTime();
         dataAtualizacao = DateUtils.getCurrentBrazilianLocalDateTime();
         
-        // Set default role as CUSTOMER if no roles are provided
         if (roles == null || roles.isEmpty()) {
             roles = new HashSet<>();
             roles.add(Role.CUSTOMER);
@@ -84,7 +83,6 @@ public class Usuario {
         dataAtualizacao = DateUtils.getCurrentBrazilianLocalDateTime();
     }
 
-    // Convenience methods for role management
     public void addRole(Role role) {
         if (roles == null) {
             roles = new HashSet<>();
