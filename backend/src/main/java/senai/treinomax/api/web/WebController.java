@@ -4,6 +4,7 @@ import senai.treinomax.api.auth.service.AuthService;
 import senai.treinomax.api.dto.response.PlanoCobrancaAdminResponse;
 import senai.treinomax.api.jobs.VerificacaoCobrancaPlanosJob;
 import senai.treinomax.api.repository.PlanoCobrancaRepository;
+import senai.treinomax.api.service.PlanoUsuarioEventosService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WebController {
 
+    private final PlanoUsuarioEventosService planoUsuarioEventosService;
     private final VerificacaoCobrancaPlanosJob cobrancaPlanosJob; 
     private final AuthService authService;
     private final PlanoCobrancaRepository planoCobrancaRepository;
@@ -97,6 +100,7 @@ public class WebController {
 
         try {
             System.out.println("Ação: Pagar cobrança - ID: " + cobrancaId + " por usuário: " + username);
+            this.planoUsuarioEventosService.pagarCobranca(UUID.fromString(cobrancaId));
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Erro ao processar pagamento da cobrança: {}", cobrancaId, e);
