@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import senai.treinomax.api.util.DateUtils;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +25,7 @@ public class ErrorResponse {
     private String path;
 
     public ErrorResponse(int status, String error, String message, String path) {
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = DateUtils.getCurrentBrazilianLocalDateTime();
         this.status = status;
         this.error = error;
         this.message = message;

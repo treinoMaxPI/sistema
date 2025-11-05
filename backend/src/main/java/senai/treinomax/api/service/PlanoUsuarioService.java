@@ -7,8 +7,15 @@ import org.springframework.transaction.annotation.Transactional;
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.model.Plano;
+import senai.treinomax.api.model.PlanoCobranca;
+import senai.treinomax.api.repository.PlanoCobrancaRepository;
+import senai.treinomax.api.util.DateUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -18,22 +25,54 @@ public class PlanoUsuarioService {
 
     private final UsuarioService usuarioService;
     private final PlanoService planoService;
+    private final PlanoCobrancaRepository planoCobrancaRepository;
 
     @Transactional
     public void atribuirPlanoAoUsuario(UUID usuarioId, UUID planoId) {
         log.info("Atribuindo plano {} ao usuário {}", planoId, usuarioId);
-
+        LocalDateTime horarioNow = DateUtils.getCurrentBrazilianLocalDateTime();
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         Plano plano = planoService.buscarPorId(planoId);
+        
+        if (usuario.getPlano() != null && usuario.getPlano().getId().equals(planoId)) {
+            throw new IllegalArgumentException("Usuário já possui este plano");
+        }
 
         if (!plano.getAtivo()) {
             log.warn("Tentativa de atribuir plano inativo {} ao usuário {}", planoId, usuarioId);
             throw new IllegalArgumentException("Não é possível atribuir um plano inativo");
         }
+        
+        YearMonth mesAtual = YearMonth.from(horarioNow);
+        LocalDate dataVencimento = horarioNow.toLocalDate();
 
-        usuario.setPlano(plano);
+        Optional<PlanoCobranca> cobrancaExistente = planoCobrancaRepository
+            .findByUsuarioIdAndMesReferencia(usuarioId, mesAtual);
+        
+        if (cobrancaExistente.isEmpty()) {
+            PlanoCobranca planoCobranca = PlanoCobranca.builder()
+                .dataVencimento(horarioNow.toLocalDate())
+                .mesReferencia(mesAtual)
+                .plano(plano)
+                .usuario(usuario)
+                .pago(false)
+                .valorCentavos(plano.getPrecoCentavos())
+            .build();
+
+            usuario.setProximoPlano(null);
+            usuario.setPlano(plano);
+            planoCobrancaRepository.save(planoCobranca);
+
+            log.info("Plano {} atribuído imediatamente ao usuário {} com vencimento em {}",
+                    plano.getNome(), usuario.getEmail(), dataVencimento);
+        } else {
+            usuario.setProximoPlano(plano);
+
+            log.info("Usuário {} já possui cobrança no mês {}. Plano {} será aplicado no próximo mês.",
+             usuario.getEmail(), mesAtual, plano.getNome());
+        }
+
         usuarioService.salvar(usuario);
-
         log.info("Plano {} atribuído com sucesso ao usuário {}", plano.getNome(), usuario.getEmail());
     }
 

@@ -7,9 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import senai.treinomax.api.model.Plano;
+import senai.treinomax.api.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -47,11 +46,9 @@ public class Usuario {
     @Column(name = "email_verificado", nullable = false)
     private Boolean emailVerificado = false;
 
-    @CreationTimestamp
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
-    @UpdateTimestamp
     @Column(name = "data_atualizacao", nullable = false)
     private LocalDateTime dataAtualizacao;
 
@@ -65,10 +62,15 @@ public class Usuario {
     @JoinColumn(name = "plano_id")
     private Plano plano;
 
+    @ManyToOne
+    @JoinColumn(name = "proximo_plano_id", nullable = true)
+    private Plano proximoPlano;
+
+
     @PrePersist
     protected void onCreate() {
-        dataCriacao = LocalDateTime.now();
-        dataAtualizacao = LocalDateTime.now();
+        dataCriacao = DateUtils.getCurrentBrazilianLocalDateTime();
+        dataAtualizacao = DateUtils.getCurrentBrazilianLocalDateTime();
         
         // Set default role as CUSTOMER if no roles are provided
         if (roles == null || roles.isEmpty()) {
@@ -79,7 +81,7 @@ public class Usuario {
 
     @PreUpdate
     protected void onUpdate() {
-        dataAtualizacao = LocalDateTime.now();
+        dataAtualizacao = DateUtils.getCurrentBrazilianLocalDateTime();
     }
 
     // Convenience methods for role management

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import senai.treinomax.api.util.DateUtils;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,11 +38,11 @@ public class RefreshToken {
 
     @PrePersist
     protected void onCreate() {
-        dataCriacao = LocalDateTime.now();
+        dataCriacao = DateUtils.getCurrentBrazilianLocalDateTime();
     }
 
     public boolean isExpirado() {
-        return LocalDateTime.now().isAfter(dataExpiracao);
+        return DateUtils.getCurrentBrazilianLocalDateTime().isAfter(dataExpiracao);
     }
 
     public boolean isValido() {

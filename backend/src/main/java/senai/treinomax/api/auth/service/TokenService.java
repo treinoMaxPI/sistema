@@ -13,6 +13,7 @@ import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.repository.RefreshTokenRepository;
 import senai.treinomax.api.auth.repository.TokenRecuperacaoSenhaRepository;
 import senai.treinomax.api.auth.repository.TokenVerificacaoEmailRepository;
+import senai.treinomax.api.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -93,7 +94,7 @@ public class TokenService {
 
         // Gerar novo token
         String token = UUID.randomUUID().toString();
-        LocalDateTime dataExpiracao = LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000);
+        LocalDateTime dataExpiracao = DateUtils.getCurrentBrazilianLocalDateTime().plusSeconds(refreshTokenExpiration / 1000);
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setToken(token);
@@ -135,7 +136,7 @@ public class TokenService {
 
         // Gerar novo token
         String token = UUID.randomUUID().toString();
-        LocalDateTime dataExpiracao = LocalDateTime.now().plusHours(1);
+        LocalDateTime dataExpiracao = DateUtils.getCurrentBrazilianLocalDateTime().plusHours(1);
 
         TokenRecuperacaoSenha tokenRecuperacao = new TokenRecuperacaoSenha();
         tokenRecuperacao.setToken(token);
@@ -177,7 +178,7 @@ public class TokenService {
 
         // Gerar novo token
         String token = UUID.randomUUID().toString();
-        LocalDateTime dataExpiracao = LocalDateTime.now().plusHours(24);
+        LocalDateTime dataExpiracao = DateUtils.getCurrentBrazilianLocalDateTime().plusHours(24);
 
         TokenVerificacaoEmail tokenVerificacao = new TokenVerificacaoEmail();
         tokenVerificacao.setToken(token);

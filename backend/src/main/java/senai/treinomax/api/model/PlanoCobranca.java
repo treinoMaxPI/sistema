@@ -1,6 +1,8 @@
 package senai.treinomax.api.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -13,47 +15,59 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.util.DateUtils;
 
-
 @Entity
-@Table(name = "planos")
+@Table(
+    name = "planos_cobrancas",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"usuario_id", "mes_referencia"}
+    )
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Plano {
+@Builder
+public class PlanoCobranca {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank
-    @Size(min = 3, max = 100)
-    @Column(nullable = false, length = 100)
-    private String nome;
-
-    @NotBlank
-    @Size(min = 10, max = 1000)
-    @Column(nullable = false, length = 1000)
-    private String descricao;
-
-    @Column(nullable = false)
-    private Boolean ativo = true;
-
-    @Column(nullable = false)
-    private Integer precoCentavos = 0;
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "criado_por", nullable = false)
-    private Usuario criadoPor;
+    @JoinColumn(name = "plano_id", nullable = false)
+    private Plano plano;
+
+    @Column(nullable = false)
+    private YearMonth mesReferencia;
+
+    @Column(nullable = false)
+    private Integer valorCentavos;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean pago = false;
+
+    @Column(name = "data_vencimento", nullable = false)
+    private LocalDate dataVencimento;
+
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
+
+    @Column(length = 500, nullable = true)
+    private String observacoes;
 
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
@@ -71,5 +85,4 @@ public class Plano {
     protected void onUpdate() {
         dataAtualizacao = DateUtils.getCurrentBrazilianLocalDateTime();
     }
-
 }
