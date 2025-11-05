@@ -9,12 +9,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import senai.treinomax.api.auth.config.SecurityUtils;
+import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.CriarPlanoRequest;
 import senai.treinomax.api.dto.request.AtualizarPlanoRequest;
+import senai.treinomax.api.dto.request.EscolherPlanoRequest;
 import senai.treinomax.api.dto.response.PlanoResponse;
 import senai.treinomax.api.model.Plano;
 import senai.treinomax.api.service.PlanoService;
+import senai.treinomax.api.service.PlanoUsuarioService;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +31,7 @@ public class PlanoController {
 
     private final PlanoService planoService;
     private final UsuarioService usuarioService;
+    private final PlanoUsuarioService planoUsuarioService;
 
     private PlanoResponse toPlanoResponse(Plano plano) {
         return new PlanoResponse(
@@ -118,6 +122,21 @@ public class PlanoController {
         log.info("Recebida solicitação para atualizar preço do plano {} para {} centavos", id, precoCentavos);
         
         planoService.atualizarPreco(id, precoCentavos);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/escolher")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'PERSONAL')")
+    public ResponseEntity<Void> escolherPlano(@PathVariable UUID id) {
+        log.info("Recebida solicitação para escolher plano: {}", id);
+        
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        Usuario usuario = usuarioService.buscarPorEmail(userEmail);
+        UUID usuarioId = usuario.getId();
+        
+        planoUsuarioService.atribuirPlanoAoUsuario(usuarioId, id);
+        
+        log.info("Plano {} escolhido com sucesso pelo usuário {}", id, userEmail);
         return ResponseEntity.ok().build();
     }
 }
