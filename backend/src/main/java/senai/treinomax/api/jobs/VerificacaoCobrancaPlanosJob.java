@@ -7,7 +7,6 @@ import java.time.ZoneId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.repository.TarefasExecutadasRepository;
@@ -17,7 +16,7 @@ import senai.treinomax.api.service.PlanoUsuarioEventosService;
 
 @Component
 @Slf4j
-public class VerificacaoMensalPlanosJob {
+public class VerificacaoCobrancaPlanosJob {
 
     @Autowired
     private PlanoUsuarioEventosService planoUsuarioEventosService;
@@ -47,7 +46,7 @@ public class VerificacaoMensalPlanosJob {
         .build(); 
         
         try {
-            planoUsuarioEventosService.executarCicloMensal();
+            planoUsuarioEventosService.executarCicloVerificacaoCobranca(diaHoraExecucao);
             tarefa.setSucesso(true);
             log.info("[JOB] Tarefa MENSAL_VERIFICAR_PLANOS concluída com sucesso.");
         } catch (Exception e) {

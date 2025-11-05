@@ -56,6 +56,10 @@ public class PlanoCobranca {
     @Column(nullable = false)
     private Integer valorCentavos;
 
+    @Column(name = "inadimplencia_processada", nullable = false)
+    @Builder.Default
+    private Boolean inadimplenciaProcessada = false;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean pago = false;

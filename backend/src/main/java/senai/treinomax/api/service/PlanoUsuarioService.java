@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import senai.treinomax.api.auth.model.Usuario;
+import senai.treinomax.api.auth.repository.UsuarioRepository;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.model.Plano;
 import senai.treinomax.api.model.PlanoCobranca;
@@ -22,6 +23,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class PlanoUsuarioService {
+
+    private final UsuarioRepository usuarioRepository;
 
     private final UsuarioService usuarioService;
     private final PlanoService planoService;
@@ -57,6 +60,7 @@ public class PlanoUsuarioService {
                 .usuario(usuario)
                 .pago(false)
                 .valorCentavos(plano.getPrecoCentavos())
+                .inadimplenciaProcessada(false)
             .build();
 
             usuario.setProximoPlano(null);
@@ -216,6 +220,21 @@ public class PlanoUsuarioService {
                 usuarios.size(), planoOrigemId, planoDestinoId);
 
         return usuarios.size();
+    }
+
+    @Transactional
+    public void processarInadimplencia(PlanoCobranca cobranca) {
+        if (cobranca.getPago()) {
+            return;
+        }
+        
+        cobranca.setInadimplenciaProcessada(true);
+        Usuario usuario = cobranca.getUsuario();
+        usuario.setPlano(null);
+        usuario.setProximoPlano(null);
+        
+        usuarioRepository.save(usuario);
+        planoCobrancaRepository.save(cobranca);
     }
 
 

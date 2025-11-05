@@ -1,5 +1,7 @@
 package senai.treinomax.api.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -50,4 +52,17 @@ public interface PlanoCobrancaRepository extends JpaRepository<PlanoCobranca, UU
 
     @Query("SELECT pc FROM PlanoCobranca pc WHERE pc.plano.id = :planoId AND pc.mesReferencia = :mesReferencia")
     List<PlanoCobranca> findByPlanoAndMes(@Param("planoId") UUID planoId, @Param("mesReferencia") YearMonth mesReferencia);
+
+    @Query("""
+        SELECT pc
+        FROM PlanoCobranca pc
+        WHERE pc.pago = false
+        AND pc.inadimplenciaProcessada = false
+        AND pc.dataVencimento < :dataAtual
+        ORDER BY pc.dataVencimento ASC
+    """)
+    Page<PlanoCobranca> findVencidasNaoProcessadas(
+        @Param("dataAtual") LocalDate dataAtual,
+        Pageable pageable
+    );
 }
