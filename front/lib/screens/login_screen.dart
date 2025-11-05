@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
-import '../models/auth_models.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +13,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _showPassword = false;
   String _errorMessage = '';
@@ -59,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else {
       setState(() {
         _errorMessage = response.message ?? 'Erro ao fazer login';
-        
+
         // Check if it's an unverified email error
         if (_errorMessage.toLowerCase().contains('não verificado')) {
           _showResendOption = true;
@@ -91,7 +90,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       });
     } else {
       setState(() {
-        _errorMessage = response.message ?? 'Erro ao reenviar email de verificação';
+        _errorMessage =
+            response.message ?? 'Erro ao reenviar email de verificação';
       });
     }
   }
@@ -113,11 +113,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Text(
                 'Gestão de Academias',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 32),
-              
+
               // Email field
               TextFormField(
                 controller: _emailController,
@@ -138,7 +138,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Password field
               TextFormField(
                 controller: _passwordController,
@@ -169,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              
+
               // Error message
               if (_errorMessage.isNotEmpty)
                 Container(
@@ -185,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
-              
+
               // Success message
               if (_successMessage.isNotEmpty)
                 Container(
@@ -201,7 +201,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: const TextStyle(color: Colors.green),
                   ),
                 ),
-              
+
               if (_showResendOption) ...[
                 const SizedBox(height: 16),
                 OutlinedButton(
@@ -209,9 +209,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: const Text('Reenviar email de verificação'),
                 ),
               ],
-              
+
               const SizedBox(height: 16),
-              
+
               // Login button
               SizedBox(
                 width: double.infinity,
@@ -224,15 +224,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text('Entrar'),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Register link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

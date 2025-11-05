@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 import '../services/auth_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -11,6 +12,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _userName;
+  String? _jwtToken;
+  JwtPayload? _parsedJwt;
   bool _isLoading = true;
 
   @override
@@ -22,9 +25,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _loadUserData() async {
     final authService = AuthService();
     final userName = await authService.getUserName();
-    
+    final token = await authService.getAccessToken();
+    final parsedJwt = await authService.getParsedAccessToken();
+
     setState(() {
       _userName = userName;
+      _jwtToken = token;
+      _parsedJwt = parsedJwt;
       _isLoading = false;
     });
   }
@@ -32,7 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _logout() async {
     final authService = AuthService();
     await authService.logout();
-    
+
     if (mounted) {
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -68,23 +75,93 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             'Bem-vindo, ${_userName ?? 'Usuário'}!',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Sistema de Gestão de Academias',
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Colors.grey[600],
+                                    ),
                           ),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
+                  // JWT Token Section
+                  if (_jwtToken != null) ...[
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.security, color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'JWT Token Information',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Raw JWT Token
+                            _buildInfoRow('JWT Token:', _jwtToken!),
+                            const SizedBox(height: 8),
+
+                            // Parsed JWT Content
+                            if (_parsedJwt != null) ...[
+                              const SizedBox(height: 16),
+                              Text(
+                                'Parsed JWT Content:',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[50],
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
+                                child: SelectableText(
+                                  _formatJson(_parsedJwt!),
+                                  style: const TextStyle(
+                                    fontFamily: 'Monospace',
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
                   // Features grid
                   Expanded(
                     child: GridView.count(
@@ -135,6 +212,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
     );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: SelectableText(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Monospace',
+              fontSize: 12,
+            ),
+            maxLines: 2,
+            // overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatJson(JwtPayload jwt) {
+    final encoder = JsonEncoder.withIndent('  ');
+    return encoder.convert(jwt.toJson());
   }
 
   Widget _buildFeatureCard({

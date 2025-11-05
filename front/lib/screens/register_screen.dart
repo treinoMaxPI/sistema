@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
-import '../models/auth_models.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -16,7 +15,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -58,7 +57,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     if (response.success) {
       setState(() {
-        _successMessage = 'Conta criada com sucesso! Verifique seu email para ativar sua conta.';
+        _successMessage =
+            'Conta criada com sucesso! Verifique seu email para ativar sua conta.';
       });
 
       // Navigate to login after a delay
@@ -84,8 +84,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final hasUppercase = RegExp(r'[A-Z]').hasMatch(value);
     final hasLowercase = RegExp(r'[a-z]').hasMatch(value);
     final hasDigits = RegExp(r'[0-9]').hasMatch(value);
-    final hasSpecialCharacters = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value);
-    
+    final hasSpecialCharacters =
+        RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value);
+
     if (!hasUppercase || !hasLowercase || !hasDigits || !hasSpecialCharacters) {
       return 'A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial';
     }
@@ -119,11 +120,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               Text(
                 'Criar Conta',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 32),
-              
+
               // Name field
               TextFormField(
                 controller: _nameController,
@@ -143,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Email field
               TextFormField(
                 controller: _emailController,
@@ -164,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Password field
               TextFormField(
                 controller: _passwordController,
@@ -187,7 +188,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 validator: _validatePassword,
               ),
               const SizedBox(height: 16),
-              
+
               // Confirm Password field
               TextFormField(
                 controller: _confirmPasswordController,
@@ -197,7 +198,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _showConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                      _showConfirmPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -210,7 +213,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 validator: _validateConfirmPassword,
               ),
               const SizedBox(height: 24),
-              
+
               // Error message
               if (_errorMessage.isNotEmpty)
                 Container(
@@ -226,7 +229,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
-              
+
               // Success message
               if (_successMessage.isNotEmpty)
                 Container(
@@ -242,9 +245,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     style: const TextStyle(color: Colors.green),
                   ),
                 ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Register button
               SizedBox(
                 width: double.infinity,
@@ -257,15 +260,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text('Cadastrar'),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Login link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
