@@ -86,7 +86,7 @@ public class WebController {
             return "admin-planos-cobrancas";
 
         } catch (Exception e) {
-            log.error("Erro ao buscar planos de cobrança", e);
+            log.error("Erro ao buscar cobranças", e);
             model.addAttribute("error", "Erro ao carregar dados");
             return "admin-planos-cobrancas";
         }

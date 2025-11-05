@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,22 +70,36 @@ public class PlanoUsuarioEventosService {
         } while (!page.isLast());
         log.info("Finalizado processamento de inadimplências");
     }
-
     public void pagarCobranca(UUID cobrancaId) {
+        log.info("Iniciando registro de pagamento para cobrança id {}", cobrancaId);
         Optional<PlanoCobranca> cobrancaOpt = this.planoCobrancaRepository.findById(cobrancaId);
         if (cobrancaOpt.isEmpty()) {
+            log.warn("Cobrança não encontrada: {}", cobrancaId);
             throw new IllegalArgumentException("Cobrança não encontrada: " + cobrancaId);
         }
 
         PlanoCobranca cobranca = cobrancaOpt.get();
+        log.debug("Estado atual da cobrança antes do pagamento: id={}, pago={}, dataPagamento={}",
+                cobranca.getId(), cobranca.isPago(), cobranca.getDataPagamento());
 
-        cobranca.setDataPagamento(DateUtils.getCurrentBrazilianLocalDate());
-        cobranca.setObservacoes("Marcado como pago manualmente por administrador: "+SecurityUtils.getCurrentUserEmail());
+        LocalDate pagamentoDate = DateUtils.getCurrentBrazilianLocalDate();
+        String usuario = SecurityUtils.getCurrentUserEmail();
+        String observacoes = "Marcado como pago manualmente por administrador: " + usuario;
+
+        cobranca.setDataPagamento(pagamentoDate);
+        cobranca.setObservacoes(observacoes);
         cobranca.setPago(true);
 
-        this.planoCobrancaRepository.save(cobranca);
+        log.debug("Atualizando cobrança id {} com dataPagamento={} observacoes={} pago={}",
+                cobranca.getId(), pagamentoDate, observacoes, cobranca.isPago());
 
-        log.info("Pagamento registrado para cobrança id {}", cobrancaId);
+        try {
+            this.planoCobrancaRepository.save(cobranca);
+            log.info("Pagamento registrado com sucesso para cobrança id {}", cobrancaId);
+        } catch (Exception ex) {
+            log.error("Erro ao salvar pagamento para cobrança id {}: {}", cobrancaId, ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
 }
