@@ -24,7 +24,7 @@ public class VerificacaoCobrancaPlanosJob {
     @Autowired
     private TarefasExecutadasRepository tarefasExecutadasRepository;
 
-    @Scheduled(fixedDelay = 30 * 60 * 1000)
+    @Scheduled(fixedDelay = 1 * 60 * 1000)
     public void tarefaComIntervaloFixo() {
         LocalDateTime diaHoraExecucao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         LocalDate diaExecucao = diaHoraExecucao.toLocalDate();

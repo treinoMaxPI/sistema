@@ -238,10 +238,12 @@ public class PlanoUsuarioService {
 
         return usuarios.size();
     }
-
     @Transactional
     public void processarInadimplencia(PlanoCobranca cobranca) {
+        log.debug("Processando inadimplência para cobrança {}", cobranca.getId());
+
         if (cobranca.getPago()) {
+            log.debug("Cobrança {} está paga, não será processada inadimplência", cobranca.getId());
             return;
         }
         
@@ -252,6 +254,8 @@ public class PlanoUsuarioService {
         
         usuarioRepository.save(usuario);
         planoCobrancaRepository.save(cobranca);
+
+        log.info("Inadimplência processada para usuário {}: plano removido", usuario.getEmail());
     }
 
     @Transactional
