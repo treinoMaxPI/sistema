@@ -125,7 +125,7 @@ public class PlanoController {
     }
 
     @PostMapping("/{id}/escolher")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'PERSONAL')")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<Void> escolherPlano(@PathVariable UUID id) {
         log.info("Recebida solicitação para escolher plano: {}", id);
         

@@ -10,7 +10,6 @@
         th { background: #ccc; }
         .error { color: red; margin: 10px 0; }
         .header-info { margin: 10px 0; }
-        .back-link { display: block; margin-top: 10px; }
         .status-pago { color: green; }
         .status-pendente { color: red; }
     </style>
@@ -87,7 +86,6 @@
     <div style="margin-top: 10px;">
         <span th:if="${adminUsername}" th:text="'Logado como: ' + ${adminUsername}"></span> |
         <a href="#" onclick="logout()">Logout</a> |
-        <a href="/admin-login" class="back-link">← Voltar para Login</a>
     </div>
 
     <script>
