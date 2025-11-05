@@ -13,7 +13,6 @@ import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.CriarPlanoRequest;
 import senai.treinomax.api.dto.request.AtualizarPlanoRequest;
-import senai.treinomax.api.dto.request.EscolherPlanoRequest;
 import senai.treinomax.api.dto.response.PlanoResponse;
 import senai.treinomax.api.model.Plano;
 import senai.treinomax.api.service.PlanoService;

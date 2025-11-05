@@ -78,4 +78,12 @@ public interface PlanoCobrancaRepository extends JpaRepository<PlanoCobranca, UU
         @Param("dataAtual") LocalDate dataAtual,
         Pageable pageable
     );
+    @Query("""
+        SELECT pc
+        FROM PlanoCobranca pc
+        JOIN FETCH pc.usuario u
+        JOIN FETCH pc.plano p
+        ORDER BY pc.dataCriacao DESC
+    """)
+    List<PlanoCobranca> findAllWithUsuarioAndPlano();
 }

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Login</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .error { color: red; margin: 10px 0; }
+        input, button { display: block; margin: 5px 0; padding: 5px; }
+        button { background: #ccc; border: 1px solid #999; }
+    </style>
+</head>
+<body>
+    <h1>Admin Login</h1>
+    
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    
+    <form id="loginForm">
+        <label>Email:</label>
+        <input type="text" id="email" name="email" required>
+        
+        <label>Senha:</label>
+        <input type="password" id="senha" name="senha" required>
+        
+        <button type="button" onclick="login()">Entrar</button>
+    </form>
+
+    <script>
+        async function login() {
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            
+            if (!email || !senha) {
+                alert('Por favor, preencha email e senha');
+                return;
+            }
+            
+            try {
+                console.log('Tentando login com:', email);
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        senha: senha
+                    })
+                });
+                
+                console.log('Resposta do servidor:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Login bem-sucedido, token recebido '+data.token);
+                    localStorage.setItem('jwtToken', data.token);
+
+                    loadAuthenticatedPage('/admin/planos-cobrancas');
+                } else {
+                    console.log('Login falhou com status:', response.status);
+                    try {
+                        const errorData = await response.json();
+                        alert('Login falhou: ' + (errorData.message || 'Credenciais inválidas'));
+                    } catch (e) {
+                        alert('Login falhou: ' + response.statusText);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro de rede:', error);
+                alert('Erro de conexão. Verifique se o servidor está rodando.');
+            }
+        }
+
+        async function loadAuthenticatedPage(path) {
+            const token = localStorage.getItem('jwtToken');
+            
+            if (!token) {
+                window.location.href = '/admin-login';
+                return;
+            }
+            
+            try {
+                const response = await fetch(path, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+                });
+
+                if (response.status < 200 || response.status >= 300) {
+                    // showing the error
+                    console.log(response)
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/admin-login';
+                    return;
+                } 
+                
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } catch (error) {
+                console.error('Erro ao carregar página:', error);
+            }
+        }
+        
+        // Permitir submit com Enter
+        document.getElementById('loginForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                login();
+            }
+        });
+
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Planos de Cobrança</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+        th { background: #ccc; }
+        .error { color: red; margin: 10px 0; }
+        .header-info { margin: 10px 0; }
+        .back-link { display: block; margin-top: 10px; }
+        .status-pago { color: green; }
+        .status-pendente { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Planos de Cobrança</h1>
+    
+    <div class="header-info">
+        <strong>Total de cobranças:</strong> <span th:text="${totalCobrancas}">0</span>
+    </div>
+    
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>Email</th>
+                <th>Plano</th>
+                <th>Mês</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Vencimento</th>
+                <th>Pagamento</th>
+                <th>Inadimplência</th>
+                <th>Próxima</th>
+                <th>Criação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="cobranca : ${cobrancas}">
+                <td th:text="${cobranca.usuarioNome}">-</td>
+                <td th:text="${cobranca.usuarioEmail}">-</td>
+                <td th:text="${cobranca.planoNome}">-</td>
+                <td th:text="${cobranca.mesReferencia}">-</td>
+                <td th:text="${#numbers.formatDecimal(cobranca.valorCentavos / 100.0, 1, 2)}">-</td>
+                <td>
+                    <span th:if="${cobranca.pago}" class="status-pago">PAGO</span>
+                    <span th:unless="${cobranca.pago}" class="status-pendente">PENDENTE</span>
+                </td>
+                <td th:text="${cobranca.dataVencimento}">-</td>
+                <td th:text="${cobranca.dataPagamento}">-</td>
+                <td>
+                    <span th:if="${cobranca.inadimplenciaProcessada}">SIM</span>
+                    <span th:unless="${cobranca.inadimplenciaProcessada}">NÃO</span>
+                </td>
+                <td>
+                    <span th:if="${cobranca.proximaCobrancaGerada}">SIM</span>
+                    <span th:unless="${cobranca.proximaCobrancaGerada}">NÃO</span>
+                </td>
+                <td th:text="${cobranca.dataCriacao}">-</td>
+                <td>
+                    <button type="button" 
+                        th:data-cobranca-id="${cobranca.id}"
+                        th:disabled="${cobranca.pago}"
+                        onclick="pagarCobranca(this.dataset.cobrancaId)">
+                    Pagar
+                    </button>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(cobrancas)}">
+                <td colspan="12" style="text-align: center;">
+                    Nenhum plano de cobrança encontrado.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 20px;">
+        <button type="button" onclick="forcarVerificacao()">Forçar verificação cobranca</button>
+    </div>
+    
+    <div style="margin-top: 10px;">
+        <span th:if="${adminUsername}" th:text="'Logado como: ' + ${adminUsername}"></span> |
+        <a href="#" onclick="logout()">Logout</a> |
+        <a href="/admin-login" class="back-link">← Voltar para Login</a>
+    </div>
+
+    <script>
+        function getJwtToken() {
+            return localStorage.getItem('jwtToken');
+        }
+
+        function redirectToLogin() {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/admin-login';
+        }
+
+        async function pagarCobranca(cobrancaId) {
+            const token = getJwtToken();
+            if (!token) {
+                alert('Token JWT não encontrado. Faça login novamente.');
+                redirectToLogin();
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/pagar-cobranca', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: 'cobrancaId=' + encodeURIComponent(cobrancaId)
+                });
+                
+                if (response.ok) {
+                    alert('Cobrança marcada como paga!');
+                    loadAuthenticatedPage('/admin/planos-cobrancas');
+                } else if (response.status === 401 || response.status === 403) {
+                    alert('Acesso negado. Faça login novamente.');
+                    redirectToLogin();
+                } else {
+                    alert('Erro ao processar pagamento');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao processar pagamento');
+            }
+        }
+
+        async function forcarVerificacao() {
+            const token = getJwtToken();
+            if (!token) {
+                alert('Token JWT não encontrado. Faça login novamente.');
+                redirectToLogin();
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/forcar-verificacao', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Verificação forçada executada!');
+                } else if (response.status === 401 || response.status === 403) {
+                    alert('Acesso negado. Faça login novamente.');
+                    redirectToLogin();
+                } else {
+                    alert('Erro ao forçar verificação');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao forçar verificação');
+            }
+        }
+
+        async function loadAuthenticatedPage(path) {
+            const token = localStorage.getItem('jwtToken');
+            
+            if (!token) {
+                window.location.href = '/admin-login';
+                return;
+            }
+            
+            try {
+                const response = await fetch(path, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+                });                
+
+                if (response.status < 200 || response.status >= 300) {
+                    // showing the error
+                    console.log(response)
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/admin-login';
+                    return;
+                } 
+                
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } catch (error) {
+                console.error('Erro ao carregar página:', error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/admin-login';
+        }
+    </script>
+</body>
+</html>
