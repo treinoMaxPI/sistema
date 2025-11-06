@@ -141,7 +141,7 @@ class JwtPayload {
 }
 
 class AuthService {
-  static const String baseUrl = 'http:
+  static const String baseUrl = 'http://localhost:8080/api/auth';
 
   Future<ApiResponse<LoginResponse>> login(LoginRequest request) async {
     try {
@@ -155,7 +155,6 @@ class AuthService {
         final loginResponse =
             LoginResponse.fromJson(json.decode(response.body));
 
-        
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', loginResponse.token);
         await prefs.setString('refreshToken', loginResponse.refreshToken);
@@ -233,8 +232,6 @@ class AuthService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/resend-verification?email=$email'),
-        
-        
       );
 
       if (response.statusCode == 200) {
