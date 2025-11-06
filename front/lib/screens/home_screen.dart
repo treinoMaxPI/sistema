@@ -43,41 +43,169 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _showUserMenu() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       builder: (context) {
         final hasMultipleRoles = (_parsedJwt?.roles.length ?? 0) > 1;
         return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (hasMultipleRoles)
-                ListTile(
-                  leading: const Icon(Icons.swap_horiz),
-                  title: const Text('Mudar perspectiva'),
+              // Indicador de arraste
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[700],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Avatar e informações do usuário
+              Column(
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                      border: Border.all(
+                        color: const Color(0xFFFF312E),
+                        width: 3,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Color(0xFFFF312E),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _userName ?? 'Usuário',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (_parsedJwt?.roles.isNotEmpty ?? false)
+                    Text(
+                      _parsedJwt!.roles.first.toString(),
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 32),
+
+              // Opções do menu
+              if (hasMultipleRoles) ...[
+                _buildMenuOption(
+                  icon: Icons.swap_horiz,
+                  title: 'Mudar perspectiva',
                   onTap: () {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Funcionalidade em desenvolvimento'),
+                      SnackBar(
+                        content:
+                            const Text('Funcionalidade em desenvolvimento'),
+                        backgroundColor: Colors.grey[800],
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   },
                 ),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text(
-                  'Sair',
-                  style: TextStyle(color: Colors.red),
-                ),
+                const SizedBox(height: 8),
+              ],
+
+              _buildMenuOption(
+                icon: Icons.logout,
+                title: 'Sair',
+                color: const Color(0xFFFF312E),
                 onTap: () {
                   Navigator.pop(context);
                   _logout();
                 },
               ),
+
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildMenuOption({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    final optionColor = color ?? Colors.white;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey[800]!,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: optionColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: optionColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: optionColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: optionColor.withOpacity(0.5),
+              size: 16,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -101,7 +229,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               )
             : Text(
-                'Olá, ${_userName ?? 'Usuário'}!',
+                'Olá, ${_userName ?? 'Usuário'}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
