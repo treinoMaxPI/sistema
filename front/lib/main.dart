@@ -4,6 +4,9 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
+import 'pages/personal/personal_screen.dart';
+import 'pages/admin/admin_screen.dart';
+import 'pages/customer/customer_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -26,6 +29,9 @@ class MyApp extends ConsumerWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
+        '/personal': (context) => const PersonalScreen(),
+        '/admin': (context) => const AdminScreen(),
+        '/customer': (context) => const CustomerScreen(),
       },
     );
   }
