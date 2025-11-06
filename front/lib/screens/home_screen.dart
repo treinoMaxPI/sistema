@@ -389,7 +389,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   List<Widget> _buildRoleButtons() {
     final selectedRole = ref.watch(selectedRoleProvider);
-    final roleNotifier = ref.read(selectedRoleProvider.notifier);
 
     final List<Widget> sections = [];
 
@@ -409,41 +408,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final roleButtonsInfo = _getRoleButtonsMap(selectedRole);
 
-    if (roleButtonsInfo.isEmpty) {
-      sections.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 24, bottom: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                roleNotifier.getRoleName(selectedRole),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-      sections.add(
-        const Text(
-          'Nenhum botão de ação definido para esta perspectiva.',
-          style: TextStyle(color: Colors.grey),
-        ),
-      );
-      return sections;
-    }
     const double spacing = 12.0;
     sections.add(
       LayoutBuilder(
@@ -493,49 +457,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             color: Colors.grey[900],
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 2,
+              color: Colors.grey[800]!,
+              width: 1,
             ),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 28,
+              Icon(
+                icon,
+                color: color,
+                size: 28,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 12,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 12,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
