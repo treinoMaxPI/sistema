@@ -16,6 +16,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Gestão de Academias',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -50,7 +51,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   Future<void> _checkAuthStatus() async {
     final authService = AuthService();
     final loggedIn = await authService.isLoggedIn();
-    
+
     setState(() {
       _isLoggedIn = loggedIn;
       _isLoading = false;
