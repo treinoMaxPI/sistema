@@ -7,6 +7,16 @@ import 'services/auth_service.dart';
 import 'pages/personal/personal_screen.dart';
 import 'pages/admin/admin_screen.dart';
 import 'pages/customer/customer_screen.dart';
+import 'pages/admin/dashboard_page.dart';
+import 'pages/admin/usuarios_page.dart';
+import 'pages/admin/relatorios_page.dart';
+import 'pages/admin/configuracoes_page.dart';
+import 'pages/personal/meus_treinos_page.dart';
+import 'pages/personal/meus_alunos_page.dart';
+import 'pages/personal/agendamentos_page.dart';
+import 'pages/customer/meu_treino_page.dart';
+import 'pages/customer/agendar_sessao_page.dart';
+import 'pages/customer/meu_progresso_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -32,6 +42,19 @@ class MyApp extends ConsumerWidget {
         '/personal': (context) => const PersonalScreen(),
         '/admin': (context) => const AdminScreen(),
         '/customer': (context) => const CustomerScreen(),
+        // Admin routes
+        '/admin/dashboard': (context) => const DashboardPage(),
+        '/admin/usuarios': (context) => const UsuariosPage(),
+        '/admin/relatorios': (context) => const RelatoriosPage(),
+        '/admin/configuracoes': (context) => const ConfiguracoesPage(),
+        // Personal trainer routes
+        '/personal/treinos': (context) => const MeusTreinosPage(),
+        '/personal/alunos': (context) => const MeusAlunosPage(),
+        '/personal/agendamentos': (context) => const AgendamentosPage(),
+        // Customer routes
+        '/customer/meu-treino': (context) => const MeuTreinoPage(),
+        '/customer/agendamentos': (context) => const AgendarSessaoPage(),
+        '/customer/progresso': (context) => const MeuProgressoPage(),
       },
     );
   }
