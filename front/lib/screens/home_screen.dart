@@ -97,14 +97,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       roleNotifier.selectRole(role);
                     }
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Perspectiva alterada para ${roleNotifier.getRoleName(role)}'),
-                        backgroundColor: const Color(0xFFFF312E),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
                   },
                 );
               }).toList(),
@@ -166,8 +158,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showUserMenu() {
-    final currentRoleName = ref.read(selectedRoleNameProvider);
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -226,14 +216,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (_parsedJwt?.roles.isNotEmpty ?? false)
-                    Text(
-                      currentRoleName,
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 14,
-                      ),
-                    ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -462,38 +444,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
       return sections;
     }
-
-    final sectionColor = roleButtonsInfo.first['color'] as Color;
-
-    sections.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 24, bottom: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 4,
-              height: 24,
-              decoration: BoxDecoration(
-                color: sectionColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              roleNotifier.getRoleName(selectedRole),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
     const double spacing = 12.0;
-
     sections.add(
       LayoutBuilder(
         builder: (context, constraints) {
