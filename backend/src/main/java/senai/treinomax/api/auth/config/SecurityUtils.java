@@ -4,9 +4,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import senai.treinomax.api.auth.model.Role;
+import senai.treinomax.api.auth.service.CustomUserDetailsService;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SecurityUtils {
@@ -60,6 +62,14 @@ public class SecurityUtils {
 
     public static String getCurrentUserEmail() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    public static UUID getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof CustomUserDetailsService.CustomUserDetails) {
+            return ((CustomUserDetailsService.CustomUserDetails) principal).getId();
+        }
+        throw new IllegalStateException("Current user is not an instance of CustomUserDetails");
     }
 
     public static boolean isAuthenticated() {
