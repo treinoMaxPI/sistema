@@ -33,11 +33,11 @@ public class PlanoUsuarioEventosService {
     @Transactional
     public void executarCicloVerificacaoCobranca(LocalDateTime horarioProcessamento) {
         processarInadimplencias(horarioProcessamento);
-        gerarNovasCobrancas(horarioProcessamento);
+        gerarNovasCobrancasEAtualizarPlanoUsuario(horarioProcessamento);
     }
 
     @Transactional
-    public void gerarNovasCobrancas(LocalDateTime now) {
+    public void gerarNovasCobrancasEAtualizarPlanoUsuario(LocalDateTime now) {
         log.info("Iniciando geração de novas cobranças em {}", now);
         Pageable pageRequest = PageRequest.of(0, batchSize);
         Page<PlanoCobranca> page;
@@ -96,11 +96,13 @@ public class PlanoUsuarioEventosService {
         log.debug("Atualizando cobrança id {} com dataPagamento={} observacoes={} pago={}",
                 cobranca.getId(), pagamentoDate, observacoes, cobranca.getPago());
 
-        cobranca.getUsuario().setPlano(cobranca.getPlano());
-        cobranca.getUsuario().setProximoPlano(null);
+                
         try {
             this.planoCobrancaRepository.save(cobranca);
-            this.usuarioRepository.save(cobranca.getUsuario());
+            if (cobranca.getUsuario().getPlano() == null) {
+                cobranca.getUsuario().setPlano(cobranca.getPlano());
+                this.usuarioRepository.save(cobranca.getUsuario());
+            }
             log.info("Pagamento registrado com sucesso para cobrança id {}", cobrancaId);
         } catch (Exception ex) {
             log.error("Erro ao salvar pagamento para cobrança id {}: {}", cobrancaId, ex.getMessage(), ex);

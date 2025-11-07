@@ -303,6 +303,8 @@ public class PlanoUsuarioService {
      
         cobranca.setProximaCobrancaGerada(true);
         
+        usuario.setPlano(cobranca.getPlano());
+
         this.usuarioRepository.save(usuario);
         this.planoCobrancaRepository.save(cobranca);
         this.planoCobrancaRepository.save(novaCobranca);
