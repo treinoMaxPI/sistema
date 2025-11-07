@@ -44,6 +44,13 @@ class RoleConfig {
     ],
     Role.ADMIN: [
       RoleButtonConfig(
+        route: '/admin/planos',
+        title: 'Planos',
+        description: 'Criar e editar planos',
+        icon: Icons.edit_document,
+        color: Color(0xFFFF312E),
+      ),
+      RoleButtonConfig(
         route: '/admin/dashboard',
         title: 'Dashboard',
         description: 'Visão geral do sistema',

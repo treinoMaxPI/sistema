@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
@@ -47,6 +48,7 @@ class MyApp extends ConsumerWidget {
         '/admin/usuarios': (context) => const UsuariosPage(),
         '/admin/relatorios': (context) => const RelatoriosPage(),
         '/admin/configuracoes': (context) => const ConfiguracoesPage(),
+        '/admin/planos': (context) => const AdminPlanosPage(),
         // Personal trainer routes
         '/personal/treinos': (context) => const MeusTreinosPage(),
         '/personal/alunos': (context) => const MeusAlunosPage(),
