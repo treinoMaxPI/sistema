@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gym_management/widgets/page_header.dart';
 import '../services/plano_service.dart';
 import '../theme/typography.dart';
 
@@ -29,14 +30,7 @@ class _BuyPlanScreenState extends ConsumerState<BuyPlanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text(
-          'Comprar Plano',
-          style: AppTypography.headlineSmall,
-        ),
-        backgroundColor: Colors.black,
-        elevation: 0,
-      ),
+      appBar: const PageHeader(title: 'Comprar Plano'),
       body: FutureBuilder<ApiResponse<List<PlanoResponse>>>(
         future: _planosFuture,
         builder: (context, snapshot) {
@@ -51,7 +45,9 @@ class _BuyPlanScreenState extends ConsumerState<BuyPlanScreen> {
                 style: AppTypography.bodyMedium.copyWith(color: Colors.red),
               ),
             );
-          } else if (!snapshot.hasData || !(snapshot.data?.success ?? false) || (snapshot.data?.data?.isEmpty ?? true)) {
+          } else if (!snapshot.hasData ||
+              !(snapshot.data?.success ?? false) ||
+              (snapshot.data?.data?.isEmpty ?? true)) {
             return Center(
               child: Text(
                 'Nenhum plano disponível no momento.',
@@ -82,19 +78,22 @@ class _BuyPlanScreenState extends ConsumerState<BuyPlanScreen> {
                         children: [
                           Text(
                             plano.nome,
-                            style: AppTypography.titleLarge.copyWith(color: Colors.white),
+                            style: AppTypography.titleLarge
+                                .copyWith(color: Colors.white),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             plano.descricao,
-                            style: AppTypography.bodyMedium.copyWith(color: Colors.grey[400]),
+                            style: AppTypography.bodyMedium
+                                .copyWith(color: Colors.grey[400]),
                           ),
                           const SizedBox(height: 16),
                           Align(
                             alignment: Alignment.bottomRight,
                             child: Text(
                               plano.precoFormatado,
-                              style: AppTypography.headlineMedium.copyWith(color: const Color(0xFFFF312E)),
+                              style: AppTypography.headlineMedium
+                                  .copyWith(color: const Color(0xFFFF312E)),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -103,20 +102,24 @@ class _BuyPlanScreenState extends ConsumerState<BuyPlanScreen> {
                             child: ElevatedButton(
                               onPressed: () async {
                                 final planoService = PlanoService();
-                                final response = await planoService.escolherPlano(plano.id);
+                                final response =
+                                    await planoService.escolherPlano(plano.id);
 
                                 if (response.success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Plano ${plano.nome} selecionado com sucesso! Aguardando aprovação do pagamento.'),
+                                      content: Text(
+                                          'Plano ${plano.nome} selecionado com sucesso! Aguardando aprovação do pagamento.'),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
-                                  Navigator.pop(context); // Go back to home screen
+                                  Navigator.pop(
+                                      context); // Go back to home screen
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(response.message ?? 'Erro ao selecionar plano.'),
+                                      content: Text(response.message ??
+                                          'Erro ao selecionar plano.'),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
@@ -124,14 +127,16 @@ class _BuyPlanScreenState extends ConsumerState<BuyPlanScreen> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFFF312E),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               child: Text(
                                 'Escolher Plano',
-                                style: AppTypography.bodyLarge.copyWith(color: Colors.white),
+                                style: AppTypography.bodyLarge
+                                    .copyWith(color: Colors.white),
                               ),
                             ),
                           ),
