@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import senai.treinomax.api.auth.config.SecurityUtils;
+import senai.treinomax.api.auth.model.Role;
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.CriarPlanoRequest;
@@ -63,10 +64,10 @@ public class PlanoController {
         log.info("Recebida solicitação para listar planos (ativos: {})", ativos);
         
         List<Plano> planos;
-        if (ativos) {
-            planos = planoService.listarPlanosAtivos();
-        } else {
+        if (!ativos && SecurityUtils.hasRole(Role.ADMIN)) {
             planos = planoService.listarTodosPlanos();
+        } else {
+            planos = planoService.listarPlanosAtivos();
         }
         
         List<PlanoResponse> response = planos.stream()
