@@ -1,23 +1,17 @@
 package senai.treinomax.api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.dto.response.PlanoCobrancaCustomerResponse;
-import senai.treinomax.api.jobs.VerificacaoCobrancaPlanosJob;
 import senai.treinomax.api.service.PlanoCobrancaService;
 
 @RestController
@@ -25,16 +19,12 @@ import senai.treinomax.api.service.PlanoCobrancaService;
 @RequiredArgsConstructor
 public class PlanoCobrancaCustomerController {
 
-    private final VerificacaoCobrancaPlanosJob verificacaoCobrancaPlanosJob;
-
     private final PlanoCobrancaService planoCobrancaService;
-    private final ObjectMapper objectMapper;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<Page<PlanoCobrancaCustomerResponse>> getCustomerCobrancas(
             Pageable pageable) throws JsonProcessingException {
-        System.out.println(objectMapper.writeValueAsString(SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
         Page<PlanoCobrancaCustomerResponse> cobrancas = planoCobrancaService.findCobrancasByUsuarioId(SecurityUtils.getCurrentUserId(), pageable)
                 .map(PlanoCobrancaCustomerResponse::fromEntity);
         return ResponseEntity.ok(cobrancas);
