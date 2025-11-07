@@ -69,7 +69,6 @@ public class PlanoUsuarioService {
             .build();
 
             usuario.setProximoPlano(null);
-            usuario.setPlano(plano);
             planoCobrancaRepository.save(planoCobranca);
 
             log.info("Plano {} atribuído imediatamente ao usuário {} com vencimento em {}",
@@ -82,7 +81,6 @@ public class PlanoUsuarioService {
             planoCobrancaRepository.save(proximaCobranca);
 
             usuario.setProximoPlano(null);
-            usuario.setPlano(plano);
             
             log.info("Próxima cobrança do usuário {} (mês {}) atualizada para o plano {} com valor {} centavos",
                     usuario.getEmail(), proximaCobranca.getMesReferencia(), plano.getNome(), plano.getPrecoCentavos());
@@ -273,17 +271,20 @@ public class PlanoUsuarioService {
         }
 
         Usuario usuario = cobranca.getUsuario();
+        Plano proximoPlano = null;
 
-        if (usuario.getProximoPlano() != null) {
+        if (usuario.getProximoPlano() == null) {
+            proximoPlano = usuario.getPlano();
+        } else {
             log.info("Atualizando plano do usuário {} de {} para {}", 
                 usuario.getEmail(), 
                 usuario.getPlano() != null ? usuario.getPlano().getNome() : "nenhum",
                 usuario.getProximoPlano().getNome());
-            usuario.setPlano(usuario.getProximoPlano());
+            proximoPlano = usuario.getProximoPlano();
             usuario.setProximoPlano(null);
         }
 
-        if (usuario.getPlano() == null) {
+        if (proximoPlano == null) {
             log.debug("Usuário {} não possui plano ativo, não será gerada próxima cobrança", usuario.getEmail());
             return;
         }
@@ -292,7 +293,7 @@ public class PlanoUsuarioService {
             .dataVencimento(DateUtils.calcularProximoVencimento(cobranca.getDataVencimento()))
             .mesReferencia(cobranca.getMesReferencia().plusMonths(1))
             .pago(false)
-            .plano(usuario.getPlano())
+            .plano(proximoPlano)
             .proximaCobrancaGerada(false)
             .inadimplenciaProcessada(false)
             .usuario(usuario)

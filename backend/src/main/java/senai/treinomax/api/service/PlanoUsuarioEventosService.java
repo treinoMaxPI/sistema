@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.config.SecurityUtils;
+import senai.treinomax.api.auth.repository.UsuarioRepository;
 import senai.treinomax.api.model.PlanoCobranca;
 import senai.treinomax.api.repository.PlanoCobrancaRepository;
 import senai.treinomax.api.util.DateUtils;
@@ -22,8 +23,10 @@ import senai.treinomax.api.util.DateUtils;
 @RequiredArgsConstructor
 @Slf4j
 public class PlanoUsuarioEventosService {
+
     private static int batchSize = 50; 
     
+    private final UsuarioRepository usuarioRepository;
     private final PlanoCobrancaRepository planoCobrancaRepository;
     private final PlanoUsuarioService planoUsuarioService;
 
@@ -93,8 +96,11 @@ public class PlanoUsuarioEventosService {
         log.debug("Atualizando cobrança id {} com dataPagamento={} observacoes={} pago={}",
                 cobranca.getId(), pagamentoDate, observacoes, cobranca.getPago());
 
+        cobranca.getUsuario().setPlano(cobranca.getPlano());
+        cobranca.getUsuario().setProximoPlano(null);
         try {
             this.planoCobrancaRepository.save(cobranca);
+            this.usuarioRepository.save(cobranca.getUsuario());
             log.info("Pagamento registrado com sucesso para cobrança id {}", cobrancaId);
         } catch (Exception ex) {
             log.error("Erro ao salvar pagamento para cobrança id {}: {}", cobrancaId, ex.getMessage(), ex);

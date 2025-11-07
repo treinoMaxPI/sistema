@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
+import '../services/plano_service.dart';
 import '../notifiers/role_selection_notifier.dart';
 import '../config/role_config.dart';
 import '../widgets/modal_components.dart';
 import '../widgets/page_button.dart';
 import '../theme/typography.dart';
+import 'dart:convert';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _userName;
   JwtPayload? _parsedJwt;
   bool _isLoading = true;
+  PlanoResponse? _currentPlano;
+  bool _hasPlano = false;
 
   @override
   void initState() {
@@ -35,6 +39,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _parsedJwt = parsedJwt;
       _isLoading = false;
       ref.read(selectedRoleProvider.notifier).initializeRole(parsedJwt);
+    });
+
+    if (_parsedJwt?.roles.contains(Role.CUSTOMER) ?? false) {
+      await _loadUserPlano();
+    }
+  }
+
+  Future<void> _loadUserPlano() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final planoService = PlanoService();
+    final response = await planoService.obterMeuPlano();
+
+    if (response.success && response.data != null) {
+      setState(() {
+        _currentPlano = response.data;
+        _hasPlano = true;
+      });
+      print(jsonEncode(_currentPlano));
+    } else {
+      setState(() {
+        _currentPlano = null;
+        _hasPlano = false;
+      });
+    }
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -147,6 +179,112 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final roleButtonsInfo = RoleConfig.getButtonsForRole(selectedRole!);
+
+    if (selectedRole == Role.CUSTOMER) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Seu Plano Atual:',
+                style: AppTypography.titleMedium,
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: _loadUserPlano,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _hasPlano
+              ? Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1C),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFF312E), width: 2),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _currentPlano!.nome,
+                              style: AppTypography.headlineSmall.copyWith(color: Colors.white),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _currentPlano!.descricao,
+                              style: AppTypography.bodyMedium.copyWith(color: Colors.grey[400]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        _currentPlano!.precoFormatado,
+                        style: AppTypography.headlineSmall.copyWith(color: const Color(0xFFFF312E)),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Você não possui um plano ativo.',
+                      style: AppTypography.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/customer/comprar-plano');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF312E),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Comprar Plano',
+                        style: AppTypography.bodyLarge.copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+          const SizedBox(height: 24),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final double totalWidth = constraints.maxWidth;
+              final double buttonWidth = (totalWidth - 12) / 2;
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: roleButtonsInfo.map<Widget>((buttonInfo) {
+                  return PageButton(
+                    icon: buttonInfo.icon,
+                    title: buttonInfo.title,
+                    description: buttonInfo.description,
+                    color: buttonInfo.color,
+                    width: buttonWidth,
+                    onTap: () {
+                      Navigator.pushNamed(context, buttonInfo.route);
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

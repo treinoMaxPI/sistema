@@ -18,6 +18,7 @@ import 'pages/personal/agendamentos_page.dart';
 import 'pages/customer/meu_treino_page.dart';
 import 'pages/customer/agendar_sessao_page.dart';
 import 'pages/customer/meu_progresso_page.dart';
+import 'screens/buy_plan_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -57,6 +58,7 @@ class MyApp extends ConsumerWidget {
         '/customer/meu-treino': (context) => const MeuTreinoPage(),
         '/customer/agendamentos': (context) => const AgendarSessaoPage(),
         '/customer/progresso': (context) => const MeuProgressoPage(),
+        '/customer/comprar-plano': (context) => const BuyPlanScreen(),
       },
     );
   }

@@ -139,4 +139,18 @@ public class PlanoController {
         log.info("Plano {} escolhido com sucesso pelo usuário {}", id, userEmail);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/meu-plano")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<PlanoResponse> obterMeuPlano() {
+        log.info("Recebida solicitação para obter plano do usuário logado");
+
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        Usuario usuario = usuarioService.buscarPorEmail(userEmail);
+        UUID usuarioId = usuario.getId();
+
+        Plano plano = planoUsuarioService.obterPlanoDoUsuario(usuarioId);
+        PlanoResponse response = toPlanoResponse(plano);
+        return ResponseEntity.ok(response);
+    }
 }

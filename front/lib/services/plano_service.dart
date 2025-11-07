@@ -27,6 +27,16 @@ class PlanoResponse {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nome': nome,
+      'descricao': descricao,
+      'ativo': ativo,
+      'precoCentavos': precoCentavos,
+    };
+  }
+
   String get precoFormatado {
     double valorReal = precoCentavos / 100.0;
     return 'R\$ ${valorReal.toStringAsFixed(2).replaceAll('.', ',')}';
@@ -93,7 +103,8 @@ class PlanoService {
     return prefs.getString('accessToken');
   }
 
-  Future<ApiResponse<List<PlanoResponse>>> listarPlanos({bool ativos = true}) async {
+  Future<ApiResponse<List<PlanoResponse>>> listarPlanos(
+      {bool ativos = true}) async {
     try {
       final token = await _getAccessToken();
       if (token == null) {
@@ -113,10 +124,9 @@ class PlanoService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final List<PlanoResponse> planos = data
-            .map((planoJson) => PlanoResponse.fromJson(planoJson))
-            .toList();
-        
+        final List<PlanoResponse> planos =
+            data.map((planoJson) => PlanoResponse.fromJson(planoJson)).toList();
+
         return ApiResponse(success: true, data: planos);
       } else {
         final errorData = json.decode(response.body);
@@ -170,7 +180,8 @@ class PlanoService {
     }
   }
 
-  Future<ApiResponse<PlanoResponse>> criarPlano(CriarPlanoRequest request) async {
+  Future<ApiResponse<PlanoResponse>> criarPlano(
+      CriarPlanoRequest request) async {
     try {
       final token = await _getAccessToken();
       if (token == null) {
@@ -208,7 +219,8 @@ class PlanoService {
     }
   }
 
-  Future<ApiResponse<PlanoResponse>> atualizarPlano(String id, AtualizarPlanoRequest request) async {
+  Future<ApiResponse<PlanoResponse>> atualizarPlano(
+      String id, AtualizarPlanoRequest request) async {
     try {
       final token = await _getAccessToken();
       if (token == null) {
@@ -281,7 +293,8 @@ class PlanoService {
     }
   }
 
-  Future<ApiResponse<void>> atualizarPrecoPlano(String id, int precoCentavos) async {
+  Future<ApiResponse<void>> atualizarPrecoPlano(
+      String id, int precoCentavos) async {
     try {
       final token = await _getAccessToken();
       if (token == null) {
@@ -316,4 +329,79 @@ class PlanoService {
     }
   }
 
+  Future<ApiResponse<PlanoResponse>> obterMeuPlano() async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/meu-plano'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final PlanoResponse plano = PlanoResponse.fromJson(data);
+        return ApiResponse(success: true, data: plano);
+      } else if (response.statusCode == 204) {
+        // No Content
+        return ApiResponse(
+            success: true, data: null, message: 'Usuário não possui plano');
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao obter plano do usuário',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<void>> escolherPlano(String planoId) async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/$planoId/escolher'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true);
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao escolher plano',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
 }
