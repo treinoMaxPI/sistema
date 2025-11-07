@@ -1,24 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
+import 'package:gym_management/pages/personal/meus_treinos_page.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
-import 'pages/personal/personal_screen.dart';
-import 'pages/admin/admin_screen.dart';
-import 'pages/admin/dashboard_page.dart';
-import 'pages/admin/usuarios_page.dart';
-import 'pages/admin/relatorios_page.dart';
-import 'pages/admin/configuracoes_page.dart';
-import 'pages/personal/meus_treinos_page.dart';
-import 'pages/personal/meus_alunos_page.dart';
-import 'pages/personal/agendamentos_page.dart';
-import 'pages/customer/meu_treino_page.dart';
-import 'pages/customer/agendar_sessao_page.dart';
-import 'pages/customer/meu_progresso_page.dart';
 import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
-import 'screens/buy_plan_screen.dart';
+import 'pages/customer/buy_plan_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -41,23 +30,12 @@ class MyApp extends ConsumerWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
-        '/personal': (context) => const PersonalScreen(),
-        '/admin': (context) => const AdminScreen(),
         // Admin routes
-        '/admin/dashboard': (context) => const DashboardPage(),
-        '/admin/usuarios': (context) => const UsuariosPage(),
-        '/admin/relatorios': (context) => const RelatoriosPage(),
-        '/admin/configuracoes': (context) => const ConfiguracoesPage(),
         '/admin/planos': (context) => const AdminPlanosPage(),
         // Personal trainer routes
         '/personal/treinos': (context) => const MeusTreinosPage(),
-        '/personal/alunos': (context) => const MeusAlunosPage(),
-        '/personal/agendamentos': (context) => const AgendamentosPage(),
         // Customer routes
-        '/customer/meu-treino': (context) => const MeuTreinoPage(),
-        '/customer/agendamentos': (context) => const AgendarSessaoPage(),
-        '/customer/progresso': (context) => const MeuProgressoPage(),
-        '/customer/comprar-plano': (context) => const BuyPlanScreen(),
+        '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
       },
     );

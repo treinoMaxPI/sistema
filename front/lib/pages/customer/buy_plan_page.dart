@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/widgets/page_header.dart';
-import '../services/plano_service.dart';
-import '../theme/typography.dart';
+import '../../services/plano_service.dart';
+import '../../theme/typography.dart';
 
-class BuyPlanScreen extends ConsumerStatefulWidget {
-  const BuyPlanScreen({super.key});
+class BuyPlanPage extends ConsumerStatefulWidget {
+  const BuyPlanPage({super.key});
 
   @override
-  ConsumerState<BuyPlanScreen> createState() => _BuyPlanScreenState();
+  ConsumerState<BuyPlanPage> createState() => _BuyPlanPageState();
 }
 
-class _BuyPlanScreenState extends ConsumerState<BuyPlanScreen> {
+class _BuyPlanPageState extends ConsumerState<BuyPlanPage> {
   late Future<ApiResponse<List<PlanoResponse>>> _planosFuture;
 
   @override

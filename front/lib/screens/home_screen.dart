@@ -7,7 +7,6 @@ import '../config/role_config.dart';
 import '../widgets/modal_components.dart';
 import '../widgets/page_button.dart';
 import '../theme/typography.dart';
-import 'dart:convert';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -82,7 +81,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _hasPlano = response.data != null;
           _errorMessage = null;
         });
-        debugPrint('Plano carregado: ${jsonEncode(_currentPlano)}');
       } else {
         setState(() {
           _currentPlano = null;
@@ -542,8 +540,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPlanoCard(),
-          const SizedBox(height: 32),
-          const Text('Acesso Rápido', style: AppTypography.titleLarge),
           const SizedBox(height: 16),
           _buildButtonGrid(roleButtonsInfo),
         ],
@@ -553,8 +549,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Acesso Rápido', style: AppTypography.titleLarge),
-        const SizedBox(height: 16),
         _buildButtonGrid(roleButtonsInfo),
       ],
     );
