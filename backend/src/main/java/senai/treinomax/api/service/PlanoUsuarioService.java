@@ -118,11 +118,6 @@ public class PlanoUsuarioService {
 
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
 
-        if (usuario.getPlano() == null) {
-            log.warn("Usuário {} não possui plano atribuído", usuarioId);
-            throw new IllegalArgumentException("Usuário não possui plano atribuído");
-        }
-
         return usuario.getPlano();
     }
 

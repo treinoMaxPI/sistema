@@ -150,6 +150,9 @@ public class PlanoController {
         UUID usuarioId = usuario.getId();
 
         Plano plano = planoUsuarioService.obterPlanoDoUsuario(usuarioId);
+        if (plano == null) {
+            return ResponseEntity.noContent().build();
+        }
         PlanoResponse response = toPlanoResponse(plano);
         return ResponseEntity.ok(response);
     }

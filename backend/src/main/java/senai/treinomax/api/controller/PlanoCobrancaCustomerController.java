@@ -17,12 +17,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.dto.response.PlanoCobrancaCustomerResponse;
+import senai.treinomax.api.jobs.VerificacaoCobrancaPlanosJob;
 import senai.treinomax.api.service.PlanoCobrancaService;
 
 @RestController
 @RequestMapping("/api/customer/cobrancas")
 @RequiredArgsConstructor
 public class PlanoCobrancaCustomerController {
+
+    private final VerificacaoCobrancaPlanosJob verificacaoCobrancaPlanosJob;
 
     private final PlanoCobrancaService planoCobrancaService;
     private final ObjectMapper objectMapper;
