@@ -36,8 +36,14 @@ public class PlanoUsuarioService {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         Plano plano = planoService.buscarPorId(planoId);
         
-        if (usuario.getPlano() != null && usuario.getPlano().getId().equals(planoId)) {
+        if (usuario.getPlano() != null && usuario.getPlano().getId().equals(planoId) && usuario.getProximoPlano() == null) {
             throw new IllegalArgumentException("Usuário já possui este plano");
+        }
+
+        if (usuario.getPlano() != null && usuario.getPlano().getId().equals(planoId) && usuario.getProximoPlano() != null) {
+            usuario.setProximoPlano(null);
+            this.usuarioRepository.save(usuario);
+            return;
         }
 
         if (!plano.getAtivo()) {

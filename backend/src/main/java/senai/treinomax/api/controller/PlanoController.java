@@ -14,6 +14,7 @@ import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.CriarPlanoRequest;
 import senai.treinomax.api.dto.request.AtualizarPlanoRequest;
+import senai.treinomax.api.dto.response.MeuPlanoResponse;
 import senai.treinomax.api.dto.response.PlanoResponse;
 import senai.treinomax.api.model.Plano;
 import senai.treinomax.api.service.PlanoService;
@@ -42,6 +43,18 @@ public class PlanoController {
             plano.getPrecoCentavos()
         );
     }
+
+    private MeuPlanoResponse toMeuPlanoResponse(Plano plano, String proximoPlanoNome) {
+        return new MeuPlanoResponse(
+            plano.getId(),
+            plano.getNome(),
+            plano.getDescricao(),
+            plano.getAtivo(),
+            plano.getPrecoCentavos(),
+            proximoPlanoNome
+        );
+    }
+
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -142,7 +155,7 @@ public class PlanoController {
 
     @GetMapping("/meu-plano")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<PlanoResponse> obterMeuPlano() {
+    public ResponseEntity<MeuPlanoResponse> obterMeuPlano() {
         log.info("Recebida solicitação para obter plano do usuário logado");
 
         String userEmail = SecurityUtils.getCurrentUserEmail();
@@ -153,7 +166,10 @@ public class PlanoController {
         if (plano == null) {
             return ResponseEntity.noContent().build();
         }
-        PlanoResponse response = toPlanoResponse(plano);
+        MeuPlanoResponse response = toMeuPlanoResponse(
+            plano,
+            usuario.getProximoPlano() == null ? null: usuario.getProximoPlano().getNome()
+        );
         return ResponseEntity.ok(response);
     }
 }

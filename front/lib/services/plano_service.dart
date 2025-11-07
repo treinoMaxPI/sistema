@@ -43,6 +43,49 @@ class PlanoResponse {
   }
 }
 
+class MeuPlanoResponse {
+  final String id;
+  final String nome;
+  final String descricao;
+  final bool ativo;
+  final int precoCentavos;
+  final String? proximoPlanoNome;
+
+  MeuPlanoResponse(
+      {required this.id,
+      required this.nome,
+      required this.descricao,
+      required this.ativo,
+      required this.precoCentavos,
+      required this.proximoPlanoNome});
+
+  factory MeuPlanoResponse.fromJson(Map<String, dynamic> json) {
+    return MeuPlanoResponse(
+        id: json['id'],
+        nome: json['nome'],
+        descricao: json['descricao'],
+        ativo: json['ativo'],
+        precoCentavos: json['precoCentavos'],
+        proximoPlanoNome: json['proximoPlanoNome']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nome': nome,
+      'descricao': descricao,
+      'ativo': ativo,
+      'precoCentavos': precoCentavos,
+      'proximoPlanoNome': proximoPlanoNome
+    };
+  }
+
+  String get precoFormatado {
+    double valorReal = precoCentavos / 100.0;
+    return 'R\$ ${valorReal.toStringAsFixed(2).replaceAll('.', ',')}';
+  }
+}
+
 class CriarPlanoRequest {
   final String nome;
   final String descricao;
@@ -329,7 +372,7 @@ class PlanoService {
     }
   }
 
-  Future<ApiResponse<PlanoResponse>> obterMeuPlano() async {
+  Future<ApiResponse<MeuPlanoResponse>> obterMeuPlano() async {
     try {
       final token = await _getAccessToken();
       if (token == null) {
@@ -349,7 +392,7 @@ class PlanoService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final PlanoResponse plano = PlanoResponse.fromJson(data);
+        final MeuPlanoResponse plano = MeuPlanoResponse.fromJson(data);
         return ApiResponse(success: true, data: plano);
       } else if (response.statusCode == 204) {
         // No Content

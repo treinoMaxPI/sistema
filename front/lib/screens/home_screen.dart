@@ -21,7 +21,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   JwtPayload? _parsedJwt;
   bool _isLoading = true;
   bool _isRefreshing = false;
-  PlanoResponse? _currentPlano;
+  MeuPlanoResponse? _currentPlano;
   bool _hasPlano = false;
   String? _errorMessage;
 
@@ -361,6 +361,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
         ),
+        if (_currentPlano!.proximoPlanoNome != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1C1C1C),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF2A2A2A)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.schedule,
+                    color: Colors.blue[300],
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Plano agendado para próximo mês',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.grey[400],
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _currentPlano!.proximoPlanoNome!,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,

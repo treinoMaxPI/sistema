@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gym_management/models/paginated_response.dart';
 import 'package:gym_management/models/plano_cobranca_customer_response.dart';
 import 'package:gym_management/services/plano_cobranca_service.dart';
 import 'package:gym_management/widgets/page_header.dart';
