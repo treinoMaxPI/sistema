@@ -101,6 +101,13 @@ class RoleConfig {
         icon: Icons.trending_up,
         color: Color(0xFF2196F3),
       ),
+      RoleButtonConfig(
+        route: '/customer/cobrancas',
+        title: 'Minhas Cobranças',
+        description: 'Visualize suas cobranças',
+        icon: Icons.receipt_long,
+        color: Color(0xFF2196F3),
+      ),
     ],
   };
 
