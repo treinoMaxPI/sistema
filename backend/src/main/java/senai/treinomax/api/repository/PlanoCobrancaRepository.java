@@ -19,7 +19,7 @@ import java.util.UUID;
 @Repository
 public interface PlanoCobrancaRepository extends JpaRepository<PlanoCobranca, UUID> {
 
-    List<PlanoCobranca> findByUsuarioId(UUID usuarioId);
+    Page<PlanoCobranca> findByUsuarioId(UUID usuarioId, Pageable pageable);
 
     List<PlanoCobranca> findByPlanoId(UUID planoId);
 
