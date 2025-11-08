@@ -22,8 +22,6 @@ const calcularNota = (
             });
             
             if (qualidadeExercicio > 0) {
-                // MUDANÇA: Normalizar para [1, 10] antes do log
-                // Isso garante log positivo e escala mais razoável
                 const qualidadeNormalizada = 1 + (qualidadeExercicio * 9);
                 somaLogQualidade += Math.log2(qualidadeNormalizada);
             }
