@@ -4,15 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-@OpenAPIDefinition(
-        info = @io.swagger.v3.oas.annotations.info.Info(title = "TreinoMax API",
-                version = "0.0.1",
-                description = "${info.app.description}",
-        contact = @io.swagger.v3.oas.annotations.info.Contact(
-                name = "Time Arquitetura e APIs",
-                email = "Marcosantoniop47@gmail.com")))
-
 @SpringBootApplication
 @EnableScheduling
 public class TreinoMaxApplication {
