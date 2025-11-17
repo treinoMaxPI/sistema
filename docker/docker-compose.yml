@@ -38,4 +38,17 @@ services:
       - ../backend/src:/app/src
       - ../backend/target:/app/target
       - ../backend/target_test-classes:/app/target_test-classes
-      - ~/.m2:/root/.m2
+      - ~/.m2:/root/.
+
+  frontend:
+    build:
+      context: ../front
+      dockerfile: Dockerfile
+    container_name: treinomax-frontend
+    ports:
+      - "4200:4200"
+    restart: always
+    volumes:
+      - ../front:/app
+      - /app/.dart_tool
+      - /app/build
