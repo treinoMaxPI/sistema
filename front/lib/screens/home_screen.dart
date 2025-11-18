@@ -7,6 +7,7 @@ import '../config/role_config.dart';
 import '../widgets/modal_components.dart';
 import '../widgets/page_button.dart';
 import '../theme/typography.dart';
+import '../notifiers/theme_mode_notifier.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -232,6 +233,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 8),
               ],
               ModalOption(
+                icon: Icons.settings,
+                title: 'Configurações',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSettingsModal();
+                },
+              ),
+              const SizedBox(height: 8),
+              ModalOption(
                 icon: Icons.logout,
                 title: 'Sair',
                 color: const Color(0xFFFF312E),
@@ -244,6 +254,91 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showSettingsModal() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        final current = ref.watch(themeModeProvider);
+        final notifier = ref.read(themeModeProvider.notifier);
+        return ModalSheet(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Configurações',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tema do aplicativo',
+                style: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _ThemeOption(
+                title: 'Modo escuro',
+                selected: current == ThemeMode.dark,
+                onTap: () => notifier.setDark(),
+              ),
+              const SizedBox(height: 8),
+              _ThemeOption(
+                title: 'Modo claro',
+                selected: current == ThemeMode.light,
+                onTap: () => notifier.setLight(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _ThemeOption({required String title, required bool selected, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFFF312E).withOpacity(0.15) : Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? const Color(0xFFFF312E) : const Color(0xFF2A2A2A),
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: AppTypography.bodyLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ),
+            if (selected)
+              const Icon(
+                Icons.check_circle,
+                color: Color(0xFFFF312E),
+                size: 20,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
