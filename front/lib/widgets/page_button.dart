@@ -21,6 +21,10 @@ class PageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surface;
+    final outline = theme.colorScheme.outline;
+    final onSurface = theme.colorScheme.onSurface;
     return SizedBox(
       width: width,
       child: InkWell(
@@ -29,10 +33,10 @@ class PageButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[900],
+            color: surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.grey[800]!,
+              color: outline,
               width: 1,
             ),
           ),
@@ -50,12 +54,13 @@ class PageButton extends StatelessWidget {
                 title,
                 style: AppTypography.bodyLarge.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 description,
-                style: AppTypography.caption,
+                style: AppTypography.caption.copyWith(color: onSurface.withOpacity(0.7)),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

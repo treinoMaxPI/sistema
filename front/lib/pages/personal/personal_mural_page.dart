@@ -125,13 +125,12 @@ class _PersonalMuralPageState extends State<PersonalMuralPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Mural da Academia'),
@@ -527,8 +526,8 @@ class _FeedPostCard extends StatelessWidget {
     required this.formatDate,
   });
 
-  Color get _cardColor => const Color(0xFF121212);
-  Color get _borderColor => const Color(0xFF1E1E1E);
+  Color get _cardColor => Theme.of(context).colorScheme.surface;
+  Color get _borderColor => Theme.of(context).colorScheme.outline;
   Color get _accent => const Color(0xFF4CAF50);
 
   @override
@@ -612,7 +611,7 @@ class _FeedPostCard extends StatelessWidget {
         ),
         PopupMenuButton<int>(
           color: _cardColor,
-          icon: const Icon(Icons.more_horiz, color: Colors.white),
+          icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurface),
           onSelected: (val) {
             if (val == 1) {
               onEdit();
@@ -640,17 +639,17 @@ class _FeedPostCard extends StatelessWidget {
               });
             }
           },
-          itemBuilder: (context) => const [
+          itemBuilder: (context) => [
             PopupMenuItem<int>(
               value: 1,
               child: Row(
-                children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Editar')],
+                children: [Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('Editar')],
               ),
             ),
             PopupMenuItem<int>(
               value: 2,
               child: Row(
-                children: [Icon(Icons.delete, color: Colors.white), SizedBox(width: 8), Text('Excluir')],
+                children: [Icon(Icons.delete, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('Excluir')],
               ),
             ),
           ],
@@ -686,20 +685,20 @@ class _FeedPostCard extends StatelessWidget {
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return Container(
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.surface,
                         child: const Center(child: CircularProgressIndicator()),
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.surface,
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.broken_image, color: Colors.white54, size: 36),
                               const SizedBox(height: 8),
-                              Text('Falha ao carregar imagem (arquivo muito grande ou inválido)', style: AppTypography.caption),
+                              Text('Falha ao carregar imagem (arquivo muito grande ou inválido)', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                             ],
                           ),
                         ),
@@ -733,17 +732,17 @@ class _FeedPostCard extends StatelessWidget {
           ),
           label: Text(
             comunicado.publicado ? 'Publicado' : 'Rascunho',
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface),
           ),
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const Spacer(),
         IconButton(
           tooltip: 'Editar',
           onPressed: onEdit,
-          icon: const Icon(Icons.edit, color: Colors.white),
+          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
         ),
         IconButton(
           tooltip: 'Excluir',

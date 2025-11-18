@@ -704,11 +704,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         toolbarHeight: 70,
-        backgroundColor: Colors.black,
         elevation: 0,
         title: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),

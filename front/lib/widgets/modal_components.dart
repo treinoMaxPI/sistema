@@ -3,19 +3,23 @@ import '../theme/typography.dart';
 
 class ModalSheet extends StatelessWidget {
   final Widget child;
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   const ModalSheet({
     super.key,
     required this.child,
-    this.backgroundColor = const Color(0xFF1A1A1A),
+    this.backgroundColor,
   });
-
+  
   @override
   Widget build(BuildContext context) {
+    final Color bg = backgroundColor ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1A1A1A)
+            : Colors.white);
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: bg,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -66,7 +70,10 @@ class ModalOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final optionColor = color ?? Colors.white;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final optionColor = color ?? onSurface;
+    final bg = Theme.of(context).colorScheme.surface;
+    final outline = Theme.of(context).colorScheme.outline;
 
     return InkWell(
       onTap: onTap,
@@ -74,10 +81,10 @@ class ModalOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey[800]!,
+            color: outline,
             width: 1,
           ),
         ),
@@ -100,7 +107,7 @@ class ModalOption extends StatelessWidget {
               child: Text(
                 title,
                 style: AppTypography.bodyLarge.copyWith(
-                  color: optionColor,
+                  color: onSurface,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -108,7 +115,7 @@ class ModalOption extends StatelessWidget {
             if (showArrow)
               Icon(
                 Icons.arrow_forward_ios,
-                color: optionColor.withOpacity(0.5),
+                color: onSurface.withOpacity(0.5),
                 size: 16,
               ),
           ],
@@ -132,7 +139,10 @@ class RoleSelectionOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? const Color(0xFFFF312E) : Colors.white;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final color = isSelected ? const Color(0xFFFF312E) : onSurface;
+    final bg = Theme.of(context).colorScheme.surface;
+    final outline = Theme.of(context).colorScheme.outline;
 
     return InkWell(
       onTap: onTap,
@@ -141,12 +151,10 @@ class RoleSelectionOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFFF312E).withOpacity(0.15)
-              : Colors.black.withOpacity(0.3),
+          color: isSelected ? const Color(0xFFFF312E).withOpacity(0.1) : bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
+            color: isSelected ? const Color(0xFFFF312E) : outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -193,7 +201,7 @@ class UserAvatar extends StatelessWidget {
           height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.black,
+            color: Theme.of(context).scaffoldBackgroundColor,
             border: Border.all(
               color: const Color(0xFFFF312E),
               width: 3,

@@ -125,13 +125,12 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Mural da Academia'),
@@ -285,16 +284,15 @@ class _NovoComunicadoSheetState extends State<_NovoComunicadoSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _tituloController,
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-            cursorColor: Colors.white,
+            cursorColor: Theme.of(context).colorScheme.primary,
             decoration: InputDecoration(
               labelText: 'Título',
-              labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+              labelStyle: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
               filled: true,
-              fillColor: Colors.black.withOpacity(0.3),
+              fillColor: Theme.of(context).colorScheme.surfaceVariant,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[800]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
             ),
           ),
@@ -302,16 +300,15 @@ class _NovoComunicadoSheetState extends State<_NovoComunicadoSheet> {
           TextField(
             controller: _mensagemController,
             maxLines: 5,
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-            cursorColor: Colors.white,
+            cursorColor: Theme.of(context).colorScheme.primary,
             decoration: InputDecoration(
               labelText: 'Mensagem',
-              labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+              labelStyle: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
               filled: true,
-              fillColor: Colors.black.withOpacity(0.3),
+              fillColor: Theme.of(context).colorScheme.surfaceVariant,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[800]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
             ),
           ),
@@ -528,8 +525,8 @@ class _FeedPostCard extends StatelessWidget {
     required this.formatDate,
   });
 
-  Color get _cardColor => const Color(0xFF121212);
-  Color get _borderColor => const Color(0xFF1E1E1E);
+  Color get _cardColor => Theme.of(context).colorScheme.surface;
+  Color get _borderColor => Theme.of(context).colorScheme.outline;
   Color get _accent => const Color(0xFFFF312E);
 
   @override
@@ -570,10 +567,10 @@ class _FeedPostCard extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: Colors.grey[800],
+          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
           child: Text(
             initials,
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: 10),
@@ -596,11 +593,11 @@ class _FeedPostCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.grey[900],
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: _borderColor),
                       ),
-                      child: Text('Rascunho', style: AppTypography.caption.copyWith(color: Colors.white70)),
+                      child: Text('Rascunho', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                     ),
                 ],
               ),
@@ -613,7 +610,7 @@ class _FeedPostCard extends StatelessWidget {
         ),
         PopupMenuButton<int>(
           color: _cardColor,
-          icon: const Icon(Icons.more_horiz, color: Colors.white),
+          icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurface),
           onSelected: (val) {
             if (val == 1) {
               onEdit();
@@ -642,16 +639,16 @@ class _FeedPostCard extends StatelessWidget {
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem<int>(
+            PopupMenuItem<int>(
               value: 1,
               child: Row(
-                children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Editar')],
+                children: [Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('Editar')],
               ),
             ),
-            const PopupMenuItem<int>(
+            PopupMenuItem<int>(
               value: 2,
               child: Row(
-                children: [Icon(Icons.delete, color: Colors.white), SizedBox(width: 8), Text('Excluir')],
+                children: [Icon(Icons.delete, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('Excluir')],
               ),
             ),
           ],
@@ -693,14 +690,14 @@ class _FeedPostCard extends StatelessWidget {
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.surface,
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.broken_image, color: Colors.white54, size: 36),
                               const SizedBox(height: 8),
-                              Text('Falha ao carregar imagem (arquivo muito grande ou inválido)', style: AppTypography.caption),
+                              Text('Falha ao carregar imagem (arquivo muito grande ou inválido)', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                             ],
                           ),
                         ),
@@ -734,17 +731,17 @@ class _FeedPostCard extends StatelessWidget {
           ),
           label: Text(
             comunicado.publicado ? 'Publicado' : 'Rascunho',
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface),
           ),
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const Spacer(),
         IconButton(
           tooltip: 'Editar',
           onPressed: onEdit,
-          icon: const Icon(Icons.edit, color: Colors.white),
+          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
         ),
         IconButton(
           tooltip: 'Excluir',

@@ -44,13 +44,12 @@ class _CustomerMuralPageState extends State<CustomerMuralPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Mural da Academia'),
@@ -130,8 +129,8 @@ class _ReadOnlyPostCard extends StatelessWidget {
     required this.formatDate,
   });
 
-  Color get _cardColor => const Color(0xFF121212);
-  Color get _borderColor => const Color(0xFF1E1E1E);
+  Color get _cardColor => Theme.of(context).colorScheme.surface;
+  Color get _borderColor => Theme.of(context).colorScheme.outline;
 
   @override
   Widget build(BuildContext context) {
@@ -213,20 +212,20 @@ class _ReadOnlyPostCard extends StatelessWidget {
               loadingBuilder: (context, child, progress) {
                 if (progress == null) return child;
                 return Container(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.surface,
                   child: const Center(child: CircularProgressIndicator()),
                 );
               },
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.surface,
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.broken_image, color: Colors.white54, size: 36),
                         const SizedBox(height: 8),
-                        Text('Falha ao carregar imagem', style: AppTypography.caption),
+                        Text('Falha ao carregar imagem', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                       ],
                     ),
                   ),
