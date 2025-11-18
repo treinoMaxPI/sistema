@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
+import 'package:gym_management/pages/admin/admin_mural_page.dart';
 import 'package:gym_management/pages/personal/meus_treinos_page.dart';
+import 'package:gym_management/pages/personal/personal_mural_page.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
 import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
+import 'package:gym_management/pages/customer/mural_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 
 void main() {
@@ -32,11 +35,14 @@ class MyApp extends ConsumerWidget {
         '/home': (context) => const HomeScreen(),
         // Admin routes
         '/admin/planos': (context) => const AdminPlanosPage(),
+        '/admin/mural': (context) => const AdminMuralPage(),
         // Personal trainer routes
         '/personal/treinos': (context) => const MeusTreinosPage(),
+        '/personal/mural': (context) => const PersonalMuralPage(),
         // Customer routes
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
+        '/customer/mural': (context) => const CustomerMuralPage(),
       },
     );
   }

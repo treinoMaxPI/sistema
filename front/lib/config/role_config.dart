@@ -27,6 +27,13 @@ class RoleConfig {
         icon: Icons.fitness_center,
         color: Color(0xFF4CAF50),
       ),
+      RoleButtonConfig(
+        route: '/personal/mural',
+        title: 'Mural da Academia',
+        description: 'Poste avisos e novidades',
+        icon: Icons.campaign,
+        color: Color(0xFF4CAF50),
+      ),
     ],
     Role.ADMIN: [
       RoleButtonConfig(
@@ -36,6 +43,13 @@ class RoleConfig {
         icon: Icons.edit_document,
         color: Color(0xFFFF312E),
       ),
+      RoleButtonConfig(
+        route: '/admin/mural',
+        title: 'Mural da Academia',
+        description: 'Poste avisos e novidades',
+        icon: Icons.campaign,
+        color: Color(0xFFFF312E),
+      ),
     ],
     Role.CUSTOMER: [
       RoleButtonConfig(
@@ -43,6 +57,13 @@ class RoleConfig {
         title: 'Minhas Cobranças',
         description: 'Visualize suas cobranças',
         icon: Icons.receipt_long,
+        color: Color(0xFF2196F3),
+      ),
+      RoleButtonConfig(
+        route: '/customer/mural',
+        title: 'Mural da Academia',
+        description: 'Veja avisos e novidades',
+        icon: Icons.campaign,
         color: Color(0xFF2196F3),
       ),
     ],
