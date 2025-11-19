@@ -10,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
@@ -40,11 +42,15 @@ public class Categoria {
     @Size(min = 3, max = 100)
     @Column(nullable = false, length = 100)
     private String nome;
-
-    @NotNull
-    @OneToMany
-    @JoinColumn(name = "plano_id", nullable = false)
+    
+    @ManyToMany
+    @JoinTable(
+        name = "categorias_planos",
+        joinColumns = @JoinColumn(name = "categoria_id"),
+        inverseJoinColumns = @JoinColumn(name = "plano_id")
+    )
     private List<Plano> planos;
+
 
     @NotNull
     @ManyToOne
