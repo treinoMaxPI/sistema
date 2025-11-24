@@ -136,6 +136,53 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
     }
   }
 
+  void _mostrarDetalhesCategoria(Categoria c) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: Text(c.nome, style: AppTypography.titleMedium.copyWith(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (c.planos != null && c.planos!.isNotEmpty) ...[
+              Text('Planos vinculados:', style: AppTypography.bodyMedium.copyWith(color: Colors.white70)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: c.planos!.map((p) => Chip(
+                  label: Text(p.nome, style: const TextStyle(color: Colors.white)),
+                  backgroundColor: const Color(0xFFFF312E),
+                  side: BorderSide.none,
+                )).toList(),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (c.dataCriacao != null)
+              Text('Criado em: ${_formatDate(c.dataCriacao!)}', style: AppTypography.bodySmall.copyWith(color: Colors.grey)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Fechar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String date) {
+    try {
+      final dt = DateTime.parse(date);
+      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+    } catch (_) {
+      return date;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,6 +226,7 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
                             categoria: c,
                             onEdit: () => _abrirNovaCategoria(initial: c),
                             onDelete: () => _removerCategoria(c),
+                            onTap: () => _mostrarDetalhesCategoria(c),
                           );
                         },
                       )),
@@ -338,8 +386,9 @@ class _CategoriaCard extends StatelessWidget {
   final Categoria categoria;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onTap;
 
-  const _CategoriaCard({required this.categoria, required this.onEdit, required this.onDelete});
+  const _CategoriaCard({required this.categoria, required this.onEdit, required this.onDelete, required this.onTap});
 
   Color get _cardColor => const Color(0xFF121212);
   Color get _borderColor => const Color(0xFF1E1E1E);
@@ -354,38 +403,42 @@ class _CategoriaCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: _borderColor),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            CircleAvatar(radius: 18, backgroundColor: Colors.grey[800], child: Text(_initialsFrom(categoria.nome), style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold))),
-            const SizedBox(width: 12),
-            Expanded(child: Text(categoria.nome, style: AppTypography.bodyLarge)),
-            PopupMenuButton<int>(
-              color: _cardColor,
-              icon: const Icon(Icons.more_horiz, color: Colors.white),
-              onSelected: (val) {
-                if (val == 1) onEdit();
-                else if (val == 2) {
-                  showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Confirmar exclusão'),
-                      content: const Text('Você deseja confirmar essa exclusão?'),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-                        TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Excluir')),
-                      ],
-                    ),
-                  ).then((confirmed) { if (confirmed == true) onDelete(); });
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem<int>(value: 1, child: Row(children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Editar')])),
-                PopupMenuItem<int>(value: 2, child: Row(children: [Icon(Icons.delete, color: _accent), SizedBox(width: 8), Text('Excluir')])),
-              ],
-            ),
-          ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              CircleAvatar(radius: 18, backgroundColor: Colors.grey[800], child: Text(_initialsFrom(categoria.nome), style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold))),
+              const SizedBox(width: 12),
+              Expanded(child: Text(categoria.nome, style: AppTypography.bodyLarge)),
+              PopupMenuButton<int>(
+                color: _cardColor,
+                icon: const Icon(Icons.more_horiz, color: Colors.white),
+                onSelected: (val) {
+                  if (val == 1) onEdit();
+                  else if (val == 2) {
+                    showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Confirmar exclusão'),
+                        content: const Text('Você deseja confirmar essa exclusão?'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Excluir')),
+                        ],
+                      ),
+                    ).then((confirmed) { if (confirmed == true) onDelete(); });
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem<int>(value: 1, child: Row(children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Editar')])),
+                  PopupMenuItem<int>(value: 2, child: Row(children: [Icon(Icons.delete, color: _accent), SizedBox(width: 8), Text('Excluir')])),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
