@@ -47,6 +47,7 @@ public class Categoria {
     )
     private List<Plano> planos;
 
+        
     /*
     @NotNull
     @ManyToOne
