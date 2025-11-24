@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gym_management/pages/admin/admin_aulas_page.dart';
+import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
 import 'package:gym_management/pages/admin/admin_relatorios_page.dart';
 import 'package:gym_management/pages/personal/meus_treinos_page.dart';
+import 'package:gym_management/pages/personal/personal_categorias_page.dart';
 import 'package:gym_management/pages/personal/personal_mural_page.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -70,13 +71,14 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/admin/clientes': (context) => const AdminClientesPage(),
         '/admin/relatorios': (context) => const AdminRelatoriosPage(),
         // Personal trainer routes
+        '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const MeusTreinosPage(),
         '/personal/mural': (context) => const PersonalMuralPage(),
+        '/personal/categorias': (context) => const PersonalCategoriasPage(),
         // Customer routes
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),
-        '/admin/aula': (context) => const AdminAulasPage(),
       },
     );
   }
