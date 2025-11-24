@@ -34,6 +34,13 @@ class RoleConfig {
         icon: Icons.campaign,
         color: Color(0xFF4CAF50),
       ),
+       RoleButtonConfig(
+        route: '/personal/aulas',
+        title: 'Gerenciar Aulas',
+        description: 'Crie e edite aulas',
+        icon: Icons.class_,
+        color: Color(0xFF4CAF50),
+      ),
     ],
     Role.ADMIN: [
       RoleButtonConfig(
