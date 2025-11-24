@@ -41,6 +41,13 @@ class RoleConfig {
         icon: Icons.class_,
         color: Color(0xFF4CAF50),
       ),
+       RoleButtonConfig(
+        route: '/personal/categorias',
+        title: 'Gerenciar Categorias',
+        description: 'Crie e edite categorias',
+        icon: Icons.class_,
+        color: Color(0xFF4CAF50),
+      ),
     ],
     Role.ADMIN: [
       RoleButtonConfig(
