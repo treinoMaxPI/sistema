@@ -129,17 +129,17 @@ class _ReadOnlyPostCard extends StatelessWidget {
     required this.formatDate,
   });
 
-  Color get _cardColor => Theme.of(context).colorScheme.surface;
-  Color get _borderColor => Theme.of(context).colorScheme.outline;
+  Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
+  Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: _cardColor,
+      color: _cardColor(context),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: _borderColor),
+        side: BorderSide(color: _borderColor(context)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -153,6 +153,8 @@ class _ReadOnlyPostCard extends StatelessWidget {
             ],
             const SizedBox(height: 10),
             _buildBody(context),
+            const SizedBox(height: 8),
+            _buildActions(context),
           ],
         ),
       ),
@@ -162,20 +164,40 @@ class _ReadOnlyPostCard extends StatelessWidget {
   bool get _hasImage => (comunicado.imagemUrl != null && comunicado.imagemUrl!.trim().isNotEmpty);
 
   Widget _buildHeader(BuildContext context) {
+    final String initials = _initialsFrom((comunicado.autorNome ?? '').trim().isEmpty ? 'A' : comunicado.autorNome!);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Icon(Icons.campaign, color: Color(0xFF2196F3)),
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          child: Text(
+            initials,
+            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+          ),
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                comunicado.titulo,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodyLarge,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      comunicado.titulo,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyLarge,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  if (comunicado.autorNome != null)
+                    Text(
+                      comunicado.autorNome!,
+                      style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                    ),
+                ],
               ),
               Text(
                 formatDate(comunicado.dataCriacao),
@@ -186,6 +208,17 @@ class _ReadOnlyPostCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _initialsFrom(String text) {
+    final parts = text.trim().split(RegExp(r"\s+")).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return 'A';
+    String first = parts.first.substring(0, 1).toUpperCase();
+    String second = '';
+    if (parts.length > 1) {
+      second = parts[1].substring(0, 1).toUpperCase();
+    }
+    return (first + second).trim();
   }
 
   Widget _buildImage(BuildContext context) {
@@ -242,6 +275,48 @@ class _ReadOnlyPostCard extends StatelessWidget {
     return Text(
       comunicado.mensagem,
       style: AppTypography.bodyMedium,
+    );
+  }
+
+  Widget _buildActions(BuildContext context) {
+    final service = MuralService();
+    return Row(
+      children: [
+        FutureBuilder<List<dynamic>>(
+          future: () async {
+            final liked = await service.hasLiked(comunicado.id);
+            final count = await service.getLikesCount(comunicado.id);
+            return [liked, count];
+          }(),
+          builder: (context, snapshot) {
+            bool liked = false;
+            int count = 0;
+            if (snapshot.hasData) {
+              liked = snapshot.data![0] as bool;
+              count = snapshot.data![1] as int;
+            }
+            return StatefulBuilder(
+              builder: (context, setStateSB) => Row(
+                children: [
+                  IconButton(
+                    tooltip: liked ? 'Descurtir' : 'Curtir',
+                    onPressed: () async {
+                      final newCount = await service.toggleLike(comunicado.id);
+                      final newLiked = await service.hasLiked(comunicado.id);
+                      setStateSB(() {
+                        count = newCount;
+                        liked = newLiked;
+                      });
+                    },
+                    icon: Icon(liked ? Icons.favorite : Icons.favorite_border, color: liked ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.onSurface),
+                  ),
+                  Text('$count', style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

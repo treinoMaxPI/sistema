@@ -29,20 +29,20 @@ class _BuyPlanPageState extends ConsumerState<BuyPlanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const PageHeader(title: 'Comprar Plano'),
       body: FutureBuilder<ApiResponse<List<PlanoResponse>>>(
         future: _planosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+              child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
             return Center(
               child: Text(
                 'Erro ao carregar planos: ${snapshot.error}',
-                style: AppTypography.bodyMedium.copyWith(color: Colors.red),
+                style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.error),
               ),
             );
           } else if (!snapshot.hasData ||
@@ -51,7 +51,7 @@ class _BuyPlanPageState extends ConsumerState<BuyPlanPage> {
             return Center(
               child: Text(
                 'Nenhum plano disponível no momento.',
-                style: AppTypography.bodyMedium.copyWith(color: Colors.grey),
+                style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
               ),
             );
           } else {
@@ -59,14 +59,14 @@ class _BuyPlanPageState extends ConsumerState<BuyPlanPage> {
             return RefreshIndicator(
               onRefresh: _refreshPlanos,
               color: const Color(0xFFFF312E),
-              backgroundColor: Colors.black,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               child: ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: planos.length,
                 itemBuilder: (context, index) {
                   final plano = planos[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
+                    color: Theme.of(context).colorScheme.surface,
                     margin: const EdgeInsets.only(bottom: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -79,13 +79,13 @@ class _BuyPlanPageState extends ConsumerState<BuyPlanPage> {
                           Text(
                             plano.nome,
                             style: AppTypography.titleLarge
-                                .copyWith(color: Colors.white),
+                                .copyWith(color: Theme.of(context).colorScheme.onSurface),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             plano.descricao,
                             style: AppTypography.bodyMedium
-                                .copyWith(color: Colors.grey[400]),
+                                .copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                           ),
                           const SizedBox(height: 16),
                           Align(
@@ -136,7 +136,7 @@ class _BuyPlanPageState extends ConsumerState<BuyPlanPage> {
                               child: Text(
                                 'Escolher Plano',
                                 style: AppTypography.bodyLarge
-                                    .copyWith(color: Colors.white),
+                                    .copyWith(color: Theme.of(context).colorScheme.onPrimary),
                               ),
                             ),
                           ),

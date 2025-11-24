@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 import '../../theme/typography.dart';
 import '../../services/mural_service.dart';
+import '../../services/auth_service.dart';
 
 class PersonalMuralPage extends StatefulWidget {
   const PersonalMuralPage({super.key});
@@ -19,10 +20,12 @@ class _PersonalMuralPageState extends State<PersonalMuralPage> {
   List<ComunicadoResponse> _comunicados = [];
   bool _isLoading = true;
   String? _errorMessage;
+  String? _userName;
 
   @override
   void initState() {
     super.initState();
+    AuthService().getUserName().then((value){ if(mounted) setState(()=> _userName = value); });
     _carregarComunicados();
   }
 
@@ -169,6 +172,7 @@ class _PersonalMuralPageState extends State<PersonalMuralPage> {
                     onEdit: () => _editarComunicado(index),
                     onDelete: () => _removerComunicado(index),
                     formatDate: _formatDate,
+                    posterName: _userName ?? c.autorNome,
                   );
                 },
               )),
@@ -517,6 +521,7 @@ class _FeedPostCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final String Function(String) formatDate;
+  final String? posterName;
 
   const _FeedPostCard({
     required this.comunicado,
@@ -524,20 +529,21 @@ class _FeedPostCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.formatDate,
+    this.posterName,
   });
 
-  Color get _cardColor => Theme.of(context).colorScheme.surface;
-  Color get _borderColor => Theme.of(context).colorScheme.outline;
+  Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
+  Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;  
   Color get _accent => const Color(0xFF4CAF50);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: _cardColor,
+      color: _cardColor(context),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: _borderColor),
+        side: BorderSide(color: _borderColor(context)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -562,7 +568,7 @@ class _FeedPostCard extends StatelessWidget {
   bool get _hasImage => (comunicado.imagemUrl != null && comunicado.imagemUrl!.trim().isNotEmpty);
 
   Widget _buildHeader(BuildContext context) {
-    final String initials = _initialsFrom(comunicado.titulo);
+    final String initials = _initialsFrom(posterName ?? comunicado.titulo);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -590,13 +596,19 @@ class _FeedPostCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
+                  if ((posterName ?? comunicado.autorNome) != null)
+                    Text(
+                      (posterName ?? comunicado.autorNome)!,
+                      style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                    ),
+                  const SizedBox(width: 6),
                   if (!comunicado.publicado)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.grey[900],
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _borderColor),
+                        border: Border.all(color: _borderColor(context)),
                       ),
                       child: Text('Rascunho', style: AppTypography.caption.copyWith(color: Colors.white70)),
                     ),
@@ -610,7 +622,7 @@ class _FeedPostCard extends StatelessWidget {
           ),
         ),
         PopupMenuButton<int>(
-          color: _cardColor,
+          color: _cardColor(context),
           icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurface),
           onSelected: (val) {
             if (val == 1) {
@@ -722,6 +734,7 @@ class _FeedPostCard extends StatelessWidget {
   }
 
   Widget _buildActions(BuildContext context) {
+    final service = MuralService();
     return Row(
       children: [
         TextButton.icon(
@@ -737,6 +750,41 @@ class _FeedPostCard extends StatelessWidget {
           style: TextButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
+        ),
+        const SizedBox(width: 8),
+        FutureBuilder<List<dynamic>>(
+          future: () async {
+            final liked = await service.hasLiked(comunicado.id);
+            final count = await service.getLikesCount(comunicado.id);
+            return [liked, count];
+          }(),
+          builder: (context, snapshot) {
+            bool liked = false;
+            int count = 0;
+            if (snapshot.hasData) {
+              liked = snapshot.data![0] as bool;
+              count = snapshot.data![1] as int;
+            }
+            return StatefulBuilder(
+              builder: (context, setStateSB) => Row(
+                children: [
+                  IconButton(
+                    tooltip: liked ? 'Descurtir' : 'Curtir',
+                    onPressed: () async {
+                      final newCount = await service.toggleLike(comunicado.id);
+                      final newLiked = await service.hasLiked(comunicado.id);
+                      setStateSB(() {
+                        count = newCount;
+                        liked = newLiked;
+                      });
+                    },
+                    icon: Icon(liked ? Icons.favorite : Icons.favorite_border, color: liked ? const Color(0xFF4CAF50) : Theme.of(context).colorScheme.onSurface),
+                  ),
+                  Text('$count', style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                ],
+              ),
+            );
+          },
         ),
         const Spacer(),
         IconButton(

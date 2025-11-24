@@ -8,6 +8,7 @@ class PageButton extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final double? width;
+  final double? height;
 
   const PageButton({
     super.key,
@@ -17,6 +18,7 @@ class PageButton extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.width,
+    this.height,
   });
 
   @override
@@ -27,6 +29,7 @@ class PageButton extends StatelessWidget {
     final onSurface = theme.colorScheme.onSurface;
     return SizedBox(
       width: width,
+      height: height,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),

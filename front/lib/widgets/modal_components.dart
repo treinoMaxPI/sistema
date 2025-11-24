@@ -185,41 +185,84 @@ class RoleSelectionOption extends StatelessWidget {
 class UserAvatar extends StatelessWidget {
   final String? userName;
   final double size;
+  final String? imageUrl;
+  final bool editable;
+  final VoidCallback? onEdit;
 
   const UserAvatar({
     super.key,
     this.userName,
     this.size = 70,
+    this.imageUrl,
+    this.editable = false,
+    this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
+    final borderColor = const Color(0xFFFF312E);
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Column(
       children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).scaffoldBackgroundColor,
-            border: Border.all(
-              color: const Color(0xFFFF312E),
-              width: 3,
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).scaffoldBackgroundColor,
+                border: Border.all(
+                  color: borderColor,
+                  width: 3,
+                ),
+              ),
+              child: ClipOval(
+                child: imageUrl != null && imageUrl!.isNotEmpty
+                    ? Image.network(
+                        imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(Icons.person, size: size * 0.57, color: borderColor),
+                        ),
+                      )
+                    : Center(
+                        child: Icon(
+                          Icons.person,
+                          size: size * 0.57,
+                          color: borderColor,
+                        ),
+                      ),
+              ),
             ),
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: Color(0xFFFF312E),
-            ),
-          ),
+            if (editable)
+              Positioned(
+                bottom: -4,
+                right: -4,
+                child: InkWell(
+                  onTap: onEdit,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    child: Icon(Icons.edit, size: 16, color: onSurface),
+                  ),
+                ),
+              ),
+          ],
         ),
         if (userName != null) ...[
           const SizedBox(height: 12),
           Text(
             userName!,
             style: AppTypography.titleMedium.copyWith(
+              color: onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),

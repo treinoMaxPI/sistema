@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
+import 'package:gym_management/pages/admin/admin_clientes_page.dart';
+import 'package:gym_management/pages/admin/admin_relatorios_page.dart';
 import 'package:gym_management/pages/personal/meus_treinos_page.dart';
 import 'package:gym_management/pages/personal/personal_mural_page.dart';
 import 'screens/login_screen.dart';
@@ -12,6 +14,7 @@ import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
 import 'package:gym_management/pages/customer/mural_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 import 'notifiers/theme_mode_notifier.dart';
+import 'notifiers/text_scale_notifier.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -29,11 +32,13 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(themeModeProvider.notifier).loadFromPrefs());
+    Future.microtask(() => ref.read(textScaleProvider.notifier).loadFromPrefs());
   }
 
   @override
   Widget build(BuildContext context) {
     final mode = ref.watch(themeModeProvider);
+    final textScale = ref.watch(textScaleProvider);
     return MaterialApp(
       title: 'Gestão de Academias',
       debugShowCheckedModeBanner: false,
@@ -47,6 +52,13 @@ class _MyAppState extends ConsumerState<MyApp> {
         appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Colors.white),
       ),
       home: const AuthWrapper(),
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(textScaleFactor: ref.read(textScaleProvider.notifier).factor()),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
@@ -54,6 +66,8 @@ class _MyAppState extends ConsumerState<MyApp> {
         // Admin routes
         '/admin/planos': (context) => const AdminPlanosPage(),
         '/admin/mural': (context) => const AdminMuralPage(),
+        '/admin/clientes': (context) => const AdminClientesPage(),
+        '/admin/relatorios': (context) => const AdminRelatoriosPage(),
         // Personal trainer routes
         '/personal/treinos': (context) => const MeusTreinosPage(),
         '/personal/mural': (context) => const PersonalMuralPage(),
