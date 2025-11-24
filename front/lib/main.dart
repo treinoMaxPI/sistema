@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gym_management/pages/admin/admin_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
@@ -75,6 +76,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),
+        '/admin/aula': (context) => const AdminAulasPage(),
       },
     );
   }
