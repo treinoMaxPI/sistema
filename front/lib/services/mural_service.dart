@@ -11,6 +11,7 @@ class ComunicadoResponse {
   final bool publicado;
   final String dataCriacao;
   final String? imagemUrl;
+  final String? autorNome;
 
   ComunicadoResponse({
     required this.id,
@@ -19,6 +20,7 @@ class ComunicadoResponse {
     required this.publicado,
     required this.dataCriacao,
     this.imagemUrl,
+    this.autorNome,
   });
 
   factory ComunicadoResponse.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class ComunicadoResponse {
       publicado: json['publicado'],
       dataCriacao: json['dataCriacao'],
       imagemUrl: json['imagemUrl'],
+      autorNome: json['autorNome'] ?? json['autor'],
     );
   }
 }
@@ -237,5 +240,30 @@ class MuralService {
     } catch (e) {
       return ApiResponse(success: false, message: 'Erro de conexão: $e');
     }
+  }
+
+  Future<int> getLikesCount(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('likes_count_$id') ?? 0;
+  }
+
+  Future<bool> hasLiked(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('liked_$id') ?? false;
+  }
+
+  Future<int> toggleLike(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final liked = prefs.getBool('liked_$id') ?? false;
+    int count = prefs.getInt('likes_count_$id') ?? 0;
+    if (liked) {
+      count = count > 0 ? count - 1 : 0;
+      await prefs.setBool('liked_$id', false);
+    } else {
+      count = count + 1;
+      await prefs.setBool('liked_$id', true);
+    }
+    await prefs.setInt('likes_count_$id', count);
+    return count;
   }
 }

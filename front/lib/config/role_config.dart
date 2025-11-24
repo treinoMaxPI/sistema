@@ -64,6 +64,20 @@ class RoleConfig {
         icon: Icons.campaign,
         color: Color(0xFFFF312E),
       ),
+      RoleButtonConfig(
+        route: '/admin/clientes',
+        title: 'Clientes',
+        description: 'Visualizar clientes',
+        icon: Icons.group,
+        color: Color(0xFFFF312E),
+      ),
+      RoleButtonConfig(
+        route: '/admin/relatorios',
+        title: 'Relatórios',
+        description: 'Entradas/Saídas e Pagamentos',
+        icon: Icons.insights,
+        color: Color(0xFFFF312E),
+      ),
     ],
     Role.CUSTOMER: [
       RoleButtonConfig(
