@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.util.DateUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "planos")
@@ -51,6 +52,7 @@ public class Plano {
     @Column(nullable = false)
     private Integer precoCentavos = 0;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne
     @JoinColumn(name = "criado_por", nullable = false)

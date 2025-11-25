@@ -7,14 +7,14 @@ import 'dart:math' as math;
 import '../../theme/typography.dart';
 import '../../services/aula_service.dart';
 
-class AdminAulasPage extends StatefulWidget {
-  const AdminAulasPage({super.key});
+class PersonalAulasPage extends StatefulWidget {
+  const PersonalAulasPage({super.key});
 
   @override
-  State<AdminAulasPage> createState() => _AdminAulasPageState();
+  State<PersonalAulasPage> createState() => _PersonalAulasPageState();
 }
 
-class _AdminAulasPageState extends State<AdminAulasPage> {
+class _PersonalAulasPageState extends State<PersonalAulasPage> {
   final AulaService _aulaService = AulaService();
   List<AulaResponse> _aulas = [];
   bool _isLoading = true;
