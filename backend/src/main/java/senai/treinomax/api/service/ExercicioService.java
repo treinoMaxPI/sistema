@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import senai.treinomax.api.auth.model.AtivacaoMuscular;
 import senai.treinomax.api.auth.model.Exercicio;
 import senai.treinomax.api.repository.ExercicioRepository;
 
@@ -37,7 +38,25 @@ public class ExercicioService {
                 .map(exercicio -> {
                     exercicio.setNome(exercicioAtualizado.getNome());
                     exercicio.setDescricao(exercicioAtualizado.getDescricao());
-                    exercicio.setAtivacaoMuscular(exercicioAtualizado.getAtivacaoMuscular());
+                    exercicio.setVideoUrl(exercicioAtualizado.getVideoUrl());
+
+                    // Processar ativações musculares
+                    // IMPORTANTE: Com orphanRemoval = true, nunca substituir a referência da coleção
+                    // Devemos limpar e adicionar à mesma instância gerenciada pelo Hibernate
+                    exercicio.getAtivacaoMuscular().clear();
+
+                    if (exercicioAtualizado.getAtivacaoMuscular() != null && !exercicioAtualizado.getAtivacaoMuscular().isEmpty()) {
+                        for (AtivacaoMuscular ativacao : exercicioAtualizado.getAtivacaoMuscular()) {
+                            // Criar novo item e adicionar à coleção existente
+                            AtivacaoMuscular novaAtivacao = new AtivacaoMuscular();
+                            novaAtivacao.setGrupoMuscular(ativacao.getGrupoMuscular());
+                            novaAtivacao.setPeso(ativacao.getPeso());
+                            novaAtivacao.setExercicio(exercicio);
+                            // Adicionar à coleção existente (não substituir a referência)
+                            exercicio.getAtivacaoMuscular().add(novaAtivacao);
+                        }
+                    }
+
                     return exercicioRepository.save(exercicio);
                 })
                 .orElse(null);

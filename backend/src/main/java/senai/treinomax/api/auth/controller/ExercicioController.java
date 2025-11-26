@@ -1,11 +1,6 @@
 package senai.treinomax.api.auth.controller;
 
-import jakarta.validation.Valid;
-import senai.treinomax.api.auth.dto.request.*;
-import senai.treinomax.api.auth.dto.response.LoginResponse;
-import senai.treinomax.api.auth.dto.response.RefreshTokenResponse;
 import senai.treinomax.api.auth.model.Exercicio;
-import senai.treinomax.api.auth.service.AuthService;
 import senai.treinomax.api.service.ExercicioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +44,18 @@ public class ExercicioController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PERSONAL')")
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody Exercicio request) {
-        var exercicio = exercicioService.atualizarExercicio(id, request);
-        return ResponseEntity.ok(exercicio);
+        try {
+            var exercicio = exercicioService.atualizarExercicio(id, request);
+            if (exercicio == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(exercicio);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", "ID inválido: " + e.getMessage()));
+        } catch (Exception e) {
+            log.error("Erro ao atualizar exercício", e);
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")

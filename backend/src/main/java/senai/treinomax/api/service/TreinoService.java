@@ -102,13 +102,13 @@ public class TreinoService {
                     treino.setNivel(treinoAtualizado.getNivel());
 
                     // Processar novos itens
-                    if (itensRequest != null && !itensRequest.isEmpty()) {
-                        // Limpar itens existentes (orphanRemoval cuidará da remoção)
-                        treino.getItens().clear();
+                    // IMPORTANTE: Com orphanRemoval = true, nunca substituir a referência da coleção
+                    // Devemos limpar e adicionar à mesma instância gerenciada pelo Hibernate
+                    treino.getItens().clear();
 
-                        List<ItemTreino> novosItens = new ArrayList<>();
+                    if (itensRequest != null && !itensRequest.isEmpty()) {
                         for (Map<String, Object> itemMap : itensRequest) {
-                            // Sempre criar novo item (orphanRemoval remove os antigos)
+                            // Criar novo item (orphanRemoval remove os antigos ao limpar)
                             ItemTreino item = new ItemTreino();
 
                             // Extrair exercício
@@ -143,9 +143,9 @@ public class TreinoService {
                             }
 
                             item.setTreino(treino);
-                            novosItens.add(item);
+                            // Adicionar à coleção existente (não substituir a referência)
+                            treino.getItens().add(item);
                         }
-                        treino.setItens(novosItens);
                     }
 
                     return treinoRepository.save(treino);
