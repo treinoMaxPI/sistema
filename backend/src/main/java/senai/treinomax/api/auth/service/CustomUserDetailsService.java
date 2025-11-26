@@ -36,16 +36,15 @@ public class CustomUserDetailsService implements UserDetailsService {
                 usuario.getEmail(),
                 usuario.getSenha(),
                 usuario.getAtivo(),
-                getAuthorities(usuario)
-        );
+                getAuthorities(usuario));
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Usuario usuario) {
         if (usuario.getRoles() == null || usuario.getRoles().isEmpty()) {
-            // Default role if no roles are assigned
-            return Collections.emptyList();
+            // Default role if no roles are assigned - ensure user is authenticated
+            return Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
         }
-        
+
         return usuario.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toList());
@@ -61,9 +60,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 usuario.getEmail(),
                 usuario.getSenha(),
                 usuario.getAtivo(),
-                getAuthorities(usuario)
-        );
+                getAuthorities(usuario));
     }
+
     @Data
     public static class CustomUserDetails implements UserDetails {
         private final UUID id;
@@ -73,7 +72,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         private final Collection<? extends GrantedAuthority> authorities;
 
         public CustomUserDetails(UUID id, String username, String password, boolean enabled,
-                               Collection<? extends GrantedAuthority> authorities) {
+                Collection<? extends GrantedAuthority> authorities) {
             this.id = id;
             this.username = username;
             this.password = password;

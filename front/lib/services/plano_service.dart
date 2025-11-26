@@ -398,11 +398,27 @@ class PlanoService {
         // No Content
         return ApiResponse(
             success: true, data: null, message: 'Usuário não possui plano');
-      } else {
-        final errorData = json.decode(response.body);
+      } else if (response.statusCode == 403) {
+        // Forbidden - user doesn't have permission
         return ApiResponse(
           success: false,
-          message: errorData['message'] ?? 'Erro ao obter plano do usuário',
+          message: 'Acesso negado. Você não tem permissão para acessar este recurso.',
+        );
+      } else {
+        // Try to parse error message, but handle cases where body might not be JSON
+        String errorMessage = 'Erro ao obter plano do usuário';
+        try {
+          if (response.body.isNotEmpty) {
+            final errorData = json.decode(response.body);
+            errorMessage = errorData['message'] ?? errorMessage;
+          }
+        } catch (e) {
+          // If JSON parsing fails, use default message
+          errorMessage = 'Erro ao obter plano do usuário (${response.statusCode})';
+        }
+        return ApiResponse(
+          success: false,
+          message: errorMessage,
         );
       }
     } catch (e) {

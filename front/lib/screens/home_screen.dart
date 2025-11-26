@@ -51,9 +51,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       ref.read(selectedRoleProvider.notifier).initializeRole(parsedJwt);
 
-      if (_parsedJwt?.roles.contains(Role.CUSTOMER) ?? false) {
-        await _loadUserPlano(showLoading: false);
-      }
+      // Try to load plan for any authenticated user (backend now allows all roles)
+      // Only show plan card in UI for CUSTOMER role (handled in _buildRoleButtons)
+      await _loadUserPlano(showLoading: false);
     } catch (e) {
       if (!mounted) return;
       setState(() {

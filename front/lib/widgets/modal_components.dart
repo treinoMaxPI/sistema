@@ -21,15 +21,28 @@ class ModalSheet extends StatelessWidget {
           topRight: Radius.circular(20),
         ),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildModalHandle(),
-          const SizedBox(height: 24),
-          child,
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: _buildModalHandle(),
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  child: child,
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+            ],
+          );
+        },
       ),
     );
   }
