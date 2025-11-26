@@ -40,4 +40,3 @@ services:
       - ../backend/target_test-classes:/app/target_test-classes
       - ~/.m2:/root/.
 
-
