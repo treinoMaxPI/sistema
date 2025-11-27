@@ -47,11 +47,30 @@ class TreinoService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        final List<Treino> treinos =
-            data.map((treinoJson) => Treino.fromJson(treinoJson)).toList();
+        try {
+          final List<dynamic> data = json.decode(response.body);
+          final List<Treino> treinos = data
+              .map((treinoJson) {
+                try {
+                  return Treino.fromJson(treinoJson as Map<String, dynamic>);
+                } catch (e) {
+                  print('Erro ao converter treino: $e');
+                  print('Treino JSON: $treinoJson');
+                  return null;
+                }
+              })
+              .whereType<Treino>()
+              .toList();
 
-        return ApiResponse(success: true, data: treinos);
+          return ApiResponse(success: true, data: treinos);
+        } catch (e) {
+          print('Erro ao decodificar resposta: $e');
+          print('Response body: ${response.body}');
+          return ApiResponse(
+            success: false,
+            message: 'Erro ao processar resposta: $e',
+          );
+        }
       } else {
         final errorData = json.decode(response.body);
         return ApiResponse(
@@ -245,6 +264,179 @@ class TreinoService {
         return ApiResponse(
           success: false,
           message: errorData['message'] ?? 'Erro ao listar usuários com treinos',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> iniciarTreino(String treinoId) async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/$treinoId/iniciar'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return ApiResponse(success: true, data: data);
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao iniciar treino',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> finalizarTreino(String execucaoId) async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/execucao/$execucaoId/finalizar'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return ApiResponse(success: true, data: data);
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao finalizar treino',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<List<Map<String, dynamic>>>> listarHistorico() async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/execucao/historico'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = response.body.trim();
+        if (body.isEmpty || body == '[]' || body == 'null') {
+          return ApiResponse(success: true, data: []);
+        }
+        try {
+          final decoded = json.decode(body);
+          if (decoded is List) {
+            final List<Map<String, dynamic>> historico = decoded
+                .whereType<Map>()
+                .map((item) => item as Map<String, dynamic>)
+                .toList();
+            return ApiResponse(success: true, data: historico);
+          } else {
+            return ApiResponse(success: true, data: []);
+          }
+        } catch (e) {
+          print('Erro ao decodificar histórico: $e');
+          return ApiResponse(success: true, data: []);
+        }
+      } else {
+        final errorData = response.body.isNotEmpty 
+            ? json.decode(response.body) 
+            : <String, dynamic>{};
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao buscar histórico',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>?>> buscarExecucaoAtiva() async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/execucao/ativa'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final body = response.body.trim();
+        // Se o body estiver vazio ou for "null", não há execução ativa
+        if (body.isEmpty || body == 'null') {
+          return ApiResponse(success: true, data: null);
+        }
+        final data = json.decode(body);
+        return ApiResponse(success: true, data: data);
+      } else if (response.statusCode == 404) {
+        // Trata 404 como "não há execução ativa" (compatibilidade)
+        return ApiResponse(success: true, data: null);
+      } else {
+        final errorData = response.body.isNotEmpty 
+            ? json.decode(response.body) 
+            : <String, dynamic>{};
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao buscar execução ativa',
         );
       }
     } catch (e) {

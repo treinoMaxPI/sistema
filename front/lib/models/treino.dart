@@ -22,23 +22,43 @@ class ItemTreino {
   });
 
   factory ItemTreino.fromJson(Map<String, dynamic> json) {
-    return ItemTreino(
-      id: json['id'],
-      exercicioId: json['exercicio'] != null 
-          ? (json['exercicio'] is Map ? json['exercicio']['id'] : json['exercicio'].toString())
-          : json['exercicioId'] ?? '',
-      exercicioNome: json['exercicio'] != null && json['exercicio'] is Map
-          ? json['exercicio']['nome']
-          : null,
-      exercicioVideoUrl: json['exercicio'] != null && json['exercicio'] is Map
-          ? json['exercicio']['videoUrl']
-          : null,
-      ordem: json['ordem'],
-      series: json['series'],
-      repeticoes: json['repeticoes'],
-      tempoDescanso: json['tempoDescanso'],
-      observacao: json['observacao'],
-    );
+    try {
+      // Extrair exercicioId
+      String exercicioId = '';
+      if (json['exercicio'] != null) {
+        if (json['exercicio'] is Map) {
+          exercicioId = json['exercicio']['id']?.toString() ?? '';
+        } else {
+          exercicioId = json['exercicio'].toString();
+        }
+      } else if (json['exercicioId'] != null) {
+        exercicioId = json['exercicioId'].toString();
+      }
+      
+      if (exercicioId.isEmpty) {
+        throw Exception('exercicioId não pode ser vazio');
+      }
+      
+      return ItemTreino(
+        id: json['id']?.toString(),
+        exercicioId: exercicioId,
+        exercicioNome: json['exercicio'] != null && json['exercicio'] is Map
+            ? json['exercicio']['nome']?.toString()
+            : null,
+        exercicioVideoUrl: json['exercicio'] != null && json['exercicio'] is Map
+            ? json['exercicio']['videoUrl']?.toString()
+            : null,
+        ordem: json['ordem'] is int ? json['ordem'] : int.tryParse(json['ordem'].toString()) ?? 0,
+        series: json['series'] is int ? json['series'] : int.tryParse(json['series'].toString()) ?? 0,
+        repeticoes: json['repeticoes']?.toString() ?? '',
+        tempoDescanso: json['tempoDescanso']?.toString(),
+        observacao: json['observacao']?.toString(),
+      );
+    } catch (e) {
+      print('Erro ao criar ItemTreino: $e');
+      print('JSON: $json');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -76,36 +96,53 @@ class Treino {
   });
 
   factory Treino.fromJson(Map<String, dynamic> json) {
-    List<ItemTreino> itens = [];
-    if (json['itens'] != null) {
-      itens = (json['itens'] as List)
-          .map((item) => ItemTreino.fromJson(item))
-          .toList();
-    }
-
-    String? usuarioId;
-    String? usuarioNome;
-    if (json['usuario'] != null) {
-      if (json['usuario'] is Map) {
-        usuarioId = json['usuario']['id'];
-        usuarioNome = json['usuario']['nome'];
-      } else {
-        usuarioId = json['usuario'].toString();
+    try {
+      List<ItemTreino> itens = [];
+      if (json['itens'] != null && json['itens'] is List) {
+        itens = (json['itens'] as List)
+            .map((item) {
+              try {
+                if (item is Map) {
+                  return ItemTreino.fromJson(item as Map<String, dynamic>);
+                }
+                return null;
+              } catch (e) {
+                print('Erro ao converter item do treino: $e');
+                return null;
+              }
+            })
+            .whereType<ItemTreino>()
+            .toList();
       }
-    } else {
-      usuarioId = json['usuarioId'];
-    }
 
-    return Treino(
-      id: json['id'],
-      nome: json['nome'],
-      tipoTreino: json['tipoTreino'],
-      descricao: json['descricao'],
-      nivel: json['nivel'],
-      itens: itens,
-      usuarioId: usuarioId,
-      usuarioNome: usuarioNome,
-    );
+      String? usuarioId;
+      String? usuarioNome;
+      if (json['usuario'] != null) {
+        if (json['usuario'] is Map) {
+          usuarioId = json['usuario']['id']?.toString();
+          usuarioNome = json['usuario']['nome']?.toString();
+        } else {
+          usuarioId = json['usuario'].toString();
+        }
+      } else {
+        usuarioId = json['usuarioId']?.toString();
+      }
+
+      return Treino(
+        id: json['id']?.toString() ?? '',
+        nome: json['nome']?.toString() ?? '',
+        tipoTreino: json['tipoTreino']?.toString(),
+        descricao: json['descricao']?.toString(),
+        nivel: json['nivel']?.toString(),
+        itens: itens,
+        usuarioId: usuarioId,
+        usuarioNome: usuarioNome,
+      );
+    } catch (e) {
+      print('Erro ao criar Treino: $e');
+      print('JSON: $json');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

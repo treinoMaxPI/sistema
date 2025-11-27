@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.auth.model.Treino;
 import senai.treinomax.api.service.TreinoService;
+import senai.treinomax.api.service.ExecucaoTreinoService;
+import senai.treinomax.api.auth.model.ExecucaoTreino;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class TreinoController {
 
     private final TreinoService treinoService;
+    private final ExecucaoTreinoService execucaoTreinoService;
 
     @PostMapping
     @PreAuthorize("hasRole('PERSONAL')")
@@ -150,5 +153,61 @@ public class TreinoController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/iniciar")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> iniciarTreino(@PathVariable UUID id) {
+        try {
+            UUID currentUserId = SecurityUtils.getCurrentUserId();
+            ExecucaoTreino execucao = execucaoTreinoService.iniciarTreino(id, currentUserId);
+            return ResponseEntity.ok(execucao);
+        } catch (RuntimeException e) {
+            log.error("Erro ao iniciar treino", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/execucao/{execucaoId}/finalizar")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> finalizarTreino(@PathVariable UUID execucaoId) {
+        try {
+            UUID currentUserId = SecurityUtils.getCurrentUserId();
+            ExecucaoTreino execucao = execucaoTreinoService.finalizarTreino(execucaoId, currentUserId);
+            return ResponseEntity.ok(execucao);
+        } catch (RuntimeException e) {
+            log.error("Erro ao finalizar treino", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/execucao/ativa")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> getExecucaoAtiva() {
+        try {
+            UUID currentUserId = SecurityUtils.getCurrentUserId();
+            var execucao = execucaoTreinoService.buscarExecucaoAtiva(currentUserId);
+            if (execucao.isPresent()) {
+                return ResponseEntity.ok(execucao.get());
+            }
+            // Retorna 200 com null ao invés de 404 para indicar que não há execução ativa
+            return ResponseEntity.ok(null);
+        } catch (Exception e) {
+            log.error("Erro ao buscar execução ativa", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/execucao/historico")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> getHistorico() {
+        try {
+            UUID currentUserId = SecurityUtils.getCurrentUserId();
+            var historico = execucaoTreinoService.listarHistorico(currentUserId);
+            return ResponseEntity.ok(historico);
+        } catch (Exception e) {
+            log.error("Erro ao buscar histórico", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

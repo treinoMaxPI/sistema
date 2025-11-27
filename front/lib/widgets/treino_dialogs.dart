@@ -3,6 +3,7 @@ import '../services/treino_service.dart';
 import '../services/exercicio_service.dart';
 import '../models/treino.dart';
 import '../models/exercicio.dart';
+import '../models/grupo_muscular.dart';
 import '../widgets/modal_components.dart';
 
 class CriarTreinoDialog extends StatefulWidget {
@@ -22,7 +23,6 @@ class CriarTreinoDialog extends StatefulWidget {
 class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
-  final _tipoTreinoController = TextEditingController();
   final _descricaoController = TextEditingController();
   final _nivelController = TextEditingController();
   bool _isLoading = false;
@@ -30,12 +30,16 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   final ExercicioService _exercicioService = ExercicioService();
   List<Exercicio> _exerciciosDisponiveis = [];
   bool _isLoadingExercicios = true;
+  List<String> _tiposTreinoSelecionados = [];
 
   final List<String> _niveis = [
     'Iniciante',
     'Intermediário',
     'Avançado',
   ];
+
+  // Usa o enum GrupoMuscular do backend para garantir consistência
+  List<String> get _tiposTreino => GrupoMuscular.allAsString;
 
   @override
   void initState() {
@@ -60,7 +64,6 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   @override
   void dispose() {
     _nomeController.dispose();
-    _tipoTreinoController.dispose();
     _descricaoController.dispose();
     _nivelController.dispose();
     super.dispose();
@@ -127,7 +130,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
 
     final request = CriarTreinoRequest(
       nome: _nomeController.text,
-      tipoTreino: _tipoTreinoController.text.isEmpty ? null : _tipoTreinoController.text,
+      tipoTreino: _tiposTreinoSelecionados.isEmpty 
+          ? null 
+          : _tiposTreinoSelecionados.join(', '),
       descricao: _descricaoController.text.isEmpty ? null : _descricaoController.text,
       nivel: _nivelController.text.isEmpty ? null : _nivelController.text,
       itens: _itens,
@@ -202,20 +207,45 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _tipoTreinoController,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo de Treino',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
-                  ),
+              const Text(
+                'Tipo de Treino',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
-                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _tiposTreino.map((tipo) {
+                  final isSelected = _tiposTreinoSelecionados.contains(tipo);
+                  return FilterChip(
+                    label: Text(tipo),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _tiposTreinoSelecionados.add(tipo);
+                        } else {
+                          _tiposTreinoSelecionados.remove(tipo);
+                        }
+                      });
+                    },
+                    backgroundColor: Colors.black,
+                    selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
+                    checkmarkColor: const Color(0xFFFF312E),
+                    labelStyle: TextStyle(
+                      color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
+                      width: 1.5,
+                    ),
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -588,7 +618,6 @@ class EditarTreinoDialog extends StatefulWidget {
 class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nomeController;
-  late final TextEditingController _tipoTreinoController;
   late final TextEditingController _descricaoController;
   late final TextEditingController _nivelController;
   bool _isLoading = false;
@@ -596,6 +625,7 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   final ExercicioService _exercicioService = ExercicioService();
   List<Exercicio> _exerciciosDisponiveis = [];
   bool _isLoadingExercicios = true;
+  List<String> _tiposTreinoSelecionados = [];
 
   final List<String> _niveis = [
     'Iniciante',
@@ -603,11 +633,21 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
     'Avançado',
   ];
 
+  // Usa o enum GrupoMuscular do backend para garantir consistência
+  List<String> get _tiposTreino => GrupoMuscular.allAsString;
+
   @override
   void initState() {
     super.initState();
     _nomeController = TextEditingController(text: widget.treino.nome);
-    _tipoTreinoController = TextEditingController(text: widget.treino.tipoTreino ?? '');
+    // Parse tipoTreino string para lista (ex: "A, B, C" -> ["A", "B", "C"])
+    if (widget.treino.tipoTreino != null && widget.treino.tipoTreino!.isNotEmpty) {
+      _tiposTreinoSelecionados = widget.treino.tipoTreino!
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
     _descricaoController = TextEditingController(text: widget.treino.descricao ?? '');
     _nivelController = TextEditingController(text: widget.treino.nivel ?? '');
     _itens = List.from(widget.treino.itens);
@@ -663,7 +703,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   @override
   void dispose() {
     _nomeController.dispose();
-    _tipoTreinoController.dispose();
     _descricaoController.dispose();
     _nivelController.dispose();
     super.dispose();
@@ -730,7 +769,9 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
 
     final request = AtualizarTreinoRequest(
       nome: _nomeController.text,
-      tipoTreino: _tipoTreinoController.text.isEmpty ? null : _tipoTreinoController.text,
+      tipoTreino: _tiposTreinoSelecionados.isEmpty 
+          ? null 
+          : _tiposTreinoSelecionados.join(', '),
       descricao: _descricaoController.text.isEmpty ? null : _descricaoController.text,
       nivel: _nivelController.text.isEmpty ? null : _nivelController.text,
       itens: _itens,
@@ -804,20 +845,45 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _tipoTreinoController,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo de Treino',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
-                  ),
+              const Text(
+                'Tipo de Treino',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
-                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _tiposTreino.map((tipo) {
+                  final isSelected = _tiposTreinoSelecionados.contains(tipo);
+                  return FilterChip(
+                    label: Text(tipo),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _tiposTreinoSelecionados.add(tipo);
+                        } else {
+                          _tiposTreinoSelecionados.remove(tipo);
+                        }
+                      });
+                    },
+                    backgroundColor: Colors.black,
+                    selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
+                    checkmarkColor: const Color(0xFFFF312E),
+                    labelStyle: TextStyle(
+                      color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
+                      width: 1.5,
+                    ),
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 16),
               TextFormField(

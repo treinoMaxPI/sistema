@@ -1,6 +1,7 @@
 package senai.treinomax.api.auth.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,6 +41,7 @@ public class ItemTreino {
     @NotNull(message = "O item deve conter um exercício.")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercicio_id", nullable = false)
+    @JsonIgnoreProperties({ "ativacaoMuscular" }) // Evita problemas de serialização
     private Exercicio exercicio;
 
     @Positive(message = "A ordem deve ser um número positivo.")

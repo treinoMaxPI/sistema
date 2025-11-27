@@ -30,7 +30,7 @@ public class Treino {
 
     @Size(max = 50, message = "O tipo do treino deve ter no máximo 50 caracteres.")
     @Column(length = 50)
-    private String tipoTreino; // Ex: "A", "B", "C", "Empurrar", "Puxar", "Leg Day"
+    private String tipoTreino;
 
     @Size(max = 500, message = "A descrição não pode exceder 500 caracteres.")
     @Column(length = 500)
@@ -46,6 +46,7 @@ public class Treino {
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    @JsonIgnoreProperties({ "senha", "roles", "plano", "proximoPlano", "dataCriacao", "dataAtualizacao" })
+    @JsonIgnoreProperties({ "senha", "roles", "plano", "proximoPlano", "dataCriacao", "dataAtualizacao",
+            "ultimoTreino" })
     private Usuario usuario;
 }

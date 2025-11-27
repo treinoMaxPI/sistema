@@ -25,7 +25,7 @@ class RoleConfig {
         title: 'Exercícios',
         description: 'Gerenciar exercícios',
         icon: Icons.fitness_center,
-        color: Color(0xFFFF312E),
+        color: Color(0xFF4CAF50),
       ),
       RoleButtonConfig(
         route: '/personal/treinos',
@@ -78,7 +78,7 @@ class RoleConfig {
         title: 'Meus Treinos',
         description: 'Visualize seus treinos',
         icon: Icons.fitness_center,
-        color: Color(0xFFFF312E),
+        color: Color(0xFF2196F3),
       ),
       RoleButtonConfig(
         route: '/customer/cobrancas',

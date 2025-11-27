@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/exercicio_service.dart';
 import '../../models/exercicio.dart';
+import '../../models/grupo_muscular.dart';
 import '../../widgets/modal_components.dart';
 
 class ExerciciosPage extends StatefulWidget {
@@ -699,17 +700,8 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
   bool _isLoading = false;
   List<String> _gruposSelecionados = [];
 
-  final List<String> _gruposMusculares = [
-    'PEITO',
-    'COSTAS',
-    'PERNA',
-    'BRAÇO',
-    'OMBRO',
-    'ABDOMEN',
-    'GLUTEOS',
-    'TRICEPS',
-    'BICEPS',
-  ];
+  // Usa o enum do backend para garantir consistência
+  List<String> get _gruposMusculares => GrupoMuscular.allAsString;
 
   @override
   void dispose() {
@@ -720,7 +712,7 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
   }
 
   Future<void> _criarExercicio() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState == null || !_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -1010,17 +1002,8 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
   bool _isLoading = false;
   List<String> _gruposSelecionados = [];
 
-  final List<String> _gruposMusculares = [
-    'PEITO',
-    'COSTAS',
-    'PERNA',
-    'BRAÇO',
-    'OMBRO',
-    'ABDOMEN',
-    'GLUTEOS',
-    'TRICEPS',
-    'BICEPS',
-  ];
+  // Usa o enum do backend para garantir consistência
+  List<String> get _gruposMusculares => GrupoMuscular.allAsString;
 
   @override
   void initState() {
@@ -1040,7 +1023,7 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
   }
 
   Future<void> _atualizarExercicio() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState == null || !_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
