@@ -1,5 +1,6 @@
 package senai.treinomax.api.auth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -66,6 +67,10 @@ public class Usuario {
     @JoinColumn(name = "proximo_plano_id", nullable = true)
     private Plano proximoPlano;
 
+    @ManyToOne
+    @JoinColumn(name = "ultimo_treino_id", nullable = true)
+    @JsonIgnoreProperties({ "itens", "usuario" })
+    private Treino ultimoTreino;
 
     @PrePersist
     protected void onCreate() {

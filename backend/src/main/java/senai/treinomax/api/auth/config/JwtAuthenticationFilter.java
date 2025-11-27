@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         try {
             String jwt = getJwtFromRequest(request);
 
@@ -42,19 +42,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-                    
+
                     if (userDetails.isEnabled()) {
-                        UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        
+
                         SecurityContextHolder.getContext().setAuthentication(authentication);
-                        log.debug("Usuário autenticado: {} (ID: {})", email, userId);
+                        log.debug("Usuário autenticado: {} (ID: {}), Roles: {}", email, userId,
+                                userDetails.getAuthorities());
+                    } else {
+                        log.warn("Tentativa de autenticação com usuário desabilitado: {}", email);
                     }
                 }
+            } else {
+                log.debug("Nenhum token JWT encontrado na requisição para: {}", request.getRequestURI());
             }
         } catch (Exception e) {
-            log.error("Não foi possível autenticar o usuário: {}", e.getMessage());
+            log.error("Não foi possível autenticar o usuário para {}: {}", request.getRequestURI(), e.getMessage(), e);
             // Não definir autenticação, continuar com o filtro
         }
 
@@ -63,11 +68,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        
+
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        
+
         return null;
     }
 }
