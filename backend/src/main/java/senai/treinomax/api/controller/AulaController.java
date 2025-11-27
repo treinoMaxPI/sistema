@@ -2,6 +2,7 @@ package senai.treinomax.api.controller;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import senai.treinomax.api.auth.config.SecurityUtils;
+import senai.treinomax.api.auth.service.UsuarioService;
+import senai.treinomax.api.dto.request.AulaRequest;
+import senai.treinomax.api.dto.response.AulaResponse;
+import senai.treinomax.api.dto.response.CategoriaResponse;
 import senai.treinomax.api.model.Aula;
 import senai.treinomax.api.service.AulaService;
 
@@ -30,38 +36,61 @@ import senai.treinomax.api.service.AulaService;
 public class AulaController {
 
     private final AulaService aulaService;
+    private final UsuarioService usuarioService;
+
+    private AulaResponse toResponse(Aula aula) {
+        CategoriaResponse categoriaResponse = new CategoriaResponse(
+                aula.getCategoria().getId(),
+                aula.getCategoria().getNome(),
+                aula.getCategoria().getPlanos());
+
+        return new AulaResponse(
+                aula.getId(),
+                aula.getTitulo(),
+                aula.getDescricao(),
+                aula.getBannerUrl(),
+                aula.getData(),
+                aula.getDuracao(),
+                categoriaResponse,
+                aula.getUsuarioPersonal() != null ? aula.getUsuarioPersonal().getNome() : null);
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('PERSONAL')")
-    public ResponseEntity<Aula> criar(@Valid @RequestBody Aula aula) {
+    public ResponseEntity<AulaResponse> criar(@Valid @RequestBody AulaRequest request) {
         log.warn("Recebendo requisição para criar aula");
-        Aula salva = aulaService.salvar(aula);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
+        String email = SecurityUtils.getCurrentUserEmail();
+        var usuario = usuarioService.buscarPorEmail(email);
+
+        Aula salva = aulaService.salvar(request, usuario.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(salva));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
-    public ResponseEntity<Aula> buscarPorId(@PathVariable String id) {
+    public ResponseEntity<AulaResponse> buscarPorId(@PathVariable String id) {
         log.warn("Recebendo requisição para buscar aula {}", id);
         Aula aula = aulaService.buscarPorId(id);
-        return ResponseEntity.ok(aula);
+        return ResponseEntity.ok(toResponse(aula));
     }
 
     @GetMapping
-    public ResponseEntity<List<Aula>> listarTodas() {
+    public ResponseEntity<List<AulaResponse>> listarTodas() {
         log.warn("Recebendo requisição para listar todas as aulas");
         List<Aula> aulas = aulaService.listarTodas();
-        return ResponseEntity.ok(aulas);
+        List<AulaResponse> responses = aulas.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PERSONAL')")
-    public ResponseEntity<Aula> atualizar(@PathVariable String id,
-                                          @Valid @RequestBody Aula aula) {
+    public ResponseEntity<AulaResponse> atualizar(@PathVariable String id,
+            @Valid @RequestBody AulaRequest request) {
         log.warn("Recebendo requisição para atualizar aula {}", id);
-        aula.setId(UUID.fromString(id));
-        Aula atualizada = aulaService.salvar(aula);
-        return ResponseEntity.ok(atualizada);
+        Aula atualizada = aulaService.atualizar(id, request);
+        return ResponseEntity.ok(toResponse(atualizada));
     }
 
     @DeleteMapping("/{id}")

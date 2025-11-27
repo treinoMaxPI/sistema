@@ -25,7 +25,6 @@ import lombok.NoArgsConstructor;
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.util.DateUtils;
 
-
 @Entity
 @Table(name = "aulas")
 @Data
@@ -36,8 +35,7 @@ public class Aula {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-
-@NotBlank
+    @NotBlank
     @Size(min = 3, max = 100)
     @Column(nullable = false, length = 100)
     private String titulo;
@@ -46,6 +44,9 @@ public class Aula {
     @Size(min = 10, max = 1000)
     @Column(nullable = false, length = 1000)
     private String descricao;
+
+    @Column(name = "banner_url")
+    private String bannerUrl;
 
     @NotBlank
     @Column(nullable = false)
@@ -63,7 +64,7 @@ public class Aula {
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
-    
+
     @NotNull
     @ManyToOne
     @JoinColumn(name = "criado_por", nullable = false)
@@ -87,11 +88,3 @@ public class Aula {
     }
 
 }
-
-
-
-
-
-
-
-

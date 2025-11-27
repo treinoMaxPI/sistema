@@ -45,9 +45,12 @@ class Categoria {
       'nome': nome,
     };
 
-    if (id != null) map['id'] = id;
+    // Backend CategoriaRequest does not have ID, so we don't send it.
+    // if (id != null) map['id'] = id; 
 
-  if (planos != null && planos!.isNotEmpty) map['planos'] = planos!.map((p) => p.toJson()).toList();
+    if (planos != null) {
+      map['planos'] = planos!.map((p) => p.toJson()).toList();
+    }
     return map;
   }
 

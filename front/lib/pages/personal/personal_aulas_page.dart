@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:characters/characters.dart';
 import '../../widgets/modal_components.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
 import 'dart:math' as math;
 import '../../theme/typography.dart';
 import '../../services/aula_service.dart';
+import '../../services/categoria_service.dart';
+import '../../models/categoria.dart';
 
 class PersonalAulasPage extends StatefulWidget {
   const PersonalAulasPage({super.key});
@@ -51,8 +54,8 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => _NovaAulaSheet(
-        onSalvar: (titulo, descricao, imagemUrl) async {
-          final resp = await _aulaService.criar(CriarAulaRequest(titulo: titulo, descricao: descricao, imagemUrl: imagemUrl));
+        onSalvar: (titulo, descricao, imagemUrl, categoriaId) async {
+          final resp = await _aulaService.criar(CriarAulaRequest(titulo: titulo, descricao: descricao, imagemUrl: imagemUrl, categoriaId: categoriaId));
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -76,7 +79,10 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
         initialTitulo: original.titulo,
         initialMensagem: original.descricao,
         initialImagemUrl: original.imagemUrl,
-        onSalvar: (titulo, descricao, imagemUrl) async {
+
+        initialCategoriaId: original.categoria?['id'],
+        onSalvar: (titulo, descricao, imagemUrl, categoriaId) async {
+          // Nota: AtualizarAulaRequest pode não suportar categoriaId ainda, verificar se necessário
           final resp = await _aulaService.atualizar(original.id, AtualizarAulaRequest(titulo: titulo, descricao: descricao, imagemUrl: imagemUrl));
           if (!resp.success) {
             if (mounted) {
@@ -200,12 +206,13 @@ class _EmptyStateAulas extends StatelessWidget {
 }
 
 class _NovaAulaSheet extends StatefulWidget {
-  final void Function(String titulo, String descricao, String? imagemUrl) onSalvar;
+  final void Function(String titulo, String descricao, String? imagemUrl, String? categoriaId) onSalvar;
   final String? initialTitulo;
   final String? initialMensagem;
   final String? initialImagemUrl;
+  final String? initialCategoriaId;
 
-  const _NovaAulaSheet({required this.onSalvar, this.initialTitulo, this.initialMensagem, this.initialImagemUrl});
+  const _NovaAulaSheet({required this.onSalvar, this.initialTitulo, this.initialMensagem, this.initialImagemUrl, this.initialCategoriaId});
 
   @override
   State<_NovaAulaSheet> createState() => _NovaAulaSheetState();
@@ -217,6 +224,9 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
   Uint8List? _pickedBytes;
   String? _pickedFilename;
   final AulaService _service = AulaService();
+  final CategoriaService _categoriaService = CategoriaService(baseUrl: 'http://localhost:8080');
+  List<Categoria> _categorias = [];
+  String? _selectedCategoriaId;
   bool _saving = false;
 
   @override
@@ -224,6 +234,25 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     super.initState();
     _tituloController = TextEditingController(text: widget.initialTitulo);
     _descricaoController = TextEditingController(text: widget.initialMensagem);
+    _selectedCategoriaId = widget.initialCategoriaId;
+    _carregarCategorias();
+  }
+
+  Future<void> _carregarCategorias() async {
+    try {
+      final token = await _getToken();
+      final list = await _categoriaService.listarTodas(token);
+      setState(() {
+        _categorias = list;
+      });
+    } catch (e) {
+      // Ignorar erro de carregamento de categorias por enquanto ou mostrar snackbar
+    }
+  }
+
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
   }
 
   @override
@@ -257,6 +286,27 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                   borderSide: BorderSide(color: Colors.grey[800]!),
                 ),
               ),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _selectedCategoriaId,
+              dropdownColor: const Color(0xFF1E1E1E),
+              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Categoria',
+                labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+                filled: true,
+                fillColor: Colors.black.withOpacity(0.3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[800]!),
+                ),
+              ),
+              items: _categorias.map((c) => DropdownMenuItem(
+                value: c.id,
+                child: Text(c.nome),
+              )).toList(),
+              onChanged: (val) => setState(() => _selectedCategoriaId = val),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -333,7 +383,8 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                           if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(up.message ?? 'Erro ao enviar imagem')));
                         }
                       }
-                      widget.onSalvar(titulo, descricao, finalUrl);
+
+                      widget.onSalvar(titulo, descricao, finalUrl, _selectedCategoriaId);
                       if (mounted) Navigator.pop(context);
                       setState(() => _saving = false);
                     },

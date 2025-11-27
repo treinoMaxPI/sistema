@@ -29,7 +29,7 @@ class AulaResponse {
       titulo: json['titulo'],
       descricao: json['descricao'],
       dataCriacao: json['dataCriacao'] ?? json['data_criacao'] ?? '',
-      imagemUrl: json['imagemUrl'] ?? json['imgUrl'] ?? json['imagem_url'],
+      imagemUrl: json['bannerUrl'] ?? json['banner_url'] ?? json['imagemUrl'] ?? json['imgUrl'],
       usuario: json['usuario'] as Map<String, dynamic>?,
       categoria: json['categoria'] as Map<String, dynamic>?,
     );
@@ -48,7 +48,7 @@ class CriarAulaRequest {
   Map<String, dynamic> toJson() => {
         'titulo': titulo,
         'descricao': descricao,
-        if (imagemUrl != null) 'imagemUrl': imagemUrl,
+        if (imagemUrl != null) 'bannerUrl': imagemUrl,
         if (categoriaId != null) 'categoriaId': categoriaId,
         if (usuarioId != null) 'usuarioId': usuarioId,
       };
@@ -62,7 +62,7 @@ class AtualizarAulaRequest {
   Map<String, dynamic> toJson() => {
         'titulo': titulo,
         'descricao': descricao,
-        if (imagemUrl != null) 'imagemUrl': imagemUrl,
+        if (imagemUrl != null) 'bannerUrl': imagemUrl,
       };
 }
 
