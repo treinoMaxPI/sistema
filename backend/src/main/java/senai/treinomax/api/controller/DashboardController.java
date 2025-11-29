@@ -3,6 +3,7 @@ package senai.treinomax.api.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/dashboard")
 @Slf4j
 public class DashboardController {
 
@@ -25,7 +27,7 @@ public class DashboardController {
     private final PlanoCobrancaRepository planoCobrancaRepository;
     private final PlanoRepository planoRepository;
 
-    @GetMapping("/dashboard")
+    @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DashboardResponse> getDashboardInfo() {
         try {
