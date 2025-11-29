@@ -21,6 +21,13 @@ class RoleConfig {
   static const Map<Role, List<RoleButtonConfig>> roleButtons = {
     Role.PERSONAL: [
       RoleButtonConfig(
+        route: '/dashboard',
+        title: 'Dashboard',
+        description: 'Visualizar estatísticas e métricas',
+        icon: Icons.dashboard,
+        color: Color(0xFF4CAF50),
+      ),
+      RoleButtonConfig(
         route: '/personal/exercicios',
         title: 'Exercícios',
         description: 'Gerenciar exercícios',
@@ -41,14 +48,14 @@ class RoleConfig {
         icon: Icons.campaign,
         color: Color(0xFF4CAF50),
       ),
-       RoleButtonConfig(
+      RoleButtonConfig(
         route: '/personal/aulas',
         title: 'Gerenciar Aulas',
         description: 'Crie e edite aulas',
         icon: Icons.class_,
         color: Color(0xFF4CAF50),
       ),
-       RoleButtonConfig(
+      RoleButtonConfig(
         route: '/personal/categorias',
         title: 'Gerenciar Categorias',
         description: 'Crie e edite categorias',
@@ -57,6 +64,13 @@ class RoleConfig {
       ),
     ],
     Role.ADMIN: [
+      RoleButtonConfig(
+        route: '/admin/dashboard',
+        title: 'Dashboard',
+        description: 'Visualizar estatísticas e métricas',
+        icon: Icons.dashboard,
+        color: Color(0xFFFF312E),
+      ),
       RoleButtonConfig(
         route: '/admin/planos',
         title: 'Planos',
@@ -73,6 +87,13 @@ class RoleConfig {
       ),
     ],
     Role.CUSTOMER: [
+      RoleButtonConfig(
+        route: '/dashboard',
+        title: 'Dashboard',
+        description: 'Visualizar estatísticas e métricas',
+        icon: Icons.dashboard,
+        color: Color(0xFF2196F3),
+      ),
       RoleButtonConfig(
         route: '/customer/treinos',
         title: 'Meus Treinos',

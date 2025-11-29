@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
+import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
@@ -40,6 +41,7 @@ class MyApp extends ConsumerWidget {
         // Admin routes
         '/admin/planos': (context) => const AdminPlanosPage(),
         '/admin/mural': (context) => const AdminMuralPage(),
+        '/admin/dashboard': (context) => const AdminDashboardPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const TreinosPage(),
