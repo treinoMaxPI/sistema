@@ -3,7 +3,6 @@ package senai.treinomax.api.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
 @Slf4j
 public class DashboardController {
@@ -27,40 +25,36 @@ public class DashboardController {
     private final PlanoCobrancaRepository planoCobrancaRepository;
     private final PlanoRepository planoRepository;
 
-    @GetMapping
+    @GetMapping("/dashboard")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DashboardResponse> getDashboardInfo() {
         try {
-            // Get current month and previous month
+
             YearMonth currentMonth = YearMonth.now();
             YearMonth previousMonth = currentMonth.minusMonths(1);
-            
-            // Calculate total revenue for current month
+
             Integer totalRevenueMonthInCents = planoCobrancaRepository
-                .sumValorRecebidoPorMes(currentMonth)
-                .orElse(0L)
-                .intValue();
-            
-            // Calculate total revenue for previous month
+                    .sumValorRecebidoPorMes(currentMonth)
+                    .orElse(0L)
+                    .intValue();
+
             Integer previousMonthRevenue = planoCobrancaRepository
-                .sumValorRecebidoPorMes(previousMonth)
-                .orElse(0L)
-                .intValue();
-            
-            // Calculate percentage growth
+                    .sumValorRecebidoPorMes(previousMonth)
+                    .orElse(0L)
+                    .intValue();
+
             Double percentualRevenueGrowthMonth = 0.0;
             if (previousMonthRevenue > 0) {
-                percentualRevenueGrowthMonth = ((double) (totalRevenueMonthInCents - previousMonthRevenue) / previousMonthRevenue) * 100;
+                percentualRevenueGrowthMonth = ((double) (totalRevenueMonthInCents - previousMonthRevenue)
+                        / previousMonthRevenue) * 100;
             } else if (totalRevenueMonthInCents > 0) {
                 percentualRevenueGrowthMonth = 100.0;
             }
-            
-            // Calculate total number of members (users with a plan)
+
             Integer totalNumberMembers = (int) usuarioRepository.count();
-            Integer totalNumberPaidMembers = 0;
-            Integer totalNumberUnpaidMembers = 0;
-            
-            // Calculate user distribution by plan
+            Integer totalNumberPaidMembers = (int) usuarioRepository.countByPlanoIsNotNull();
+            Integer totalNumberUnpaidMembers = totalNumberMembers - totalNumberPaidMembers;
+
             Map<String, Double> userDistributionByPlan = new HashMap<>();
             planoRepository.findByAtivoTrue().forEach(plano -> {
                 long count = usuarioRepository.countByPlanoId(plano.getId());
@@ -69,23 +63,22 @@ public class DashboardController {
                     userDistributionByPlan.put(plano.getNome(), percentage);
                 }
             });
-            
-            // Create and return dashboard response
+
             DashboardResponse response = DashboardResponse.builder()
-                .totalRenevenueMonthInCents(totalRevenueMonthInCents)
-                .percentualRevenueGrowthMonth(percentualRevenueGrowthMonth)
-                .totalNumberMembers(totalNumberMembers)
-                .totalNumberPaidMembers(totalNumberPaidMembers)
-                .totalNumberUnpaidMembers(totalNumberUnpaidMembers)
-                .userDistributionByPlan(userDistributionByPlan)
-                .build();
-            
+                    .totalRenevenueMonthInCents(totalRevenueMonthInCents)
+                    .percentualRevenueGrowthMonth(percentualRevenueGrowthMonth)
+                    .totalNumberMembers(totalNumberMembers)
+                    .totalNumberPaidMembers(totalNumberPaidMembers)
+                    .totalNumberUnpaidMembers(totalNumberUnpaidMembers)
+                    .userDistributionByPlan(userDistributionByPlan)
+                    .build();
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             log.error("Error fetching dashboard info", e);
             return ResponseEntity.internalServerError().build();
         }
     }
-    
+
 }
