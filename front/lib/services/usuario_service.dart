@@ -1,7 +1,38 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'mural_service.dart';
+
+class ApiResponse<T> {
+  final bool success;
+  final String? message;
+  final T? data;
+
+  ApiResponse({
+    required this.success,
+    this.message,
+    this.data,
+  });
+}
+
+class UsuarioModel {
+  final String id;
+  final String nome;
+  final String email;
+
+  UsuarioModel({
+    required this.id,
+    required this.nome,
+    required this.email,
+  });
+
+  factory UsuarioModel.fromJson(Map<String, dynamic> json) {
+    return UsuarioModel(
+      id: json['id'],
+      nome: json['nome'],
+      email: json['email'],
+    );
+  }
+}
 
 class UsuarioResponse {
   final String id;
@@ -10,7 +41,13 @@ class UsuarioResponse {
   final String login;
   final List<String>? roles;
 
-  UsuarioResponse({required this.id, required this.nome, required this.email, required this.login, this.roles});
+  UsuarioResponse({
+    required this.id,
+    required this.nome,
+    required this.email,
+    required this.login,
+    this.roles,
+  });
 
   factory UsuarioResponse.fromJson(Map<String, dynamic> json) {
     return UsuarioResponse(
@@ -24,24 +61,65 @@ class UsuarioResponse {
 }
 
 class UsuarioService {
-  static const String baseUrl = 'http://localhost:8080/api/admin/usuarios';
-  static const String fallbackBaseUrl = 'http://localhost:8080/api/usuarios';
+  static const String baseUrl = 'http://localhost:8080/api/usuarios';
+  static const String adminBaseUrl = 'http://localhost:8080/api/admin/usuarios';
 
-  Future<String?> _getToken() async {
+  Future<String?> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
   }
 
+  // Used by TreinosPage
+  Future<ApiResponse<List<UsuarioModel>>> listarTodos() async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.get(
+        Uri.parse(baseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final List<UsuarioModel> usuarios =
+            data.map((usuarioJson) => UsuarioModel.fromJson(usuarioJson)).toList();
+
+        return ApiResponse(success: true, data: usuarios);
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao listar usuários',
+        );
+      }
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  // Used by AdminClientesPage
   Future<ApiResponse<List<UsuarioResponse>>> listarClientes() async {
     try {
-      final token = await _getToken();
+      final token = await _getAccessToken();
       if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
       final headers = {'Authorization': 'Bearer $token', 'Accept': 'application/json'};
       final urls = [
-        '$baseUrl?role=CUSTOMER',
-        '$fallbackBaseUrl?role=CUSTOMER',
+        '$adminBaseUrl?role=CUSTOMER',
+        '$baseUrl?role=CUSTOMER', // Fallback to normal endpoint with param if admin fails
+        adminBaseUrl,
         baseUrl,
-        fallbackBaseUrl,
       ];
       for (final u in urls) {
         final resp = await http.get(Uri.parse(u), headers: headers);
@@ -62,10 +140,10 @@ class UsuarioService {
 
   Future<ApiResponse<void>> atualizarLogin(String id, String novoLogin) async {
     try {
-      final token = await _getToken();
+      final token = await _getAccessToken();
       if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
       http.Response resp = await http.put(
-        Uri.parse('$baseUrl/$id/login'),
+        Uri.parse('$adminBaseUrl/$id/login'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token', 'Accept': 'application/json'},
         body: json.encode({'login': novoLogin}),
       );
@@ -74,7 +152,7 @@ class UsuarioService {
       } else {
         // Fallback
         resp = await http.put(
-          Uri.parse('$fallbackBaseUrl/$id/login'),
+          Uri.parse('$baseUrl/$id/login'),
           headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token', 'Accept': 'application/json'},
           body: json.encode({'login': novoLogin}),
         );
@@ -89,10 +167,10 @@ class UsuarioService {
 
   Future<ApiResponse<void>> resetarSenha(String id) async {
     try {
-      final token = await _getToken();
+      final token = await _getAccessToken();
       if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
       http.Response resp = await http.post(
-        Uri.parse('$baseUrl/$id/resetar-senha'),
+        Uri.parse('$adminBaseUrl/$id/resetar-senha'),
         headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
       );
       if (resp.statusCode == 200) {
@@ -100,7 +178,7 @@ class UsuarioService {
       } else {
         // Fallback
         resp = await http.post(
-          Uri.parse('$fallbackBaseUrl/$id/resetar-senha'),
+          Uri.parse('$baseUrl/$id/resetar-senha'),
           headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
         );
         if (resp.statusCode == 200) return ApiResponse(success: true);
