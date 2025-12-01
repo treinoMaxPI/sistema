@@ -36,38 +36,35 @@ public class PlanoController {
 
     private PlanoResponse toPlanoResponse(Plano plano) {
         return new PlanoResponse(
-            plano.getId(),
-            plano.getNome(),
-            plano.getDescricao(),
-            plano.getAtivo(),
-            plano.getPrecoCentavos()
-        );
+                plano.getId(),
+                plano.getNome(),
+                plano.getDescricao(),
+                plano.getAtivo(),
+                plano.getPrecoCentavos());
     }
 
     private MeuPlanoResponse toMeuPlanoResponse(Plano plano, String proximoPlanoNome) {
         return new MeuPlanoResponse(
-            plano.getId(),
-            plano.getNome(),
-            plano.getDescricao(),
-            plano.getAtivo(),
-            plano.getPrecoCentavos(),
-            proximoPlanoNome
-        );
+                plano.getId(),
+                plano.getNome(),
+                plano.getDescricao(),
+                plano.getAtivo(),
+                plano.getPrecoCentavos(),
+                proximoPlanoNome);
     }
-
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlanoResponse> criarPlano(@Valid @RequestBody CriarPlanoRequest request) {
         log.info("Recebida solicitação para criar plano: {}", request.getNome());
-        
+
         String userEmail = SecurityUtils.getCurrentUserEmail();
         var usuario = usuarioService.buscarPorEmail(userEmail);
         UUID usuarioId = usuario.getId();
-        
+
         Plano plano = planoService.criarPlano(request, usuarioId);
         PlanoResponse response = toPlanoResponse(plano);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -75,18 +72,18 @@ public class PlanoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
     public ResponseEntity<List<PlanoResponse>> listarPlanos(@RequestParam(defaultValue = "true") Boolean ativos) {
         log.info("Recebida solicitação para listar planos (ativos: {})", ativos);
-        
+
         List<Plano> planos;
         if (!ativos && SecurityUtils.hasRole(Role.ADMIN)) {
             planos = planoService.listarTodosPlanos();
         } else {
             planos = planoService.listarPlanosAtivos();
         }
-        
+
         List<PlanoResponse> response = planos.stream()
                 .map(this::toPlanoResponse)
                 .collect(Collectors.toList());
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -94,19 +91,19 @@ public class PlanoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
     public ResponseEntity<PlanoResponse> buscarPlanoPorId(@PathVariable UUID id) {
         log.info("Recebida solicitação para buscar plano por ID: {}", id);
-        
+
         Plano plano = planoService.buscarPorId(id);
         PlanoResponse response = toPlanoResponse(plano);
         return ResponseEntity.ok(response);
     }
-    
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlanoResponse> atualizarPlano(
             @PathVariable UUID id,
             @Valid @RequestBody AtualizarPlanoRequest request) {
         log.info("Recebida solicitação para atualizar plano: {}", id);
-        
+
         Plano plano = planoService.atualizarPlano(id, request);
         PlanoResponse response = toPlanoResponse(plano);
         return ResponseEntity.ok(response);
@@ -118,7 +115,7 @@ public class PlanoController {
             @PathVariable UUID id,
             @RequestParam boolean ativo) {
         log.info("Recebida solicitação para {} plano: {}", ativo ? "ativar" : "desativar", id);
-        
+
         if (ativo) {
             planoService.ativarPlano(id);
         } else {
@@ -133,7 +130,7 @@ public class PlanoController {
             @PathVariable UUID id,
             @RequestParam Integer precoCentavos) {
         log.info("Recebida solicitação para atualizar preço do plano {} para {} centavos", id, precoCentavos);
-        
+
         planoService.atualizarPreco(id, precoCentavos);
         return ResponseEntity.ok().build();
     }
@@ -142,19 +139,19 @@ public class PlanoController {
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<Void> escolherPlano(@PathVariable UUID id) {
         log.info("Recebida solicitação para escolher plano: {}", id);
-        
+
         String userEmail = SecurityUtils.getCurrentUserEmail();
         Usuario usuario = usuarioService.buscarPorEmail(userEmail);
         UUID usuarioId = usuario.getId();
-        
+
         planoUsuarioService.atribuirPlanoAoUsuario(usuarioId, id);
-        
+
         log.info("Plano {} escolhido com sucesso pelo usuário {}", id, userEmail);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/meu-plano")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MeuPlanoResponse> obterMeuPlano() {
         log.info("Recebida solicitação para obter plano do usuário logado");
 
@@ -167,9 +164,8 @@ public class PlanoController {
             return ResponseEntity.noContent().build();
         }
         MeuPlanoResponse response = toMeuPlanoResponse(
-            plano,
-            usuario.getProximoPlano() == null ? null: usuario.getProximoPlano().getNome()
-        );
+                plano,
+                usuario.getProximoPlano() == null ? null : usuario.getProximoPlano().getNome());
         return ResponseEntity.ok(response);
     }
 }
