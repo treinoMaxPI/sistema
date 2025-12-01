@@ -17,6 +17,7 @@ import 'package:gym_management/pages/customer/mural_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 import 'notifiers/theme_mode_notifier.dart';
 import 'notifiers/text_scale_notifier.dart';
+import 'pages/agenda_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -79,6 +80,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),
+        '/agenda': (context) => const AgendaPage(),
       },
     );
   }

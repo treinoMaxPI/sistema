@@ -817,4 +817,5 @@ class _FeedPostCard extends StatelessWidget {
     if (w < 800) return 3 / 4;
     return 16 / 9;
   }
+
 }

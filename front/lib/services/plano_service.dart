@@ -19,7 +19,7 @@ class PlanoResponse {
 
   factory PlanoResponse.fromJson(Map<String, dynamic> json) {
     return PlanoResponse(
-      id: json['id'],
+      id: (json['uuid'] ?? json['id']) as String,
       nome: json['nome'],
       descricao: json['descricao'],
       ativo: json['ativo'],
@@ -29,7 +29,7 @@ class PlanoResponse {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'uuid': id,
       'nome': nome,
       'descricao': descricao,
       'ativo': ativo,
@@ -61,7 +61,7 @@ class MeuPlanoResponse {
 
   factory MeuPlanoResponse.fromJson(Map<String, dynamic> json) {
     return MeuPlanoResponse(
-        id: json['id'],
+        id: (json['uuid'] ?? json['id']) as String,
         nome: json['nome'],
         descricao: json['descricao'],
         ativo: json['ativo'],
@@ -71,7 +71,7 @@ class MeuPlanoResponse {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'uuid': id,
       'nome': nome,
       'descricao': descricao,
       'ativo': ativo,

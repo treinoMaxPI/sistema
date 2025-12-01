@@ -31,10 +31,16 @@ class PagamentoResumo {
   PagamentoResumo({required this.pagos, required this.pendentes, required this.quitados});
 
   factory PagamentoResumo.fromJson(Map<String, dynamic> json) {
+    int parseInt(dynamic v) => int.tryParse(v?.toString() ?? '0') ?? 0;
+
+    final pagos = json['pagos'] ?? json['paid'] ?? json['pagosCount'] ?? json['countPagos'];
+    final pendentes = json['pendentes'] ?? json['pending'] ?? json['pendentesCount'] ?? json['countPendentes'] ?? json['abertos'];
+    final quitados = json['quitados'] ?? json['settled'] ?? json['quitadosCount'] ?? json['countQuitados'];
+
     return PagamentoResumo(
-      pagos: int.tryParse(json['pagos']?.toString() ?? '0') ?? 0,
-      pendentes: int.tryParse(json['pendentes']?.toString() ?? '0') ?? 0,
-      quitados: int.tryParse(json['quitados']?.toString() ?? '0') ?? 0,
+      pagos: parseInt(pagos),
+      pendentes: parseInt(pendentes),
+      quitados: parseInt(quitados),
     );
   }
 }
@@ -62,10 +68,12 @@ class RelatorioService {
       if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
       final headers = {'Authorization': 'Bearer $token', 'Accept': 'application/json'};
       final q = _rangeQuery(inicio, fim);
-      final urls = [
-        '$baseEntradas$q',
-        ...entradasFallbacks.map((e) => '$e$q'),
-      ];
+      final bases = [baseEntradas, ...entradasFallbacks];
+      final List<String> urls = [];
+      for (final b in bases) {
+        urls.add('$b$q');
+        urls.add(b);
+      }
       String? lastErr;
       for (final u in urls) {
         final resp = await http.get(Uri.parse(u), headers: headers);
@@ -92,10 +100,12 @@ class RelatorioService {
       if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
       final headers = {'Authorization': 'Bearer $token', 'Accept': 'application/json'};
       final q = _rangeQuery(inicio, fim);
-      final urls = [
-        '$basePagamentos$q',
-        ...pagamentosFallbacks.map((e) => '$e$q'),
-      ];
+      final bases = [basePagamentos, ...pagamentosFallbacks];
+      final List<String> urls = [];
+      for (final b in bases) {
+        urls.add('$b$q');
+        urls.add(b);
+      }
       String? lastErr;
       for (final u in urls) {
         final resp = await http.get(Uri.parse(u), headers: headers);

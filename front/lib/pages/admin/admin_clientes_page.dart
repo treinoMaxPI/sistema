@@ -15,10 +15,17 @@ class _AdminClientesPageState extends State<AdminClientesPage> {
   List<UsuarioResponse> _usuarios = [];
   bool _isLoading = true;
   String? _error;
+  bool _devDialogShown = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_devDialogShown) {
+        _devDialogShown = true;
+        _showDevelopmentDialog();
+      }
+    });
     _carregar();
   }
 
@@ -93,6 +100,39 @@ class _AdminClientesPageState extends State<AdminClientesPage> {
                       },
                     ),
             ),
+    );
+  }
+
+  Future<void> _showDevelopmentDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Theme.of(context).colorScheme.outline)),
+          title: Text('Atenção', style: AppTypography.titleMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold)),
+          content: Text('Esta tela está em desenvolvimento. Algumas funcionalidades podem não estar disponíveis.', style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8))),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.onSurface),
+              child: const Text('OK'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.of(context).maybePop();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF312E), foregroundColor: Colors.white),
+              child: const Text('Voltar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
