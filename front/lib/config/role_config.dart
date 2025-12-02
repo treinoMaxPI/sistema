@@ -95,13 +95,6 @@ class RoleConfig {
     ],
     Role.CUSTOMER: [
       RoleButtonConfig(
-        route: '/dashboard',
-        title: 'Dashboard',
-        description: 'Visualizar estatísticas e métricas',
-        icon: Icons.dashboard,
-        color: Color(0xFF2196F3),
-      ),
-      RoleButtonConfig(
         route: '/customer/treinos',
         title: 'Meus Treinos',
         description: 'Visualize seus treinos',
