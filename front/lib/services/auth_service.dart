@@ -287,6 +287,26 @@ class AuthService {
     return prefs.getString('userName');
   }
 
+  Future<void> setUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userName', name);
+  }
+
+  Future<String?> getUserAvatarUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('avatarUrl');
+  }
+
+  Future<void> setUserAvatarUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('avatarUrl', url);
+  }
+
+  Future<void> clearUserAvatarUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('avatarUrl');
+  }
+
   Future<JwtPayload?> getParsedAccessToken() async {
     final token = await getAccessToken();
     return _parseJwt(token);

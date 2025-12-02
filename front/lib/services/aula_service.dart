@@ -4,6 +4,50 @@ import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class AgendamentoResponse {
+  final String id;
+  final bool recorrente;
+  final int? horarioRecorrente;
+  final bool? segunda;
+  final bool? terca;
+  final bool? quarta;
+  final bool? quinta;
+  final bool? sexta;
+  final bool? sabado;
+  final bool? domingo;
+  final String? dataExata;
+
+  AgendamentoResponse({
+    required this.id,
+    required this.recorrente,
+    this.horarioRecorrente,
+    this.segunda,
+    this.terca,
+    this.quarta,
+    this.quinta,
+    this.sexta,
+    this.sabado,
+    this.domingo,
+    this.dataExata,
+  });
+
+  factory AgendamentoResponse.fromJson(Map<String, dynamic> json) {
+    return AgendamentoResponse(
+      id: json['id'],
+      recorrente: json['recorrente'],
+      horarioRecorrente: json['horarioRecorrente'],
+      segunda: json['segunda'],
+      terca: json['terca'],
+      quarta: json['quarta'],
+      quinta: json['quinta'],
+      sexta: json['sexta'],
+      sabado: json['sabado'],
+      domingo: json['domingo'],
+      dataExata: json['dataExata'],
+    );
+  }
+}
+
 class AulaResponse {
   final String id;
   final String titulo;
@@ -12,6 +56,8 @@ class AulaResponse {
   final String? imagemUrl;
   final Map<String, dynamic>? usuario;
   final Map<String, dynamic>? categoria;
+  final AgendamentoResponse? agendamento;
+  final int? duracao;
 
   AulaResponse({
     required this.id,
@@ -21,6 +67,8 @@ class AulaResponse {
     this.imagemUrl,
     this.usuario,
     this.categoria,
+    this.agendamento,
+    this.duracao,
   });
 
   factory AulaResponse.fromJson(Map<String, dynamic> json) {
@@ -29,40 +77,78 @@ class AulaResponse {
       titulo: json['titulo'],
       descricao: json['descricao'],
       dataCriacao: json['dataCriacao'] ?? json['data_criacao'] ?? '',
-      imagemUrl: json['imagemUrl'] ?? json['imgUrl'] ?? json['imagem_url'],
+      imagemUrl: json['bannerUrl'] ?? json['banner_url'] ?? json['imagemUrl'] ?? json['imgUrl'],
       usuario: json['usuario'] as Map<String, dynamic>?,
       categoria: json['categoria'] as Map<String, dynamic>?,
+      agendamento: json['agendamento'] != null ? AgendamentoResponse.fromJson(json['agendamento']) : null,
+      duracao: json['duracao'],
     );
   }
+}
+
+class AgendamentoRequest {
+  final bool recorrente;
+  final int? horarioRecorrente;
+  final bool? segunda;
+  final bool? terca;
+  final bool? quarta;
+  final bool? quinta;
+  final bool? sexta;
+  final bool? sabado;
+  final bool? domingo;
+  final String? dataExata;
+
+  AgendamentoRequest({
+    required this.recorrente,
+    this.horarioRecorrente,
+    this.segunda,
+    this.terca,
+    this.quarta,
+    this.quinta,
+    this.sexta,
+    this.sabado,
+    this.domingo,
+    this.dataExata,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'recorrente': recorrente,
+        if (horarioRecorrente != null) 'horarioRecorrente': horarioRecorrente,
+        if (segunda != null) 'segunda': segunda,
+        if (terca != null) 'terca': terca,
+        if (quarta != null) 'quarta': quarta,
+        if (quinta != null) 'quinta': quinta,
+        if (sexta != null) 'sexta': sexta,
+        if (sabado != null) 'sabado': sabado,
+        if (domingo != null) 'domingo': domingo,
+        if (dataExata != null) 'dataExata': dataExata,
+      };
 }
 
 class CriarAulaRequest {
   final String titulo;
   final String descricao;
-  final String? imagemUrl;
-  final String? categoriaId;
-  final String? usuarioId;
+  final String? bannerUrl;
+  final int duracao;
+  final String categoriaId;
+  final AgendamentoRequest agendamento;
 
-  CriarAulaRequest({required this.titulo, required this.descricao, this.imagemUrl, this.categoriaId, this.usuarioId});
+  CriarAulaRequest({
+    required this.titulo,
+    required this.descricao,
+    this.bannerUrl,
+    required this.duracao,
+    required this.categoriaId,
+    required this.agendamento,
+  });
 
   Map<String, dynamic> toJson() => {
         'titulo': titulo,
         'descricao': descricao,
-        if (imagemUrl != null) 'imagemUrl': imagemUrl,
-        if (categoriaId != null) 'categoriaId': categoriaId,
-        if (usuarioId != null) 'usuarioId': usuarioId,
-      };
-}
-
-class AtualizarAulaRequest {
-  final String titulo;
-  final String descricao;
-  final String? imagemUrl;
-  AtualizarAulaRequest({required this.titulo, required this.descricao, this.imagemUrl});
-  Map<String, dynamic> toJson() => {
-        'titulo': titulo,
-        'descricao': descricao,
-        if (imagemUrl != null) 'imagemUrl': imagemUrl,
+        if (bannerUrl != null) 'bannerUrl': bannerUrl,
+        'duracao': duracao,
+        'categoriaId': categoriaId,
+        'agendamento': agendamento.toJson(),
       };
 }
 
@@ -127,7 +213,7 @@ class AulaService {
     }
   }
 
-  Future<ApiResponse<AulaResponse>> atualizar(String id, AtualizarAulaRequest req) async {
+  Future<ApiResponse<AulaResponse>> atualizar(String id, CriarAulaRequest req) async {
     try {
       final token = await _getToken();
       if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
@@ -192,10 +278,9 @@ class AulaService {
       final streamed = await req.send();
       final resp = await http.Response.fromStream(streamed);
       if (resp.statusCode == 200) {
-        final data = json.decode(resp.body);
-        final url = data['url'] as String?;
-        if (url != null) return ApiResponse(success: true, data: url);
-        return ApiResponse(success: false, message: 'Resposta sem URL de imagem');
+        final url = resp.body;
+        if (url.isNotEmpty) return ApiResponse(success: true, data: url);
+        return ApiResponse(success: false, message: 'Resposta vazia do servidor');
       }
       final error = json.decode(resp.body);
       return ApiResponse(success: false, message: error['message'] ?? 'Erro ao enviar imagem');

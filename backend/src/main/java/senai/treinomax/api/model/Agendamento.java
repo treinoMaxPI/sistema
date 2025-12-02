@@ -9,9 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Size;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,22 +26,38 @@ public class Agendamento {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "aula_id", nullable = false)
     private Aula aula;
 
     @Column(name = "recorrente", nullable = false)
     private Boolean recorrente;
 
-    @Column(name = "horario_recorrente", nullable = false)
+    @Column(name = "horario_recorrente", nullable = true)
     private Integer horarioRecorrente;
-    
-    @Size(min = 1, max = 7)
-    @Column(name = "dia_recorrente", nullable = false)
-    private Integer diaRecorrente;
 
-    @Column(name = "data_exata", nullable = false)
+    @Column(name = "segunda", nullable = true)
+    private Boolean segunda;
+
+    @Column(name = "terca", nullable = true)
+    private Boolean terca;
+
+    @Column(name = "quarta", nullable = true)
+    private Boolean quarta;
+
+    @Column(name = "quinta", nullable = true)
+    private Boolean quinta;
+
+    @Column(name = "sexta", nullable = true)
+    private Boolean sexta;
+
+    @Column(name = "sabado", nullable = true)
+    private Boolean sabado;
+
+    @Column(name = "domingo", nullable = true)
+    private Boolean domingo;
+
+    @Column(name = "data_exata", nullable = true)
     private LocalDateTime dataExata;
-
 
 }

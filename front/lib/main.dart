@@ -4,6 +4,8 @@ import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
 import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
+import 'package:gym_management/pages/admin/admin_clientes_page.dart';
+import 'package:gym_management/pages/admin/admin_relatorios_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
@@ -16,24 +18,57 @@ import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
 import 'package:gym_management/pages/customer/mural_page.dart';
 import 'package:gym_management/pages/customer/meus_treinos_page.dart';
 import 'pages/customer/buy_plan_page.dart';
+import 'notifiers/theme_mode_notifier.dart';
+import 'notifiers/text_scale_notifier.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+        () => ref.read(themeModeProvider.notifier).loadFromPrefs());
+    Future.microtask(
+        () => ref.read(textScaleProvider.notifier).loadFromPrefs());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mode = ref.watch(themeModeProvider);
+    final textScale = ref.watch(textScaleProvider);
     return MaterialApp(
       title: 'Gestão de Academias',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
+      themeMode: mode,
+      theme: ThemeData.light(useMaterial3: true).copyWith(
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white, foregroundColor: Colors.black),
+      ),
+      darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.black, foregroundColor: Colors.white),
       ),
       home: const AuthWrapper(),
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(
+              textScaleFactor: ref.read(textScaleProvider.notifier).factor()),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
@@ -42,6 +77,8 @@ class MyApp extends ConsumerWidget {
         '/admin/planos': (context) => const AdminPlanosPage(),
         '/admin/mural': (context) => const AdminMuralPage(),
         '/admin/dashboard': (context) => const AdminDashboardPage(),
+        '/admin/clientes': (context) => const AdminClientesPage(),
+        '/admin/relatorios': (context) => const AdminRelatoriosPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const TreinosPage(),

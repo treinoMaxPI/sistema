@@ -1,4 +1,5 @@
 package senai.treinomax.api.service;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -15,8 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import senai.treinomax.api.auth.model.Usuario;
+import senai.treinomax.api.auth.service.UsuarioService;
+import senai.treinomax.api.dto.request.AulaRequest;
+import senai.treinomax.api.model.Agendamento;
 import senai.treinomax.api.model.Aula;
+import senai.treinomax.api.model.Categoria;
 import senai.treinomax.api.repository.AulaRepository;
+import senai.treinomax.api.repository.CategoriaRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -24,18 +31,84 @@ import senai.treinomax.api.repository.AulaRepository;
 public class AulaService {
 
     private final AulaRepository aulaRepository;
+    private final UsuarioService usuarioService;
+    private final CategoriaRepository categoriaRepository;
 
     /**
-     * Salva (cria/atualiza) uma aula.
+     * Salva (cria) uma aula.
      */
     @Transactional
-    public Aula salvar(Aula aula) {
-        if (aula.getId() == null) {
-            aula.setId(UUID.randomUUID());
+    public Aula salvar(AulaRequest request, UUID usuarioId) {
+        log.info("Salvando aula: {}", request.getTitulo());
+
+        Usuario usuario = usuarioService.buscarPorId(usuarioId);
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada: " + request.getCategoriaId()));
+
+        Aula aula = new Aula();
+        aula.setTitulo(request.getTitulo());
+        aula.setDescricao(request.getDescricao());
+        aula.setBannerUrl(request.getBannerUrl());
+        aula.setDuracao(request.getDuracao());
+        aula.setCategoria(categoria);
+        aula.setUsuarioPersonal(usuario);
+        aula.setCriadoPor(usuario);
+
+        Agendamento agendamento = new Agendamento();
+        agendamento.setRecorrente(request.getAgendamento().getRecorrente());
+        agendamento.setHorarioRecorrente(request.getAgendamento().getHorarioRecorrente());
+        agendamento.setSegunda(request.getAgendamento().getSegunda());
+        agendamento.setTerca(request.getAgendamento().getTerca());
+        agendamento.setQuarta(request.getAgendamento().getQuarta());
+        agendamento.setQuinta(request.getAgendamento().getQuinta());
+        agendamento.setSexta(request.getAgendamento().getSexta());
+        agendamento.setSabado(request.getAgendamento().getSabado());
+        agendamento.setDomingo(request.getAgendamento().getDomingo());
+        agendamento.setDataExata(request.getAgendamento().getDataExata());
+        agendamento.setAula(aula);
+
+        aula.setAgendamento(agendamento);
+
+        return aulaRepository.save(aula);
+    }
+
+    /**
+     * Atualiza uma aula existente.
+     */
+    @Transactional
+    public Aula atualizar(String id, AulaRequest request) {
+        log.info("Atualizando aula: {}", id);
+
+        Aula aula = buscarPorId(id);
+
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada: " + request.getCategoriaId()));
+
+        aula.setTitulo(request.getTitulo());
+        aula.setDescricao(request.getDescricao());
+        aula.setBannerUrl(request.getBannerUrl());
+        aula.setDuracao(request.getDuracao());
+        aula.setCategoria(categoria);
+
+        // Update Agendamento
+        Agendamento agendamento = aula.getAgendamento();
+        if (agendamento == null) {
+            agendamento = new Agendamento();
+            agendamento.setAula(aula);
+            aula.setAgendamento(agendamento);
         }
-        Aula salva = aulaRepository.save(aula);
-        log.info("Aula salva: {}", salva.getId());
-        return salva;
+        agendamento.setRecorrente(request.getAgendamento().getRecorrente());
+        agendamento.setHorarioRecorrente(request.getAgendamento().getHorarioRecorrente());
+        agendamento.setSegunda(request.getAgendamento().getSegunda());
+        agendamento.setTerca(request.getAgendamento().getTerca());
+        agendamento.setQuarta(request.getAgendamento().getQuarta());
+        agendamento.setQuinta(request.getAgendamento().getQuinta());
+        agendamento.setSexta(request.getAgendamento().getSexta());
+        agendamento.setSabado(request.getAgendamento().getSabado());
+        agendamento.setDomingo(request.getAgendamento().getDomingo());
+        agendamento.setDataExata(request.getAgendamento().getDataExata());
+
+        return aulaRepository.save(aula);
     }
 
     /**
@@ -86,7 +159,8 @@ public class AulaService {
     }
 
     /**
-     * Armazena imagem de aula em disco em "uploads/aulas" e retorna o path relativo que pode ser exposto pela API.
+     * Armazena imagem de aula em disco em "uploads/aulas" e retorna o path relativo
+     * que pode ser exposto pela API.
      * Ex.: /uploads/aulas/{filename}
      */
     public String salvarImagem(MultipartFile file) {
@@ -117,9 +191,11 @@ public class AulaService {
     }
 
     private String extension(String name) {
-        if (name == null) return "";
+        if (name == null)
+            return "";
         int idx = name.lastIndexOf('.');
-        if (idx == -1) return "";
+        if (idx == -1)
+            return "";
         return name.substring(idx + 1);
     }
 }
