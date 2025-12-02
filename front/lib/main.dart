@@ -78,7 +78,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/admin/mural': (context) => const AdminMuralPage(),
         '/admin/dashboard': (context) => const AdminDashboardPage(),
         '/admin/clientes': (context) => const AdminClientesPage(),
-        '/admin/relatorios': (context) => const AdminRelatoriosPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const TreinosPage(),
