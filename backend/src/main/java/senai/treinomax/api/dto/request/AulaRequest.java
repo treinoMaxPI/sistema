@@ -1,6 +1,5 @@
 package senai.treinomax.api.dto.request;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
@@ -20,17 +19,17 @@ public class AulaRequest {
     private String titulo;
 
     @NotBlank(message = "Descrição é obrigatória")
-    @Size(min = 10, max = 1000, message = "Descrição deve ter entre 10 e 1000 caracteres")
+    @Size(min = 3, max = 1000, message = "Descrição deve ter entre 3 e 1000 caracteres")
     private String descricao;
 
     private String bannerUrl;
-
-    @NotNull(message = "Data é obrigatória")
-    private LocalDateTime data;
 
     @NotNull(message = "Duração é obrigatória")
     private Integer duracao;
 
     @NotNull(message = "Categoria é obrigatória")
     private UUID categoriaId;
+
+    @NotNull(message = "Agendamento é obrigatório")
+    private AgendamentoRequest agendamento;
 }

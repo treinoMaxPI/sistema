@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.AulaRequest;
+import senai.treinomax.api.model.Agendamento;
 import senai.treinomax.api.model.Aula;
 import senai.treinomax.api.model.Categoria;
 import senai.treinomax.api.repository.AulaRepository;
@@ -48,11 +49,25 @@ public class AulaService {
         aula.setTitulo(request.getTitulo());
         aula.setDescricao(request.getDescricao());
         aula.setBannerUrl(request.getBannerUrl());
-        aula.setData(request.getData());
         aula.setDuracao(request.getDuracao());
         aula.setCategoria(categoria);
         aula.setUsuarioPersonal(usuario);
         aula.setCriadoPor(usuario);
+
+        Agendamento agendamento = new Agendamento();
+        agendamento.setRecorrente(request.getAgendamento().getRecorrente());
+        agendamento.setHorarioRecorrente(request.getAgendamento().getHorarioRecorrente());
+        agendamento.setSegunda(request.getAgendamento().getSegunda());
+        agendamento.setTerca(request.getAgendamento().getTerca());
+        agendamento.setQuarta(request.getAgendamento().getQuarta());
+        agendamento.setQuinta(request.getAgendamento().getQuinta());
+        agendamento.setSexta(request.getAgendamento().getSexta());
+        agendamento.setSabado(request.getAgendamento().getSabado());
+        agendamento.setDomingo(request.getAgendamento().getDomingo());
+        agendamento.setDataExata(request.getAgendamento().getDataExata());
+        agendamento.setAula(aula);
+
+        aula.setAgendamento(agendamento);
 
         return aulaRepository.save(aula);
     }
@@ -72,9 +87,26 @@ public class AulaService {
         aula.setTitulo(request.getTitulo());
         aula.setDescricao(request.getDescricao());
         aula.setBannerUrl(request.getBannerUrl());
-        aula.setData(request.getData());
         aula.setDuracao(request.getDuracao());
         aula.setCategoria(categoria);
+
+        // Update Agendamento
+        Agendamento agendamento = aula.getAgendamento();
+        if (agendamento == null) {
+            agendamento = new Agendamento();
+            agendamento.setAula(aula);
+            aula.setAgendamento(agendamento);
+        }
+        agendamento.setRecorrente(request.getAgendamento().getRecorrente());
+        agendamento.setHorarioRecorrente(request.getAgendamento().getHorarioRecorrente());
+        agendamento.setSegunda(request.getAgendamento().getSegunda());
+        agendamento.setTerca(request.getAgendamento().getTerca());
+        agendamento.setQuarta(request.getAgendamento().getQuarta());
+        agendamento.setQuinta(request.getAgendamento().getQuinta());
+        agendamento.setSexta(request.getAgendamento().getSexta());
+        agendamento.setSabado(request.getAgendamento().getSabado());
+        agendamento.setDomingo(request.getAgendamento().getDomingo());
+        agendamento.setDataExata(request.getAgendamento().getDataExata());
 
         return aulaRepository.save(aula);
     }

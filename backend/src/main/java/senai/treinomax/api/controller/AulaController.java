@@ -1,7 +1,6 @@
 package senai.treinomax.api.controller;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -24,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.AulaRequest;
+import senai.treinomax.api.dto.response.AgendamentoResponse;
 import senai.treinomax.api.dto.response.AulaResponse;
 import senai.treinomax.api.dto.response.CategoriaResponse;
 import senai.treinomax.api.model.Aula;
@@ -44,15 +44,31 @@ public class AulaController {
                 aula.getCategoria().getNome(),
                 aula.getCategoria().getPlanos());
 
+        AgendamentoResponse agendamentoResponse = null;
+        if (aula.getAgendamento() != null) {
+            agendamentoResponse = new AgendamentoResponse(
+                    aula.getAgendamento().getId(),
+                    aula.getAgendamento().getRecorrente(),
+                    aula.getAgendamento().getHorarioRecorrente(),
+                    aula.getAgendamento().getSegunda(),
+                    aula.getAgendamento().getTerca(),
+                    aula.getAgendamento().getQuarta(),
+                    aula.getAgendamento().getQuinta(),
+                    aula.getAgendamento().getSexta(),
+                    aula.getAgendamento().getSabado(),
+                    aula.getAgendamento().getDomingo(),
+                    aula.getAgendamento().getDataExata());
+        }
+
         return new AulaResponse(
                 aula.getId(),
                 aula.getTitulo(),
                 aula.getDescricao(),
                 aula.getBannerUrl(),
-                aula.getData(),
                 aula.getDuracao(),
                 categoriaResponse,
-                aula.getUsuarioPersonal() != null ? aula.getUsuarioPersonal().getNome() : null);
+                aula.getUsuarioPersonal() != null ? aula.getUsuarioPersonal().getNome() : null,
+                agendamentoResponse);
     }
 
     @PostMapping

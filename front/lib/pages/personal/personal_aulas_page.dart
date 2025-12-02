@@ -54,8 +54,8 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => _NovaAulaSheet(
-        onSalvar: (titulo, descricao, imagemUrl, categoriaId) async {
-          final resp = await _aulaService.criar(CriarAulaRequest(titulo: titulo, descricao: descricao, imagemUrl: imagemUrl, categoriaId: categoriaId));
+        onSalvar: (req) async {
+          final resp = await _aulaService.criar(req);
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -81,9 +81,10 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
         initialImagemUrl: original.imagemUrl,
 
         initialCategoriaId: original.categoria?['id'],
-        onSalvar: (titulo, descricao, imagemUrl, categoriaId) async {
-          // Nota: AtualizarAulaRequest pode não suportar categoriaId ainda, verificar se necessário
-          final resp = await _aulaService.atualizar(original.id, AtualizarAulaRequest(titulo: titulo, descricao: descricao, imagemUrl: imagemUrl));
+        initialDuracao: original.duracao,
+        initialAgendamento: original.agendamento,
+        onSalvar: (req) async {
+          final resp = await _aulaService.atualizar(original.id, req);
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -206,13 +207,23 @@ class _EmptyStateAulas extends StatelessWidget {
 }
 
 class _NovaAulaSheet extends StatefulWidget {
-  final void Function(String titulo, String descricao, String? imagemUrl, String? categoriaId) onSalvar;
+  final void Function(CriarAulaRequest req) onSalvar;
   final String? initialTitulo;
   final String? initialMensagem;
   final String? initialImagemUrl;
   final String? initialCategoriaId;
+  final int? initialDuracao;
+  final AgendamentoResponse? initialAgendamento;
 
-  const _NovaAulaSheet({required this.onSalvar, this.initialTitulo, this.initialMensagem, this.initialImagemUrl, this.initialCategoriaId});
+  const _NovaAulaSheet({
+    required this.onSalvar,
+    this.initialTitulo,
+    this.initialMensagem,
+    this.initialImagemUrl,
+    this.initialCategoriaId,
+    this.initialDuracao,
+    this.initialAgendamento,
+  });
 
   @override
   State<_NovaAulaSheet> createState() => _NovaAulaSheetState();
@@ -221,6 +232,7 @@ class _NovaAulaSheet extends StatefulWidget {
 class _NovaAulaSheetState extends State<_NovaAulaSheet> {
   late final TextEditingController _tituloController;
   late final TextEditingController _descricaoController;
+  late final TextEditingController _duracaoController;
   Uint8List? _pickedBytes;
   String? _pickedFilename;
   final AulaService _service = AulaService();
@@ -229,12 +241,47 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
   String? _selectedCategoriaId;
   bool _saving = false;
 
+  // Agendamento fields
+  bool _isRecorrente = false;
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
+  TimeOfDay? _recorrenteTime;
+  // 0=Seg, 1=Ter, ..., 6=Dom
+  final List<bool> _selectedDays = List.filled(7, false);
+
   @override
   void initState() {
     super.initState();
     _tituloController = TextEditingController(text: widget.initialTitulo);
     _descricaoController = TextEditingController(text: widget.initialMensagem);
+    _duracaoController = TextEditingController(text: widget.initialDuracao?.toString() ?? '');
     _selectedCategoriaId = widget.initialCategoriaId;
+    
+    if (widget.initialAgendamento != null) {
+      final ag = widget.initialAgendamento!;
+      _isRecorrente = ag.recorrente;
+      if (_isRecorrente) {
+        _selectedDays[0] = ag.segunda ?? false;
+        _selectedDays[1] = ag.terca ?? false;
+        _selectedDays[2] = ag.quarta ?? false;
+        _selectedDays[3] = ag.quinta ?? false;
+        _selectedDays[4] = ag.sexta ?? false;
+        _selectedDays[5] = ag.sabado ?? false;
+        _selectedDays[6] = ag.domingo ?? false;
+        
+        if (ag.horarioRecorrente != null) {
+          final hr = ag.horarioRecorrente!;
+          _recorrenteTime = TimeOfDay(hour: hr ~/ 60, minute: hr % 60);
+        }
+      } else if (ag.dataExata != null) {
+        try {
+          final dt = DateTime.parse(ag.dataExata!);
+          _selectedDate = dt;
+          _selectedTime = TimeOfDay.fromDateTime(dt);
+        } catch (_) {}
+      }
+    }
+
     _carregarCategorias();
   }
 
@@ -246,7 +293,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
         _categorias = list;
       });
     } catch (e) {
-      // Ignorar erro de carregamento de categorias por enquanto ou mostrar snackbar
+      // Ignorar erro
     }
   }
 
@@ -259,6 +306,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
   void dispose() {
     _tituloController.dispose();
     _descricaoController.dispose();
+    _duracaoController.dispose();
     super.dispose();
   }
 
@@ -276,32 +324,14 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
               controller: _tituloController,
               style: AppTypography.bodyMedium.copyWith(color: Colors.white),
               cursorColor: Colors.white,
-              decoration: InputDecoration(
-                labelText: 'Título',
-                labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.black.withOpacity(0.3),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
-                ),
-              ),
+              decoration: _inputDecoration('Título'),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _selectedCategoriaId,
               dropdownColor: const Color(0xFF1E1E1E),
               style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Categoria',
-                labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.black.withOpacity(0.3),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
-                ),
-              ),
+              decoration: _inputDecoration('Categoria'),
               items: _categorias.map((c) => DropdownMenuItem(
                 value: c.id,
                 child: Text(c.nome),
@@ -311,20 +341,64 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
             const SizedBox(height: 12),
             TextField(
               controller: _descricaoController,
-              maxLines: 5,
+              maxLines: 3,
               style: AppTypography.bodyMedium.copyWith(color: Colors.white),
               cursorColor: Colors.white,
-              decoration: InputDecoration(
-                labelText: 'Descrição',
-                labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.black.withOpacity(0.3),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
-                ),
-              ),
+              decoration: _inputDecoration('Descrição'),
             ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _duracaoController,
+              keyboardType: TextInputType.number,
+              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+              cursorColor: Colors.white,
+              decoration: _inputDecoration('Duração (minutos)'),
+            ),
+            const SizedBox(height: 16),
+            const Text('Agendamento', style: AppTypography.bodyLarge),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              title: const Text('Aula Recorrente?', style: AppTypography.bodyMedium),
+              value: _isRecorrente,
+              onChanged: (val) => setState(() => _isRecorrente = val),
+              activeColor: const Color(0xFFFF312E),
+              contentPadding: EdgeInsets.zero,
+            ),
+            if (_isRecorrente) ...[
+              const Text('Dias da Semana', style: AppTypography.bodyMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildDayToggle('Seg', 0),
+                  _buildDayToggle('Ter', 1),
+                  _buildDayToggle('Qua', 2),
+                  _buildDayToggle('Qui', 3),
+                  _buildDayToggle('Sex', 4),
+                  _buildDayToggle('Sáb', 5),
+                  _buildDayToggle('Dom', 6),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildTimePicker(
+                label: 'Horário',
+                time: _recorrenteTime,
+                onPick: (t) => setState(() => _recorrenteTime = t),
+              ),
+            ] else ...[
+              _buildDatePicker(
+                label: 'Data',
+                date: _selectedDate,
+                onPick: (d) => setState(() => _selectedDate = d),
+              ),
+              const SizedBox(height: 12),
+              _buildTimePicker(
+                label: 'Horário',
+                time: _selectedTime,
+                onPick: (t) => setState(() => _selectedTime = t),
+              ),
+            ],
             const SizedBox(height: 12),
             _ImagePickerRow(
               pickedBytes: _pickedBytes,
@@ -370,24 +444,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () async {
-                      final titulo = _tituloController.text.trim();
-                      final descricao = _descricaoController.text.trim();
-                      if (titulo.isEmpty || descricao.isEmpty) return;
-                      setState(() => _saving = true);
-                      String? finalUrl;
-                      if (_pickedBytes != null && _pickedFilename != null) {
-                        final up = await _service.uploadImagem(_pickedBytes!, _pickedFilename!);
-                        if (up.success && up.data != null) finalUrl = up.data;
-                        else {
-                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(up.message ?? 'Erro ao enviar imagem')));
-                        }
-                      }
-
-                      widget.onSalvar(titulo, descricao, finalUrl, _selectedCategoriaId);
-                      if (mounted) Navigator.pop(context);
-                      setState(() => _saving = false);
-                    },
+                    onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF312E),
                       foregroundColor: Colors.white,
@@ -402,6 +459,156 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
         ),
       ),
     );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+      filled: true,
+      fillColor: Colors.black.withOpacity(0.3),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[800]!),
+      ),
+    );
+  }
+
+  Widget _buildDatePicker({required String label, required DateTime? date, required ValueChanged<DateTime> onPick}) {
+    return InkWell(
+      onTap: () async {
+        final now = DateTime.now();
+        final d = await showDatePicker(
+          context: context,
+          initialDate: date ?? now,
+          firstDate: now,
+          lastDate: now.add(const Duration(days: 365)),
+        );
+        if (d != null) onPick(d);
+      },
+      child: InputDecorator(
+        decoration: _inputDecoration(label),
+        child: Text(
+          date != null ? '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}' : 'Selecione a data',
+          style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimePicker({required String label, required TimeOfDay? time, required ValueChanged<TimeOfDay> onPick}) {
+    return InkWell(
+      onTap: () async {
+        final t = await showTimePicker(
+          context: context,
+          initialTime: time ?? TimeOfDay.now(),
+        );
+        if (t != null) onPick(t);
+      },
+      child: InputDecorator(
+        decoration: _inputDecoration(label),
+        child: Text(
+          time != null ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}' : 'Selecione o horário',
+          style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDayToggle(String label, int index) {
+    final isSelected = _selectedDays[index];
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (val) => setState(() => _selectedDays[index] = val),
+      selectedColor: const Color(0xFFFF312E),
+      checkmarkColor: Colors.white,
+      labelStyle: AppTypography.bodySmall.copyWith(
+        color: isSelected ? Colors.white : Colors.white70,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      backgroundColor: Colors.black.withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!),
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    final titulo = _tituloController.text.trim();
+    final descricao = _descricaoController.text.trim();
+    final duracaoStr = _duracaoController.text.trim();
+    
+    if (titulo.isEmpty || descricao.isEmpty || duracaoStr.isEmpty || _selectedCategoriaId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos obrigatórios')));
+      return;
+    }
+
+    final duracao = int.tryParse(duracaoStr);
+    if (duracao == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Duração inválida')));
+      return;
+    }
+
+    AgendamentoRequest agendamento;
+    if (_isRecorrente) {
+      if (!_selectedDays.contains(true) || _recorrenteTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione pelo menos um dia e o horário')));
+        return;
+      }
+      final minutes = _recorrenteTime!.hour * 60 + _recorrenteTime!.minute;
+      agendamento = AgendamentoRequest(
+        recorrente: true,
+        horarioRecorrente: minutes,
+        segunda: _selectedDays[0],
+        terca: _selectedDays[1],
+        quarta: _selectedDays[2],
+        quinta: _selectedDays[3],
+        sexta: _selectedDays[4],
+        sabado: _selectedDays[5],
+        domingo: _selectedDays[6],
+      );
+    } else {
+      if (_selectedDate == null || _selectedTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione a data e horário')));
+        return;
+      }
+      final dt = DateTime(
+        _selectedDate!.year,
+        _selectedDate!.month,
+        _selectedDate!.day,
+        _selectedTime!.hour,
+        _selectedTime!.minute,
+      );
+      agendamento = AgendamentoRequest(
+        recorrente: false,
+        dataExata: dt.toIso8601String(),
+      );
+    }
+
+    setState(() => _saving = true);
+    String? finalUrl;
+    if (_pickedBytes != null && _pickedFilename != null) {
+      final up = await _service.uploadImagem(_pickedBytes!, _pickedFilename!);
+      if (up.success && up.data != null) finalUrl = up.data;
+      else {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(up.message ?? 'Erro ao enviar imagem')));
+      }
+    }
+
+    final req = CriarAulaRequest(
+      titulo: titulo,
+      descricao: descricao,
+      bannerUrl: finalUrl ?? widget.initialImagemUrl,
+      duracao: duracao,
+      categoriaId: _selectedCategoriaId!,
+      agendamento: agendamento,
+    );
+
+    widget.onSalvar(req);
+    if (mounted) Navigator.pop(context);
+    setState(() => _saving = false);
   }
 }
 
@@ -507,88 +714,38 @@ class _AulaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: _cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: _cardColor,
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: _borderColor),
+        border: Border.all(color: _borderColor),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            if (_hasImage) ...[
-              const SizedBox(height: 10),
-              _buildImage(context),
-            ],
-            const SizedBox(height: 10),
-            _buildBody(context),
-            const SizedBox(height: 8),
-            _buildActions(context),
-          ],
-        ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_hasImage) _buildImage(context),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                const SizedBox(height: 8),
+                Text(aula.descricao, style: AppTypography.bodyMedium.copyWith(color: Colors.white70), maxLines: 3, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 16),
+                _buildInfoRow(),
+                const SizedBox(height: 16),
+                _buildActions(context),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   bool get _hasImage => (aula.imagemUrl != null && aula.imagemUrl!.trim().isNotEmpty);
-
-  Widget _buildHeader(BuildContext context) {
-    final String initials = _initialsFrom(aula.titulo);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: Colors.grey[800],
-          child: Text(initials, style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(aula.titulo, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodyLarge),
-                  ),
-                ],
-              ),
-              Text(formatDate(aula.dataCriacao), style: AppTypography.caption),
-            ],
-          ),
-        ),
-        PopupMenuButton<int>(
-          color: _cardColor,
-          icon: const Icon(Icons.more_horiz, color: Colors.white),
-          onSelected: (val) {
-            if (val == 1) onEdit();
-            else if (val == 2) {
-              showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Confirmar exclusão'),
-                  content: const Text('Você deseja confirmar essa exclusão?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-                    TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Excluir')),
-                  ],
-                ),
-              ).then((confirmed) { if (confirmed == true) onDelete(); });
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem<int>(value: 1, child: Row(children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Editar')])),
-            const PopupMenuItem<int>(value: 2, child: Row(children: [Icon(Icons.delete, color: Colors.white), SizedBox(width: 8), Text('Excluir')])),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildImage(BuildContext context) {
     String url = aula.imagemUrl!;
@@ -596,66 +753,144 @@ class _AulaCard extends StatelessWidget {
       final uri = Uri.parse(AulaService.baseUrl);
       url = '${uri.scheme}://${uri.host}:${uri.port}$url';
     }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = constraints.maxWidth;
-        double ar = _aspectForWidth(w);
-        final double desiredHeight = w / ar;
-        final double maxFeedHeight = 300;
-        final double height = math.min(desiredHeight, maxFeedHeight);
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: SizedBox(
-            height: height,
-            width: double.infinity,
-            child: Image.network(
-              url,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return Container(color: Colors.black, child: const Center(child: CircularProgressIndicator()));
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.black,
-                  child: Center(
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.broken_image, color: Colors.white54, size: 36), const SizedBox(height: 8), Text('Falha ao carregar imagem (arquivo muito grande ou inválido)', style: AppTypography.caption)]),
-                  ),
-                );
-              },
+    return SizedBox(
+      height: 200,
+      width: double.infinity,
+      child: Image.network(
+        url,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(color: Colors.black, child: const Center(child: CircularProgressIndicator()));
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.black,
+            child: Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.broken_image, color: Colors.white54, size: 36), const SizedBox(height: 8), Text('Erro ao carregar imagem', style: AppTypography.caption)]),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
-    return Text(aula.descricao, style: AppTypography.bodyMedium);
-  }
-
-  Widget _buildActions(BuildContext context) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        const Spacer(),
-        IconButton(tooltip: 'Editar', onPressed: onEdit, icon: const Icon(Icons.edit, color: Colors.white)),
-        IconButton(tooltip: 'Excluir', onPressed: onDelete, icon: Icon(Icons.delete, color: _accent)),
+        Expanded(
+          child: Text(
+            aula.titulo,
+            style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        if (aula.categoria != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _accent.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _accent.withOpacity(0.5)),
+            ),
+            child: Text(
+              aula.categoria!['nome'],
+              style: AppTypography.caption.copyWith(color: _accent, fontWeight: FontWeight.bold),
+            ),
+          ),
       ],
     );
   }
 
-  String _initialsFrom(String text) {
-    final parts = text.trim().split(RegExp(r"\s+")).where((e) => e.isNotEmpty).toList();
-    if (parts.isEmpty) return 'A';
-    final first = parts.first.characters.take(1).toString().toUpperCase();
-    String second = '';
-    if (parts.length > 1) second = parts[1].characters.take(1).toString().toUpperCase();
-    return (first + second).trim();
+  Widget _buildInfoRow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildIconText(Icons.timer, '${aula.duracao} min'),
+        const SizedBox(height: 4),
+        if (aula.agendamento != null) ...[
+          if (aula.agendamento!.recorrente)
+            _buildIconText(Icons.repeat, _formatRecurrence(aula.agendamento!))
+          else if (aula.agendamento!.dataExata != null)
+            _buildIconText(Icons.calendar_today, _formatExactDate(aula.agendamento!.dataExata!)),
+          
+          if (aula.agendamento!.horarioRecorrente != null)
+             _buildIconText(Icons.access_time, _formatTime(aula.agendamento!.horarioRecorrente!))
+          else if (aula.agendamento!.dataExata != null)
+             _buildIconText(Icons.access_time, _formatTimeFromDate(aula.agendamento!.dataExata!)),
+        ],
+      ],
+    );
   }
 
-  double _aspectForWidth(double w) {
-    if (w < 480) return 4 / 5;
-    if (w < 800) return 3 / 4;
-    return 16 / 9;
+  Widget _buildIconText(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: Colors.white54),
+        const SizedBox(width: 8),
+        Text(text, style: AppTypography.bodySmall.copyWith(color: Colors.white70)),
+      ],
+    );
   }
+
+  String _formatRecurrence(AgendamentoResponse ag) {
+    List<String> days = [];
+    if (ag.segunda == true) days.add('Seg');
+    if (ag.terca == true) days.add('Ter');
+    if (ag.quarta == true) days.add('Qua');
+    if (ag.quinta == true) days.add('Qui');
+    if (ag.sexta == true) days.add('Sex');
+    if (ag.sabado == true) days.add('Sáb');
+    if (ag.domingo == true) days.add('Dom');
+    
+    if (days.isEmpty) return 'Recorrente';
+    return days.join(', ');
+  }
+
+  String _formatExactDate(String iso) {
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+    } catch (_) {
+      return iso;
+    }
+  }
+
+  String _formatTime(int minutes) {
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTimeFromDate(String iso) {
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  Widget _buildActions(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        TextButton.icon(
+          onPressed: onEdit,
+          icon: const Icon(Icons.edit, size: 18),
+          label: const Text('Editar'),
+          style: TextButton.styleFrom(foregroundColor: Colors.white70),
+        ),
+        const SizedBox(width: 8),
+        TextButton.icon(
+          onPressed: onDelete,
+          icon: const Icon(Icons.delete, size: 18),
+          label: const Text('Excluir'),
+          style: TextButton.styleFrom(foregroundColor: _accent),
+        ),
+      ],
+    );
+  }
+
+
 }

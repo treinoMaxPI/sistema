@@ -1,6 +1,5 @@
 package senai.treinomax.api.dto.response;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -15,8 +14,8 @@ public class AulaResponse {
     private String titulo;
     private String descricao;
     private String bannerUrl;
-    private LocalDateTime data;
     private Integer duracao;
     private CategoriaResponse categoria;
     private String nomePersonal;
+    private AgendamentoResponse agendamento;
 }
