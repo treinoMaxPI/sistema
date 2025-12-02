@@ -21,15 +21,15 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style: AppTypography.titleMedium,
+        style: AppTypography.titleMedium.copyWith(
+          color: Theme.of(context).appBarTheme.foregroundColor,
+        ),
       ),
-      backgroundColor: Colors.black,
       elevation: 0,
       leading: showBackButton
           ? IconButton(
               icon: const Icon(
                 Icons.arrow_back,
-                color: Colors.white,
               ),
               onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
             )

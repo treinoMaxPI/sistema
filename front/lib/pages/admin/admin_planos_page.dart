@@ -108,18 +108,18 @@ class _AdminPlanosPageState extends State<AdminPlanosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Gerenciar Planos',
-          style: TextStyle(
-            color: Colors.white,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -132,9 +132,7 @@ class _AdminPlanosPageState extends State<AdminPlanosPage> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFFFF312E),
-              ),
+              child: CircularProgressIndicator(),
             )
           : _errorMessage != null
               ? Center(
@@ -149,8 +147,8 @@ class _AdminPlanosPageState extends State<AdminPlanosPage> {
                       const SizedBox(height: 16),
                       Text(
                         _errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 16,
                         ),
                         textAlign: TextAlign.center,
@@ -170,20 +168,20 @@ class _AdminPlanosPageState extends State<AdminPlanosPage> {
                   ),
                 )
               : _planos.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.assignment_outlined,
                             size: 64,
-                            color: Colors.grey,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Nenhum plano encontrado',
-                            style: TextStyle(
-                              color: Colors.white,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -191,8 +189,8 @@ class _AdminPlanosPageState extends State<AdminPlanosPage> {
                           SizedBox(height: 8),
                           Text(
                             'Não há planos cadastrados',
-                            style: TextStyle(
-                              color: Colors.grey,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                               fontSize: 14,
                             ),
                           ),
@@ -200,19 +198,19 @@ class _AdminPlanosPageState extends State<AdminPlanosPage> {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _planos.length,
-                      itemBuilder: (context, index) {
-                        final plano = _planos[index];
-                        return _PlanoCard(
-                            plano: plano,
-                            onEditar: () => _showEditarPlanoDialog(plano),
-                            onAlterarStatus: (novoStatus) =>
-                                _alterarStatusPlano(plano, novoStatus),
-                            onAtualizarPreco: () =>
-                                _showAtualizarPrecoDialog(plano));
-                      },
-                    ),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _planos.length,
+                    itemBuilder: (context, index) {
+                      final plano = _planos[index];
+                      return _PlanoCard(
+                          plano: plano,
+                          onEditar: () => _showEditarPlanoDialog(plano),
+                          onAlterarStatus: (novoStatus) =>
+                              _alterarStatusPlano(plano, novoStatus),
+                          onAtualizarPreco: () =>
+                              _showAtualizarPrecoDialog(plano));
+                    },
+                  ),
     );
   }
 }
@@ -236,10 +234,10 @@ class _PlanoCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: plano.ativo ? const Color(0xFFFF312E) : Colors.grey[700]!,
+          color: plano.ativo ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.outline,
           width: 1,
         ),
       ),
@@ -251,8 +249,8 @@ class _PlanoCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   plano.nome,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -280,8 +278,8 @@ class _PlanoCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             plano.descricao,
-            style: const TextStyle(
-              color: Colors.grey,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontSize: 14,
             ),
             maxLines: 2,
@@ -438,10 +436,10 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Criar Novo Plano',
-              style: TextStyle(
-                color: Colors.white,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -449,13 +447,13 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _nomeController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              decoration: InputDecoration(
                 labelText: 'Nome do Plano',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -474,14 +472,14 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _descricaoController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Descrição',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -500,7 +498,7 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _precoController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9,]')),
@@ -514,18 +512,18 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
                   );
                 }
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Preço (R\$)',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
                 prefixText: 'R\$ ',
-                prefixStyle: TextStyle(color: Colors.white),
+                prefixStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 hintText: '0,00',
               ),
               validator: (value) {
@@ -555,19 +553,19 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
                       _ativo = value ?? true;
                     });
                   },
-                  checkColor: Colors.white,
+                  checkColor: Theme.of(context).colorScheme.onPrimary,
                   fillColor: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
                       if (states.contains(MaterialState.selected)) {
                         return const Color(0xFFFF312E);
                       }
-                      return Colors.grey;
+                      return Theme.of(context).colorScheme.outline;
                     },
                   ),
                 ),
-                const Text(
+                Text(
                   'Plano Ativo',
-                  style: TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface),
                 ),
               ],
             ),
@@ -578,8 +576,8 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text('Cancelar'),
@@ -600,7 +598,7 @@ class _CriarPlanoDialogState extends State<CriarPlanoDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: null,
                             ),
                           )
                         : const Text('Criar Plano'),
@@ -768,8 +766,8 @@ class _EditarPlanoDialogState extends State<EditarPlanoDialog> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text('Cancelar'),
@@ -790,7 +788,7 @@ class _EditarPlanoDialogState extends State<EditarPlanoDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: null,
                             ),
                           )
                         : const Text('Salvar Alterações'),
@@ -979,8 +977,8 @@ class _AtualizarPrecoDialogState extends State<AtualizarPrecoDialog> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text('Cancelar'),
@@ -1001,7 +999,7 @@ class _AtualizarPrecoDialogState extends State<AtualizarPrecoDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: null,
                             ),
                           )
                         : const Text('Atualizar'),

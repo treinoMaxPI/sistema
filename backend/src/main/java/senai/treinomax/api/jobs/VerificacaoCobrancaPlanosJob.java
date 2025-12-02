@@ -77,7 +77,7 @@ public class VerificacaoCobrancaPlanosJob {
         try {
             tarefasExecutadasRepository.save(tarefa);
             log.debug("[FORÇAR] Execução anterior atualizada com sucesso. Chamando forcarVerificacaoCobranca() recursivamente.");
-            this.forcarVerificacaoCobranca();
+            this.tarefaComIntervaloFixo();
         } catch (Exception e) {
             log.error("[FORÇAR] Erro ao atualizar/forçar verificação de cobrança", e);
         }

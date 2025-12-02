@@ -3,33 +3,50 @@ import '../theme/typography.dart';
 
 class ModalSheet extends StatelessWidget {
   final Widget child;
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   const ModalSheet({
     super.key,
     required this.child,
-    this.backgroundColor = const Color(0xFF1A1A1A),
+    this.backgroundColor,
   });
-
+  
   @override
   Widget build(BuildContext context) {
+    final Color bg = backgroundColor ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1A1A1A)
+            : Colors.white);
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: bg,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildModalHandle(),
-          const SizedBox(height: 24),
-          child,
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: _buildModalHandle(),
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  child: child,
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+            ],
+          );
+        },
       ),
     );
   }
@@ -66,7 +83,10 @@ class ModalOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final optionColor = color ?? Colors.white;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final optionColor = color ?? onSurface;
+    final bg = Theme.of(context).colorScheme.surface;
+    final outline = Theme.of(context).colorScheme.outline;
 
     return InkWell(
       onTap: onTap,
@@ -74,10 +94,10 @@ class ModalOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey[800]!,
+            color: outline,
             width: 1,
           ),
         ),
@@ -100,7 +120,7 @@ class ModalOption extends StatelessWidget {
               child: Text(
                 title,
                 style: AppTypography.bodyLarge.copyWith(
-                  color: optionColor,
+                  color: onSurface,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -108,7 +128,7 @@ class ModalOption extends StatelessWidget {
             if (showArrow)
               Icon(
                 Icons.arrow_forward_ios,
-                color: optionColor.withOpacity(0.5),
+                color: onSurface.withOpacity(0.5),
                 size: 16,
               ),
           ],
@@ -132,7 +152,10 @@ class RoleSelectionOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? const Color(0xFFFF312E) : Colors.white;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final color = isSelected ? const Color(0xFFFF312E) : onSurface;
+    final bg = Theme.of(context).colorScheme.surface;
+    final outline = Theme.of(context).colorScheme.outline;
 
     return InkWell(
       onTap: onTap,
@@ -141,12 +164,10 @@ class RoleSelectionOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFFF312E).withOpacity(0.15)
-              : Colors.black.withOpacity(0.3),
+          color: isSelected ? const Color(0xFFFF312E).withOpacity(0.1) : bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
+            color: isSelected ? const Color(0xFFFF312E) : outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -177,41 +198,84 @@ class RoleSelectionOption extends StatelessWidget {
 class UserAvatar extends StatelessWidget {
   final String? userName;
   final double size;
+  final String? imageUrl;
+  final bool editable;
+  final VoidCallback? onEdit;
 
   const UserAvatar({
     super.key,
     this.userName,
     this.size = 70,
+    this.imageUrl,
+    this.editable = false,
+    this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
+    final borderColor = const Color(0xFFFF312E);
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Column(
       children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.black,
-            border: Border.all(
-              color: const Color(0xFFFF312E),
-              width: 3,
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).scaffoldBackgroundColor,
+                border: Border.all(
+                  color: borderColor,
+                  width: 3,
+                ),
+              ),
+              child: ClipOval(
+                child: imageUrl != null && imageUrl!.isNotEmpty
+                    ? Image.network(
+                        imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(Icons.person, size: size * 0.57, color: borderColor),
+                        ),
+                      )
+                    : Center(
+                        child: Icon(
+                          Icons.person,
+                          size: size * 0.57,
+                          color: borderColor,
+                        ),
+                      ),
+              ),
             ),
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: Color(0xFFFF312E),
-            ),
-          ),
+            if (editable)
+              Positioned(
+                bottom: -4,
+                right: -4,
+                child: InkWell(
+                  onTap: onEdit,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    child: Icon(Icons.edit, size: 16, color: onSurface),
+                  ),
+                ),
+              ),
+          ],
         ),
         if (userName != null) ...[
           const SizedBox(height: 12),
           Text(
             userName!,
             style: AppTypography.titleMedium.copyWith(
+              color: onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),

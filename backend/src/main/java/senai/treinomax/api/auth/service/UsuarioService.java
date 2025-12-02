@@ -28,21 +28,18 @@ public class UsuarioService {
     public Usuario registrarUsuario(RegistroRequest registroRequest) {
         log.info("Tentando registrar usuário com email: {}", registroRequest.getEmail());
 
-        
         if (usuarioRepository.existsByEmail(registroRequest.getEmail())) {
             log.warn("Tentativa de registro com email já cadastrado: {}", registroRequest.getEmail());
             throw new EmailJaCadastradoException("Email já cadastrado: " + registroRequest.getEmail());
         }
 
-        
         Usuario usuario = new Usuario();
         usuario.setNome(registroRequest.getNome());
         usuario.setEmail(registroRequest.getEmail());
         usuario.setSenha(passwordEncoder.encode(registroRequest.getSenha()));
         usuario.setAtivo(true);
         usuario.setEmailVerificado(false);
-        
-        
+
         if (registroRequest.getRoles() != null && !registroRequest.getRoles().isEmpty()) {
             usuario.setRoles(registroRequest.getRoles());
         }
@@ -50,10 +47,8 @@ public class UsuarioService {
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         log.info("Usuário registrado com sucesso: {}", usuarioSalvo.getEmail());
 
-        
         String tokenVerificacao = tokenService.gerarTokenVerificacaoEmail(usuarioSalvo);
-        
-        
+
         emailService.enviarEmailVerificacao(usuarioSalvo, tokenVerificacao);
 
         return usuarioSalvo;
@@ -87,10 +82,10 @@ public class UsuarioService {
     public void ativarUsuario(UUID id) {
         log.info("Ativando usuário com ID: {}", id);
         Usuario usuario = buscarPorId(id);
-        
+
         usuario.setAtivo(true);
         usuario.setEmailVerificado(true);
-        
+
         usuarioRepository.save(usuario);
         log.info("Usuário ativado com sucesso: {}", usuario.getEmail());
     }
@@ -98,27 +93,24 @@ public class UsuarioService {
     @Transactional
     public void atualizarSenha(Usuario usuario, String novaSenha) {
         log.info("Atualizando senha para usuário: {}", usuario.getEmail());
-        
+
         usuario.setSenha(passwordEncoder.encode(novaSenha));
         usuarioRepository.save(usuario);
-        
-        
+
         emailService.enviarEmailConfirmacaoResetSenha(usuario);
-        
+
         log.info("Senha atualizada com sucesso para usuário: {}", usuario.getEmail());
     }
 
     @Transactional
     public void verificarEmail(String token) {
         log.info("Verificando email com token: {}", token);
-        
-        
+
         Usuario usuario = tokenService.validarTokenVerificacaoEmail(token);
-        
-        
+
         usuario.setEmailVerificado(true);
         usuario.setAtivo(true);
-        
+
         usuarioRepository.save(usuario);
         log.info("Email verificado com sucesso para usuário: {}", usuario.getEmail());
     }
@@ -126,20 +118,18 @@ public class UsuarioService {
     @Transactional
     public void reenviarEmailVerificacao(String email) {
         log.info("Reenviando email de verificação para: {}", email);
-        
+
         Usuario usuario = buscarPorEmail(email);
-        
+
         if (usuario.getEmailVerificado()) {
             log.warn("Tentativa de reenvio de email para usuário já verificado: {}", email);
             throw new IllegalArgumentException("Email já verificado");
         }
 
-        
         String tokenVerificacao = tokenService.gerarTokenVerificacaoEmail(usuario);
-        
-        
+
         emailService.enviarEmailVerificacao(usuario, tokenVerificacao);
-        
+
         log.info("Email de verificação reenviado com sucesso para: {}", email);
     }
 
@@ -149,21 +139,21 @@ public class UsuarioService {
 
     public boolean validarCredenciais(String email, String senha) {
         log.debug("Validando credenciais para: {}", email);
-        
+
         try {
             Usuario usuario = buscarPorEmail(email);
-            
+
             if (!usuario.getAtivo()) {
                 log.warn("Tentativa de login com usuário inativo: {}", email);
                 return false;
             }
 
             boolean senhaValida = passwordEncoder.matches(senha, usuario.getSenha());
-            
+
             if (!senhaValida) {
                 log.warn("Senha inválida para usuário: {}", email);
             }
-            
+
             return senhaValida;
         } catch (UsuarioNaoEncontradoException e) {
             log.warn("Usuário não encontrado durante validação de credenciais: {}", email);
@@ -175,10 +165,10 @@ public class UsuarioService {
     public void desativarUsuario(UUID id) {
         log.info("Desativando usuário com ID: {}", id);
         Usuario usuario = buscarPorId(id);
-        
+
         usuario.setAtivo(false);
         usuarioRepository.save(usuario);
-        
+
         log.info("Usuário desativado com sucesso: {}", usuario.getEmail());
     }
 
@@ -195,5 +185,10 @@ public class UsuarioService {
     public long contarUsuariosPorPlano(UUID planoId) {
         log.debug("Contando usuários com plano {}", planoId);
         return usuarioRepository.countByPlanoId(planoId);
+    }
+
+    public List<Usuario> listarTodos() {
+        log.debug("Listando todos os usuários");
+        return usuarioRepository.findAll();
     }
 }
