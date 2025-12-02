@@ -61,7 +61,7 @@ public class DashboardController {
             planoRepository.findByAtivoTrue().forEach(plano -> {
                 long count = usuarioRepository.countByPlanoId(plano.getId());
                 if (count > 0) {
-                    double percentage = ((double) count / totalNumberMembers) * 100;
+                    double percentage = ((double) count / totalNumberPaidMembers) * 100;
                     userDistributionByPlan.put(plano.getNome(), percentage);
                 }
             });
