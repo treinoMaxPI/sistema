@@ -396,29 +396,96 @@ class _CategoriaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: _cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: _borderColor),
+    final hasPlanos = categoria.planos != null && categoria.planos!.isNotEmpty;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: hasPlanos ? _accent : _borderColor,
+          width: 1,
+        ),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              CircleAvatar(radius: 18, backgroundColor: Colors.grey[800], child: Text(_initialsFrom(categoria.nome), style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold))),
-              const SizedBox(width: 12),
-              Expanded(child: Text(categoria.nome, style: AppTypography.bodyLarge)),
-              PopupMenuButton<int>(
-                color: _cardColor,
-                icon: const Icon(Icons.more_horiz, color: Colors.white),
-                onSelected: (val) {
-                  if (val == 1) onEdit();
-                  else if (val == 2) {
+              Expanded(
+                child: InkWell(
+                  onTap: onTap,
+                  child: Text(
+                    categoria.nome,
+                    style: AppTypography.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+              if (hasPlanos)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _accent.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${categoria.planos!.length} ${categoria.planos!.length == 1 ? 'plano' : 'planos'}',
+                    style: TextStyle(
+                      color: _accent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (hasPlanos) ...[
+            Text('Planos vinculados:', style: AppTypography.caption.copyWith(color: Colors.white54)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: categoria.planos!.map((p) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _accent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _accent.withOpacity(0.3)),
+                ),
+                child: Text(
+                  p.nome,
+                  style: AppTypography.caption.copyWith(color: _accent),
+                ),
+              )).toList(),
+            ),
+            const SizedBox(height: 12),
+          ] else ...[
+            Text(
+              'Nenhum plano vinculado',
+              style: AppTypography.bodySmall.copyWith(color: Colors.white38),
+            ),
+            const SizedBox(height: 12),
+          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _buildActionButton(
+                icon: Icons.edit,
+                color: Colors.blue,
+                onPressed: onEdit,
+                tooltip: 'Editar',
+              ),
+              const SizedBox(width: 8),
+              _buildActionButton(
+                icon: Icons.delete,
+                color: Colors.red,
+                onPressed: () {
                     showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
@@ -430,26 +497,28 @@ class _CategoriaCard extends StatelessWidget {
                         ],
                       ),
                     ).then((confirmed) { if (confirmed == true) onDelete(); });
-                  }
                 },
-                itemBuilder: (context) => [
-                  const PopupMenuItem<int>(value: 1, child: Row(children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Editar')])),
-                  PopupMenuItem<int>(value: 2, child: Row(children: [Icon(Icons.delete, color: _accent), SizedBox(width: 8), Text('Excluir')])),
-                ],
+                tooltip: 'Excluir',
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
 
-  String _initialsFrom(String text) {
-    final parts = text.trim().split(RegExp(r"\s+")).where((e) => e.isNotEmpty).toList();
-    if (parts.isEmpty) return 'C';
-    final first = parts.first.characters.take(1).toString().toUpperCase();
-    String second = '';
-    if (parts.length > 1) second = parts[1].characters.take(1).toString().toUpperCase();
-    return (first + second).trim();
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    required String tooltip,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, color: color, size: 20),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+    );
   }
 }

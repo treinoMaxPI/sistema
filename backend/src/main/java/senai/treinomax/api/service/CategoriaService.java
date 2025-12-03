@@ -95,7 +95,7 @@ public class CategoriaService {
 	@Transactional
 	public List<Categoria> listarTodas() {
 		log.warn("Listando todas as categorias");
-		return categoriaRepository.findAll();
+		return categoriaRepository.findAllByOrderByDataAtualizacaoDesc();
 	}
 
 	@Transactional
