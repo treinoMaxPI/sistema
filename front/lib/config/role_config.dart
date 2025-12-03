@@ -21,13 +21,6 @@ class RoleConfig {
   static const Map<Role, List<RoleButtonConfig>> roleButtons = {
     Role.PERSONAL: [
       RoleButtonConfig(
-        route: '/dashboard',
-        title: 'Dashboard',
-        description: 'Visualizar estatísticas e métricas',
-        icon: Icons.dashboard,
-        color: Color(0xFF4CAF50),
-      ),
-      RoleButtonConfig(
         route: '/personal/exercicios',
         title: 'Exercícios',
         description: 'Gerenciar exercícios',
