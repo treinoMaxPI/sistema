@@ -87,6 +87,15 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
                     )).toList() 
                   : <Plano>[];
               await _service.criar(Categoria(nome: nome, planos: selectedPlanos), token);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Categoria criada com sucesso!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
             } else {
               final selectedPlanos = planosIds != null 
                   ? _planos.where((p) => planosIds.contains(p.id)).map((p) => Plano(
@@ -98,10 +107,27 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
                     )).toList() 
                   : <Plano>[];
               await _service.atualizar(initial.id ?? '', Categoria(id: initial.id, nome: nome, planos: selectedPlanos), token);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Categoria atualizada com sucesso!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
             }
             await _carregarCategorias();
           } catch (e) {
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Erro: ${e.toString()}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
           }
         },
       ),
@@ -131,8 +157,25 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
       }
       await _service.deletar(cat.id ?? '', token);
       await _carregarCategorias();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Categoria deletada com sucesso!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
