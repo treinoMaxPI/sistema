@@ -11,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.model.Usuario;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.CategoriaRequest;
-import senai.treinomax.api.dto.response.CategoriaResponse;
 import senai.treinomax.api.model.Categoria;
+
+import senai.treinomax.api.repository.AulaRepository;
 import senai.treinomax.api.repository.CategoriaRepository;
 
 @Service
@@ -21,6 +22,8 @@ import senai.treinomax.api.repository.CategoriaRepository;
 public class CategoriaService {
 
 	private final CategoriaRepository categoriaRepository;
+
+	private final AulaRepository aulaRepository;
 	private final UsuarioService usuarioService;
 
 	@Transactional
@@ -68,6 +71,10 @@ public class CategoriaService {
 
 		if (!categoriaRepository.existsById(uuid)) {
 			throw new IllegalArgumentException("Categoria não encontrada com ID: " + id);
+		}
+
+		if (!aulaRepository.findByCategoriaId(uuid).isEmpty()) {
+			throw new IllegalArgumentException("Não é possível apagar uma categoria já relacionada a uma aula");
 		}
 
 		categoriaRepository.deleteById(uuid);
@@ -125,6 +132,7 @@ public class CategoriaService {
 		}
 
 		categoriaExistente.setNome(categoriaAtualizada.getNome());
+		categoriaExistente.setPlanos(categoriaAtualizada.getPlanos());
 
 		return categoriaRepository.save(categoriaExistente);
 	}

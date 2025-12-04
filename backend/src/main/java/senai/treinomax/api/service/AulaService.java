@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,9 @@ public class AulaService {
     private final AulaRepository aulaRepository;
     private final UsuarioService usuarioService;
     private final CategoriaRepository categoriaRepository;
+
+    @Value("${upload.directory}")
+    private String uploadDirectory;
 
     /**
      * Salva (cria) uma aula.
@@ -169,7 +173,7 @@ public class AulaService {
         }
 
         try {
-            Path uploadDir = Paths.get("uploads", "aulas");
+            Path uploadDir = Paths.get(uploadDirectory, "aulas");
             Files.createDirectories(uploadDir);
 
             String original = file.getOriginalFilename();
@@ -182,7 +186,9 @@ public class AulaService {
             }
 
             String relative = "/uploads/aulas/" + filename;
-            log.info("Imagem salva em {}", relative);
+            log.info("Imagem salva com sucesso!");
+            log.info("  - Path absoluto: {}", target.toAbsolutePath());
+            log.info("  - Path relativo (URL): {}", relative);
             return relative;
         } catch (IOException e) {
             log.error("Erro ao salvar imagem de aula", e);
