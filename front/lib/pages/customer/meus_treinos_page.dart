@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+// Removido: import 'dart:html' as html if (dart.library.html) 'dart:html';
+// Removido: import 'dart:ui_web' as ui_web if (dart.library.html) 'dart:ui_web';
+import 'package:url_launcher/url_launcher.dart'; // Import para abrir URLs
 import '../../services/treino_service.dart';
 import '../../models/treino.dart';
 import '../../models/execucao_treino.dart';
 import 'executar_treino_page.dart';
-
-// Para web - imports condicionais
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html if (dart.library.html) 'dart:html';
-// ignore: avoid_web_libraries_in_flutter  
-import 'dart:ui_web' as ui_web if (dart.library.html) 'dart:ui_web';
 
 class MeusTreinosPage extends StatefulWidget {
   const MeusTreinosPage({super.key});
@@ -45,7 +42,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
 
     // Para CUSTOMER, o backend já filtra automaticamente pelos treinos do usuário logado
     final response = await _treinoService.listarTodos();
-    
+
     print('Response success: ${response.success}');
     print('Response data: ${response.data}');
     print('Response data type: ${response.data?.runtimeType}');
@@ -77,9 +74,9 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               return null;
             }
           }).whereType<Treino>().toList();
-          
+
           print('Treinos convertidos: ${treinos.length}');
-          
+
           setState(() {
             _treinos = treinos;
             _isLoading = false;
@@ -110,16 +107,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   Future<void> _carregarUltimoTreino() async {
     try {
       final response = await _treinoService.buscarExecucaoAtiva();
-      
+
       if (response.success && response.data != null) {
         final execucao = response.data;
         if (execucao != null && execucao is Map && execucao.isNotEmpty) {
-          final treinoId = execucao['treino'] != null 
-              ? (execucao['treino'] is Map 
+          final treinoId = execucao['treino'] != null
+              ? (execucao['treino'] is Map
                   ? execucao['treino']['id']?.toString()
                   : execucao['treino'].toString())
               : null;
-          
+
           if (treinoId != null && treinoId.isNotEmpty) {
             if (mounted) {
               setState(() {
@@ -166,24 +163,24 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   Future<void> _carregarHistorico() async {
     try {
       final response = await _treinoService.listarHistorico();
-      
+
       if (response.success && response.data != null) {
         final historico = response.data;
         if (historico != null && historico is List && historico.isNotEmpty) {
           // Criar mapa de última execução por treino (apenas finalizadas)
           final Map<String, DateTime?> ultimaExecucao = {};
-          
+
           for (var item in historico) {
             if (item is Map && item.isNotEmpty) {
               try {
                 final execucao = ExecucaoTreino.fromJson(item);
                 // Só considerar execuções finalizadas com treinoId válido
-                if (execucao.treinoId.isNotEmpty && 
-                    execucao.finalizada && 
+                if (execucao.treinoId.isNotEmpty &&
+                    execucao.finalizada &&
                     execucao.dataFim != null) {
                   final treinoId = execucao.treinoId;
                   // Se não tem data ainda ou esta é mais recente, atualizar
-                  if (!ultimaExecucao.containsKey(treinoId) || 
+                  if (!ultimaExecucao.containsKey(treinoId) ||
                       ultimaExecucao[treinoId] == null ||
                       (execucao.dataFim != null && ultimaExecucao[treinoId] != null &&
                        execucao.dataFim!.isAfter(ultimaExecucao[treinoId]!))) {
@@ -196,7 +193,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               }
             }
           }
-          
+
           if (mounted) {
             setState(() {
               _ultimaExecucaoPorTreino = ultimaExecucao;
@@ -392,7 +389,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                 final isProximoTreino = _proximoTreinoId == treino.id;
                                 final ultimaExecucao = _ultimaExecucaoPorTreino[treino.id];
                                 return _buildTreinoCard(
-                                  treino, 
+                                  treino,
                                   isUltimoTreino: isUltimoTreino,
                                   isProximoTreino: isProximoTreino,
                                   ultimaExecucao: ultimaExecucao,
@@ -427,7 +424,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
         final data = response.data;
         if (data != null && data is Map && data['id'] != null) {
           final execucaoId = data['id'].toString();
-          
+
           // Navegar para a tela de execução
           final resultado = await Navigator.push(
             context,
@@ -464,19 +461,28 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
     }
   }
 
-  void _mostrarVideo(String videoUrl) {
-    showDialog(
-      context: context,
-      builder: (context) => _VideoDialog(videoUrl: videoUrl),
-    );
+  Future<void> _mostrarVideo(String videoUrl) async {
+    final uri = Uri.parse(videoUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Não foi possível abrir o vídeo: $videoUrl'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   String _formatarData(DateTime? data) {
     if (data == null) return '';
-    
+
     final agora = DateTime.now();
     final diferenca = agora.difference(data);
-    
+
     if (diferenca.inDays == 0) {
       if (diferenca.inHours == 0) {
         if (diferenca.inMinutes == 0) {
@@ -509,10 +515,10 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
       color: const Color(0xFF1A1A1A),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isUltimoTreino 
+        side: isUltimoTreino
             ? BorderSide(
-                color: _temTreinoAtivo 
-                    ? const Color(0xFFFF312E) 
+                color: _temTreinoAtivo
+                    ? const Color(0xFFFF312E)
                     : const Color(0xFF4CAF50),
                 width: 2,
               )
@@ -555,16 +561,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               width: 1,
                             ),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.next_plan,
                                 size: 14,
                                 color: Color(0xFF2196F3),
                               ),
-                              const SizedBox(width: 4),
-                              const Text(
+                              SizedBox(width: 4),
+                              Text(
                                 'Próximo',
                                 style: TextStyle(
                                   color: Color(0xFF2196F3),
@@ -581,12 +587,12 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _temTreinoAtivo 
+                            color: _temTreinoAtivo
                                 ? const Color(0xFFFF312E).withOpacity(0.2)
                                 : const Color(0xFF4CAF50).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _temTreinoAtivo 
+                              color: _temTreinoAtivo
                                   ? const Color(0xFFFF312E)
                                   : const Color(0xFF4CAF50),
                               width: 1,
@@ -598,7 +604,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               Icon(
                                 _temTreinoAtivo ? Icons.play_circle : Icons.check_circle,
                                 size: 14,
-                                color: _temTreinoAtivo 
+                                color: _temTreinoAtivo
                                     ? const Color(0xFFFF312E)
                                     : const Color(0xFF4CAF50),
                               ),
@@ -606,7 +612,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               Text(
                                 _temTreinoAtivo ? 'Em andamento' : 'Último treino',
                                 style: TextStyle(
-                                  color: _temTreinoAtivo 
+                                  color: _temTreinoAtivo
                                       ? const Color(0xFFFF312E)
                                       : const Color(0xFF4CAF50),
                                   fontSize: 11,
@@ -651,15 +657,15 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                     ),
                   ] else if (!isProximoTreino && !isUltimoTreino) ...[
                     const SizedBox(height: 4),
-                    Row(
+                    const Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline,
                           size: 14,
                           color: Colors.grey,
                         ),
-                        const SizedBox(width: 4),
-                        const Text(
+                        SizedBox(width: 4),
+                        Text(
                           'Nunca executado',
                           style: TextStyle(
                             color: Colors.grey,
@@ -837,21 +843,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                 child: Text(
                                   'Descanso: ${item.tempoDescanso}',
                                   style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            if (item.observacao != null &&
-                                item.observacao!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  item.observacao!,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                    fontStyle: FontStyle.italic,
+                                    color: Color(0xFF4CAF50),
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -860,7 +853,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       ),
                     ],
                   ),
-                )),
+                )).toList(),
           ],
         ],
       ),
@@ -868,222 +861,5 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   }
 }
 
-// Dialog para exibir vídeo do exercício
-class _VideoDialog extends StatelessWidget {
-  final String videoUrl;
-
-  const _VideoDialog({required this.videoUrl});
-
-  bool _isImageOrGif(String url) {
-    final lowerUrl = url.toLowerCase();
-    return lowerUrl.endsWith('.gif') ||
-        lowerUrl.endsWith('.jpg') ||
-        lowerUrl.endsWith('.jpeg') ||
-        lowerUrl.endsWith('.png') ||
-        lowerUrl.endsWith('.webp') ||
-        lowerUrl.contains('.gif') ||
-        lowerUrl.contains('image/');
-  }
-
-  String _getEmbedUrl(String url) {
-    // Se for imagem ou GIF, retornar a URL original
-    if (_isImageOrGif(url)) {
-      return url;
-    }
-    
-    // Se for YouTube
-    if (url.contains('youtube.com/watch?v=')) {
-      final videoId = url.split('v=')[1].split('&')[0];
-      return 'https://www.youtube.com/embed/$videoId';
-    }
-    // Se for YouTube short link
-    if (url.contains('youtu.be/')) {
-      final videoId = url.split('youtu.be/')[1].split('?')[0];
-      return 'https://www.youtube.com/embed/$videoId';
-    }
-    // Se for Vimeo
-    if (url.contains('vimeo.com/')) {
-      final videoId = url.split('vimeo.com/')[1].split('?')[0];
-      return 'https://player.vimeo.com/video/$videoId';
-    }
-    // Se já for uma URL de embed, retornar como está
-    if (url.contains('embed') || url.contains('player')) {
-      return url;
-    }
-    // Caso contrário, tentar usar como iframe direto
-    return url;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final embedUrl = _getEmbedUrl(videoUrl);
-    final isImage = _isImageOrGif(videoUrl);
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(
-                    isImage ? 'Demonstração do Exercício' : 'Vídeo do Exercício',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            // Video/Image player
-            isImage
-                ? Container(
-                    constraints: const BoxConstraints(
-                      maxHeight: 500,
-                      maxWidth: double.infinity,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        embedUrl,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 300,
-                            color: Colors.black,
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFFF312E),
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 300,
-                            color: Colors.black,
-                            child: const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: Colors.red,
-                                    size: 48,
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Erro ao carregar imagem',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  )
-                : AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Container(
-                      color: Colors.black,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: _buildVideoPlayer(embedUrl),
-                      ),
-                    ),
-                  ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideoPlayer(String embedUrl) {
-    if (kIsWeb) {
-      // Para web, criar iframe HTML
-      final String viewType = 'iframe-${embedUrl.hashCode}';
-      
-      // Registrar o viewType (registrar sempre, pois pode ser reutilizado)
-      ui_web.platformViewRegistry.registerViewFactory(
-        viewType,
-        (int viewId) {
-          final iframe = html.IFrameElement()
-            ..src = embedUrl
-            ..style.border = 'none'
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..allowFullscreen = true
-            ..allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-          return iframe;
-        },
-      );
-      
-      // Usar HtmlElementView do Flutter (disponível apenas em web)
-      return SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: HtmlElementView(viewType: viewType),
-      );
-    } else {
-      // Para mobile, mostrar botão para abrir em navegador
-      return Container(
-        color: Colors.black,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.play_circle_filled,
-                size: 64,
-                color: Color(0xFFFF312E),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Vídeo disponível',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // Abrir vídeo em navegador externo
-                  // Usar url_launcher package se necessário
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF312E),
-                ),
-                child: const Text(
-                  'Abrir vídeo',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-}
-
+// REMOVIDO a classe _VideoDialog original porque usava dart:html/dart:ui_web
+// e a funcionalidade foi substituída por url_launcher.

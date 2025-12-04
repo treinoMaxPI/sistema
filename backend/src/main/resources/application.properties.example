@@ -6,48 +6,48 @@ server.port=8080
 #spring.profiles.active=dev
 
 # Database Configuration (PostgreSQL - Docker Development)
-spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/treinomax}
-spring.datasource.username=${DATABASE_USERNAME:postgres}
-spring.datasource.password=${DATABASE_PASSWORD:postgres}
+spring.datasource.url=jdbc:postgresql://localhost:5435/treinomax
+spring.datasource.username=postgres
+spring.datasource.password=postgres
 
-# Development JPA Settings
-spring.jpa.hibernate.ddl-auto=validate
-spring.jpa.show-sql=true
+# JPA Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
-# Flyway for Development
-spring.flyway.enabled=true
+# Flyway Configuration
+# Flyway desabilitado temporariamente
+spring.flyway.enabled=false
 spring.flyway.locations=classpath:db/migration
-spring.flyway.baseline-on-migrate=true
 
-# JWT Configuration for Development
-jwt.secret=${JWT_SECRET:your-jwt-secret-key-here-change-in-production}
+# JWT Configuration
+jwt.secret=e13c014dca8cf70b5ee3e6b0a0c22ba09d821f675c9a9f21a40adaa000d07f04
 jwt.expiration=86400000
 jwt.refresh-token.expiration=2592000000
 
-# Email Configuration for Development (Gmail example)
-spring.mail.host=${SMTP_HOST:smtp.gmail.com}
-spring.mail.port=${SMTP_PORT:587}
-spring.mail.username=${SMTP_USERNAME:your-email@gmail.com}
-spring.mail.password=${SMTP_PASSWORD:your-app-password}
-spring.mail.properties.mail.smtp.ssl.enable=true
-spring.mail.properties.mail.smtp.starttls.enable=false
+# Email Configuration
+# spring.mail.host=smtp.gmail.com
+# spring.mail.port=587
+# spring.mail.username=your-email@gmail.com
+spring.mail.username=your-email@gmail.com
+# spring.mail.password=SMTP_PASSWORD
+# spring.mail.properties.mail.smtp.ssl.enable=true
+# spring.mail.properties.mail.smtp.starttls.enable=false
 # spring.mail.test.connection=false
+spring.mail.mock.enabled=true
 
 # Development CORS
 cors.allowed-origins=http://localhost:4200
 
+# spring.devtools.restart.enabled=true
+# spring.devtools.restart.poll-interval=1000
+# spring.devtools.restart.quiet-period=400
+# spring.devtools.livereload.enabled=true
+
 # Development Logging
-logging.level.senai.treinomax.api=DEBUG
-logging.level.org.springframework.security=INFO
-logging.level.org.springframework.mail=INFO
-logging.level.org.hibernate.SQL=DEBUG
+# logging.level.senai.treinomax.api=DEBUG
+# logging.level.org.springframework.security=INFO
+# logging.level.org.springframework.mail=INFO
+# logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
-
-# Development Server
-server.servlet.context-path=/
-
-# Development Features
-spring.mail.test-connection=true
-spring.jpa.properties.hibernate.generate_statistics=true

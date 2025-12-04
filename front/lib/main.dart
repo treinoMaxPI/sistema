@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
+import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
-import 'package:gym_management/pages/admin/admin_relatorios_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
@@ -35,8 +35,10 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(themeModeProvider.notifier).loadFromPrefs());
-    Future.microtask(() => ref.read(textScaleProvider.notifier).loadFromPrefs());
+    Future.microtask(
+        () => ref.read(themeModeProvider.notifier).loadFromPrefs());
+    Future.microtask(
+        () => ref.read(textScaleProvider.notifier).loadFromPrefs());
   }
 
   @override
@@ -49,17 +51,20 @@ class _MyAppState extends ConsumerState<MyApp> {
       themeMode: mode,
       theme: ThemeData.light(useMaterial3: true).copyWith(
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(backgroundColor: Colors.white, foregroundColor: Colors.black),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white, foregroundColor: Colors.black),
       ),
       darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
         scaffoldBackgroundColor: Colors.black,
-        appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Colors.white),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.black, foregroundColor: Colors.white),
       ),
       home: const AuthWrapper(),
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         return MediaQuery(
-          data: mq.copyWith(textScaleFactor: ref.read(textScaleProvider.notifier).factor()),
+          data: mq.copyWith(
+              textScaleFactor: ref.read(textScaleProvider.notifier).factor()),
           child: child ?? const SizedBox.shrink(),
         );
       },
@@ -70,8 +75,8 @@ class _MyAppState extends ConsumerState<MyApp> {
         // Admin routes
         '/admin/planos': (context) => const AdminPlanosPage(),
         '/admin/mural': (context) => const AdminMuralPage(),
+        '/admin/dashboard': (context) => const AdminDashboardPage(),
         '/admin/clientes': (context) => const AdminClientesPage(),
-        '/admin/relatorios': (context) => const AdminRelatoriosPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const TreinosPage(),

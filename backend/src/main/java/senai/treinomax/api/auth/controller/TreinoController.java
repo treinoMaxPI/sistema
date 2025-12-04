@@ -79,19 +79,17 @@ public class TreinoController {
     @PreAuthorize("hasAnyRole('PERSONAL', 'CUSTOMER')")
     public ResponseEntity<?> getAll(@RequestParam(required = false) UUID usuarioId) {
         List<Treino> treinos;
-
-        // Customer vê apenas seus treinos
-        if (SecurityUtils.hasRole(senai.treinomax.api.auth.model.Role.CUSTOMER)) {
-            UUID currentUserId = SecurityUtils.getCurrentUserId();
-            treinos = treinoService.listarPorUsuario(currentUserId);
-        } else if (usuarioId != null) {
+        
+        if (usuarioId != null) {
+            if (!SecurityUtils.hasRole(senai.treinomax.api.auth.model.Role.PERSONAL)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Acesso negado: apenas Personal pode filtrar por usuário"));
+            }
             // Personal pode filtrar por usuário
             treinos = treinoService.listarPorUsuario(usuarioId);
-        } else {
-            // Personal sem filtro vê todos
-            treinos = treinoService.listarTodos();
+            return ResponseEntity.ok(treinos);
         }
-
+        UUID currentUserId = SecurityUtils.getCurrentUserId();  
+        treinos = treinoService.listarPorUsuario(currentUserId);
         return ResponseEntity.ok(treinos);
     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../services/treino_service.dart';
 import '../services/exercicio_service.dart';
 import '../models/treino.dart';
@@ -130,10 +131,11 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
 
     final request = CriarTreinoRequest(
       nome: _nomeController.text,
-      tipoTreino: _tiposTreinoSelecionados.isEmpty 
-          ? null 
+      tipoTreino: _tiposTreinoSelecionados.isEmpty
+          ? null
           : _tiposTreinoSelecionados.join(', '),
-      descricao: _descricaoController.text.isEmpty ? null : _descricaoController.text,
+      descricao:
+          _descricaoController.text.isEmpty ? null : _descricaoController.text,
       nivel: _nivelController.text.isEmpty ? null : _nivelController.text,
       itens: _itens,
       usuarioId: widget.usuarioId,
@@ -184,162 +186,208 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _nomeController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome do Treino *',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
-                  ),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _nomeController,
+              decoration: const InputDecoration(
+                labelText: 'Nome do Treino *',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
                 ),
-                style: const TextStyle(color: Colors.white),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nome é obrigatório';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Tipo de Treino',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _tiposTreino.map((tipo) {
-                  final isSelected = _tiposTreinoSelecionados.contains(tipo);
-                  return FilterChip(
-                    label: Text(tipo),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _tiposTreinoSelecionados.add(tipo);
-                        } else {
-                          _tiposTreinoSelecionados.remove(tipo);
-                        }
-                      });
-                    },
-                    backgroundColor: Colors.black,
-                    selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
-                    checkmarkColor: const Color(0xFFFF312E),
-                    labelStyle: TextStyle(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.white,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    side: BorderSide(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
-                      width: 1.5,
-                    ),
-                  );
-                }).toList(),
+              style: const TextStyle(color: Colors.white),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Nome é obrigatório';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Tipo de Treino',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descricaoController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _tiposTreino.map((tipo) {
+                final isSelected = _tiposTreinoSelecionados.contains(tipo);
+                return FilterChip(
+                  label: Text(tipo),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        _tiposTreinoSelecionados.add(tipo);
+                      } else {
+                        _tiposTreinoSelecionados.remove(tipo);
+                      }
+                    });
+                  },
+                  backgroundColor: Colors.black,
+                  selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
+                  checkmarkColor: const Color(0xFFFF312E),
+                  labelStyle: TextStyle(
+                    color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
+                  side: BorderSide(
+                    color: isSelected
+                        ? const Color(0xFFFF312E)
+                        : Colors.grey[800]!,
+                    width: 1.5,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _descricaoController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Descrição',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF312E)),
+                ),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value:
+                  _nivelController.text.isEmpty ? null : _nivelController.text,
+              decoration: const InputDecoration(
+                labelText: 'Nível',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF312E)),
+                ),
+              ),
+              dropdownColor: const Color(0xFF1A1A1A),
+              style: const TextStyle(color: Colors.white),
+              items: _niveis.map((nivel) {
+                return DropdownMenuItem<String>(
+                  value: nivel,
+                  child: Text(nivel),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _nivelController.text = value ?? '';
+                });
+              },
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Exercícios',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _nivelController.text.isEmpty ? null : _nivelController.text,
-                decoration: const InputDecoration(
-                  labelText: 'Nível',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
-                  ),
+                IconButton(
+                  onPressed: _adicionarItemTreino,
+                  icon: const Icon(Icons.add, color: Color(0xFFFF312E)),
                 ),
-                dropdownColor: const Color(0xFF1A1A1A),
-                style: const TextStyle(color: Colors.white),
-                items: _niveis.map((nivel) {
-                  return DropdownMenuItem<String>(
-                    value: nivel,
-                    child: Text(nivel),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _nivelController.text = value ?? '';
-                  });
-                },
+              ],
+            ),
+            const SizedBox(height: 16),
+            ..._itens.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return _buildItemTreinoCard(item, index);
+            }),
+            if (_itens.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Nenhum exercício adicionado',
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // Ao clicar, exibe um alerta
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Funcionalidade em desenvolvimento'),
+                      content: const Text(
+                          'Algoritmo de gerar treino ainda não foi desenvolvido.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey, // Cor diferente para destaque
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Exercícios',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  SvgPicture.asset(
+                    'assets/icons/sparkles.svg',
+                    color: Colors.white,
+                    width: 24,
+                    height: 24,
                   ),
-                  IconButton(
-                    onPressed: _adicionarItemTreino,
-                    icon: const Icon(Icons.add, color: Color(0xFFFF312E)),
-                  ),
+                  const SizedBox(width: 8),
+                  const Text('Gerar Treino'),
                 ],
               ),
-              const SizedBox(height: 16),
-              ..._itens.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                return _buildItemTreinoCard(item, index);
-              }),
-              if (_itens.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Nenhum exercício adicionado',
-                    style: TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _criarTreino,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF312E),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Criar Treino'),
+            ),
+            const SizedBox(height: 16), // Espaço entre os botões
+            ElevatedButton(
+              onPressed: _isLoading ? null : _criarTreino,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF312E),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-            ],
-          ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Criar Treino'),
+            ),
+          ],
         ),
+      ),
     );
   }
 
@@ -444,7 +492,8 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         item.exercicioId.isEmpty
@@ -461,9 +510,11 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                                         ),
                                       ),
                                       if (item.exercicioId.isNotEmpty &&
-                                          exercicioSelecionado?.descricao != null)
+                                          exercicioSelecionado?.descricao !=
+                                              null)
                                         Padding(
-                                          padding: const EdgeInsets.only(top: 4),
+                                          padding:
+                                              const EdgeInsets.only(top: 4),
                                           child: Text(
                                             exercicioSelecionado!.descricao!,
                                             style: const TextStyle(
@@ -641,14 +692,16 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
     super.initState();
     _nomeController = TextEditingController(text: widget.treino.nome);
     // Parse tipoTreino string para lista (ex: "A, B, C" -> ["A", "B", "C"])
-    if (widget.treino.tipoTreino != null && widget.treino.tipoTreino!.isNotEmpty) {
+    if (widget.treino.tipoTreino != null &&
+        widget.treino.tipoTreino!.isNotEmpty) {
       _tiposTreinoSelecionados = widget.treino.tipoTreino!
           .split(',')
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
           .toList();
     }
-    _descricaoController = TextEditingController(text: widget.treino.descricao ?? '');
+    _descricaoController =
+        TextEditingController(text: widget.treino.descricao ?? '');
     _nivelController = TextEditingController(text: widget.treino.nivel ?? '');
     _itens = List.from(widget.treino.itens);
     _carregarExercicios();
@@ -769,16 +822,18 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
 
     final request = AtualizarTreinoRequest(
       nome: _nomeController.text,
-      tipoTreino: _tiposTreinoSelecionados.isEmpty 
-          ? null 
+      tipoTreino: _tiposTreinoSelecionados.isEmpty
+          ? null
           : _tiposTreinoSelecionados.join(', '),
-      descricao: _descricaoController.text.isEmpty ? null : _descricaoController.text,
+      descricao:
+          _descricaoController.text.isEmpty ? null : _descricaoController.text,
       nivel: _nivelController.text.isEmpty ? null : _nivelController.text,
       itens: _itens,
     );
 
     final treinoService = TreinoService();
-    final response = await treinoService.atualizarTreino(widget.treino.id, request);
+    final response =
+        await treinoService.atualizarTreino(widget.treino.id, request);
 
     if (mounted) {
       setState(() {
@@ -822,162 +877,166 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _nomeController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome do Treino *',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
-                  ),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _nomeController,
+              decoration: const InputDecoration(
+                labelText: 'Nome do Treino *',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
                 ),
-                style: const TextStyle(color: Colors.white),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nome é obrigatório';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Tipo de Treino',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _tiposTreino.map((tipo) {
-                  final isSelected = _tiposTreinoSelecionados.contains(tipo);
-                  return FilterChip(
-                    label: Text(tipo),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _tiposTreinoSelecionados.add(tipo);
-                        } else {
-                          _tiposTreinoSelecionados.remove(tipo);
-                        }
-                      });
-                    },
-                    backgroundColor: Colors.black,
-                    selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
-                    checkmarkColor: const Color(0xFFFF312E),
-                    labelStyle: TextStyle(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.white,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    side: BorderSide(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
-                      width: 1.5,
-                    ),
-                  );
-                }).toList(),
+              style: const TextStyle(color: Colors.white),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Nome é obrigatório';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Tipo de Treino',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descricaoController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _tiposTreino.map((tipo) {
+                final isSelected = _tiposTreinoSelecionados.contains(tipo);
+                return FilterChip(
+                  label: Text(tipo),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        _tiposTreinoSelecionados.add(tipo);
+                      } else {
+                        _tiposTreinoSelecionados.remove(tipo);
+                      }
+                    });
+                  },
+                  backgroundColor: Colors.black,
+                  selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
+                  checkmarkColor: const Color(0xFFFF312E),
+                  labelStyle: TextStyle(
+                    color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
+                  side: BorderSide(
+                    color: isSelected
+                        ? const Color(0xFFFF312E)
+                        : Colors.grey[800]!,
+                    width: 1.5,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _descricaoController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Descrição',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF312E)),
+                ),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value:
+                  _nivelController.text.isEmpty ? null : _nivelController.text,
+              decoration: const InputDecoration(
+                labelText: 'Nível',
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF312E)),
+                ),
+              ),
+              dropdownColor: const Color(0xFF1A1A1A),
+              style: const TextStyle(color: Colors.white),
+              items: _niveis.map((nivel) {
+                return DropdownMenuItem<String>(
+                  value: nivel,
+                  child: Text(nivel),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _nivelController.text = value ?? '';
+                });
+              },
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Exercícios',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _nivelController.text.isEmpty ? null : _nivelController.text,
-                decoration: const InputDecoration(
-                  labelText: 'Nível',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF312E)),
-                  ),
+                IconButton(
+                  onPressed: _adicionarItemTreino,
+                  icon: const Icon(Icons.add, color: Color(0xFFFF312E)),
                 ),
-                dropdownColor: const Color(0xFF1A1A1A),
-                style: const TextStyle(color: Colors.white),
-                items: _niveis.map((nivel) {
-                  return DropdownMenuItem<String>(
-                    value: nivel,
-                    child: Text(nivel),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _nivelController.text = value ?? '';
-                  });
-                },
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Exercícios',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _adicionarItemTreino,
-                    icon: const Icon(Icons.add, color: Color(0xFFFF312E)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ..._itens.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                return _buildItemTreinoCard(item, index);
-              }),
-              if (_itens.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Nenhum exercício adicionado',
-                    style: TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ..._itens.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return _buildItemTreinoCard(item, index);
+            }),
+            if (_itens.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Nenhum exercício adicionado',
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center,
                 ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _atualizarTreino,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF312E),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Atualizar Treino'),
               ),
-            ],
-          ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _atualizarTreino,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF312E),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Atualizar Treino'),
+            ),
+          ],
         ),
+      ),
     );
   }
 
@@ -986,11 +1045,13 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
     if (item.exercicioId.isNotEmpty) {
       exercicioSelecionado = _exerciciosDisponiveis.firstWhere(
         (e) => e.id == item.exercicioId,
-        orElse: () => _exerciciosDisponiveis.isNotEmpty ? _exerciciosDisponiveis.first : Exercicio(
-          id: '',
-          nome: '',
-          grupoMuscular: [],
-        ),
+        orElse: () => _exerciciosDisponiveis.isNotEmpty
+            ? _exerciciosDisponiveis.first
+            : Exercicio(
+                id: '',
+                nome: '',
+                grupoMuscular: [],
+              ),
       );
     }
 
@@ -1054,7 +1115,8 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         item.exercicioId.isEmpty
@@ -1071,9 +1133,11 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                                         ),
                                       ),
                                       if (item.exercicioId.isNotEmpty &&
-                                          exercicioSelecionado?.descricao != null)
+                                          exercicioSelecionado?.descricao !=
+                                              null)
                                         Padding(
-                                          padding: const EdgeInsets.only(top: 4),
+                                          padding:
+                                              const EdgeInsets.only(top: 4),
                                           child: Text(
                                             exercicioSelecionado!.descricao!,
                                             style: const TextStyle(
@@ -1210,7 +1274,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
     );
   }
 }
-
 
 // Widget para seleção de exercícios com busca
 class _ExercicioSelectionModal extends StatefulWidget {
