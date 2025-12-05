@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 // Removido: import 'dart:html' as html if (dart.library.html) 'dart:html';
 // Removido: import 'dart:ui_web' as ui_web if (dart.library.html) 'dart:ui_web';
 import 'package:url_launcher/url_launcher.dart'; // Import para abrir URLs
 import '../../services/treino_service.dart';
+import '../../services/offline_service.dart';
 import '../../models/treino.dart';
 import '../../models/execucao_treino.dart';
+import '../../widgets/offline_dialog.dart';
 import 'executar_treino_page.dart';
 
 class MeusTreinosPage extends StatefulWidget {
@@ -17,6 +18,7 @@ class MeusTreinosPage extends StatefulWidget {
 
 class _MeusTreinosPageState extends State<MeusTreinosPage> {
   final TreinoService _treinoService = TreinoService();
+  final OfflineService _offlineService = OfflineService();
   List<Treino> _treinos = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -25,13 +27,134 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   bool _temTreinoAtivo = false; // Se há um treino em andamento
   Map<String, DateTime?> _ultimaExecucaoPorTreino = {}; // Mapa: treinoId -> última data de execução finalizada
   String? _proximoTreinoId; // ID do próximo treino a ser executado
+  bool _isOfflineMode = false;
+  bool _verificandoBackend = false;
 
   @override
   void initState() {
     super.initState();
-    _carregarTreinos();
-    _carregarUltimoTreino();
-    _carregarHistorico();
+    _verificarBackendECarregar();
+    _iniciarVerificacaoPeriodica();
+  }
+
+  void _iniciarVerificacaoPeriodica() {
+    // Verifica a cada 30 segundos se o backend voltou
+    Future.delayed(const Duration(seconds: 30), () {
+      if (mounted && _isOfflineMode) {
+        _verificarSeBackendVoltou();
+        _iniciarVerificacaoPeriodica(); // Continua verificando
+      }
+    });
+  }
+
+  Future<void> _verificarSeBackendVoltou() async {
+    if (!_isOfflineMode) return;
+    
+    final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+    if (backendDisponivel && mounted) {
+      await _offlineService.setModoOffline(false);
+      setState(() {
+        _isOfflineMode = false;
+      });
+      
+      // Recarrega os dados
+      _carregarTreinos();
+      _carregarUltimoTreino();
+      _carregarHistorico();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Conectado ao servidor'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _verificarBackendECarregar() async {
+    // Verifica se já está em modo offline
+    final isOffline = await _offlineService.isModoOffline();
+    if (isOffline) {
+      setState(() {
+        _isOfflineMode = true;
+      });
+      _carregarTreinos();
+      return;
+    }
+
+    // Tenta verificar se o backend está disponível
+    setState(() {
+      _verificandoBackend = true;
+    });
+
+    final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+    
+    setState(() {
+      _verificandoBackend = false;
+    });
+
+    if (!backendDisponivel && mounted) {
+      // Backend não disponível - mostra dialog
+      final continuarOffline = await OfflineDialog.show(
+        context,
+        onContinuarOffline: () {
+          Navigator.of(context).pop(true);
+        },
+        onTentarNovamente: () async {
+          setState(() {
+            _verificandoBackend = true;
+          });
+          
+          final disponivel = await _offlineService.verificarBackendDisponivel();
+          
+          setState(() {
+            _verificandoBackend = false;
+          });
+
+          if (disponivel) {
+            Navigator.of(context).pop(false);
+            await _offlineService.setModoOffline(false);
+            setState(() {
+              _isOfflineMode = false;
+            });
+            _carregarTreinos();
+          } else {
+            // Ainda não disponível, mas não fecha o dialog
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Backend ainda não está disponível'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        },
+        isLoading: _verificandoBackend,
+      );
+
+      if (continuarOffline == true) {
+        // Usuário escolheu continuar offline
+        await _offlineService.setModoOffline(true);
+        setState(() {
+          _isOfflineMode = true;
+        });
+        _carregarTreinos();
+      } else {
+        // Usuário cancelou ou backend ficou disponível
+        if (backendDisponivel) {
+          _carregarTreinos();
+        }
+      }
+    } else {
+      // Backend disponível
+      await _offlineService.setModoOffline(false);
+      setState(() {
+        _isOfflineMode = false;
+      });
+      _carregarTreinos();
+      _carregarUltimoTreino();
+      _carregarHistorico();
+    }
   }
 
   Future<void> _carregarTreinos() async {
@@ -46,8 +169,17 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
     print('Response success: ${response.success}');
     print('Response data: ${response.data}');
     print('Response data type: ${response.data?.runtimeType}');
+    print('Is offline mode: $_isOfflineMode');
 
     if (response.success && response.data != null) {
+      // Se a requisição foi bem-sucedida, desativa modo offline
+      if (_isOfflineMode) {
+        await _offlineService.setModoOffline(false);
+        setState(() {
+          _isOfflineMode = false;
+        });
+      }
+      
       final data = response.data;
       if (data != null && data is List<Treino>) {
         // O serviço já retorna List<Treino>, então podemos usar diretamente
@@ -240,14 +372,81 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Meus Treinos',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            const Text(
+              'Meus Treinos',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_isOfflineMode) ...[
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.wifi_off,
+                color: Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: 4),
+              const Text(
+                'Offline',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ],
+          ],
         ),
+        actions: [
+          if (_isOfflineMode)
+            IconButton(
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              onPressed: () async {
+                // Tenta reconectar
+                setState(() {
+                  _verificandoBackend = true;
+                });
+                
+                final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+                
+                setState(() {
+                  _verificandoBackend = false;
+                });
+
+                if (backendDisponivel) {
+                  await _offlineService.setModoOffline(false);
+                  setState(() {
+                    _isOfflineMode = false;
+                  });
+                  _carregarTreinos();
+                  _carregarUltimoTreino();
+                  _carregarHistorico();
+                  
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Conectado ao servidor'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Backend ainda não está disponível'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -375,9 +574,27 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                           )
                         : RefreshIndicator(
                             onRefresh: () async {
-                              await _carregarTreinos();
-                              await _carregarUltimoTreino();
-                              await _carregarHistorico();
+                              if (_isOfflineMode) {
+                                // Tenta reconectar quando em modo offline
+                                final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+                                if (backendDisponivel) {
+                                  await _offlineService.setModoOffline(false);
+                                  setState(() {
+                                    _isOfflineMode = false;
+                                  });
+                                  await _carregarTreinos();
+                                  await _carregarUltimoTreino();
+                                  await _carregarHistorico();
+                                } else {
+                                  // Ainda offline, apenas recarrega do cache
+                                  await _carregarTreinos();
+                                }
+                              } else {
+                                // Modo online normal
+                                await _carregarTreinos();
+                                await _carregarUltimoTreino();
+                                await _carregarHistorico();
+                              }
                             },
                             color: const Color(0xFFFF312E),
                             child: ListView.builder(

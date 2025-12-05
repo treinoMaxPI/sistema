@@ -5,9 +5,11 @@ import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 import '../services/plano_service.dart';
 import '../services/mural_service.dart';
+import '../services/offline_service.dart';
 import '../notifiers/role_selection_notifier.dart';
 import '../config/role_config.dart';
 import '../widgets/modal_components.dart';
+import '../widgets/offline_dialog.dart';
 import '../widgets/page_button.dart';
 import '../theme/typography.dart';
 import '../notifiers/theme_mode_notifier.dart';
@@ -36,16 +38,145 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   late final AuthService _authService;
   late final PlanoService _planoService;
+  final OfflineService _offlineService = OfflineService();
+  bool _isOfflineMode = false;
+  bool _verificandoBackend = false;
 
   @override
   void initState() {
     super.initState();
     _authService = AuthService();
     _planoService = PlanoService();
-    _loadUserData();
+    _verificarBackendECarregar();
+    _iniciarVerificacaoPeriodica();
   }
 
-  Future<void> _loadUserData() async {
+  void _iniciarVerificacaoPeriodica() {
+    // Verifica a cada 30 segundos se o backend voltou
+    Future.delayed(const Duration(seconds: 30), () {
+      if (mounted && _isOfflineMode) {
+        _verificarSeBackendVoltou();
+        _iniciarVerificacaoPeriodica(); // Continua verificando
+      }
+    });
+  }
+
+  Future<void> _verificarSeBackendVoltou() async {
+    if (!_isOfflineMode) return;
+    
+    final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+    if (backendDisponivel && mounted) {
+      await _offlineService.setModoOffline(false);
+      setState(() {
+        _isOfflineMode = false;
+      });
+      
+      // Recarrega os dados
+      _loadUserData();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Conectado ao servidor'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _verificarBackendECarregar() async {
+    // Verifica se já está em modo offline
+    final isOffline = await _offlineService.isModoOffline();
+    if (isOffline) {
+      setState(() {
+        _isOfflineMode = true;
+      });
+      _loadUserData(skipPlano: true);
+      return;
+    }
+
+    // Tenta verificar se o backend está disponível
+    setState(() {
+      _verificandoBackend = true;
+    });
+
+    final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+    
+    setState(() {
+      _verificandoBackend = false;
+    });
+
+    if (!backendDisponivel) {
+      // Aguarda um pouco para garantir que o widget está montado
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      if (!mounted) return;
+      
+      // Backend não disponível - mostra dialog
+      final continuarOffline = await OfflineDialog.show(
+        context,
+        onContinuarOffline: () {
+          Navigator.of(context).pop(true);
+        },
+        onTentarNovamente: () async {
+          setState(() {
+            _verificandoBackend = true;
+          });
+          
+          final disponivel = await _offlineService.verificarBackendDisponivel();
+          
+          setState(() {
+            _verificandoBackend = false;
+          });
+
+          if (disponivel) {
+            Navigator.of(context).pop(false);
+            await _offlineService.setModoOffline(false);
+            setState(() {
+              _isOfflineMode = false;
+            });
+            _loadUserData();
+          } else {
+            // Ainda não disponível, mas não fecha o dialog
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Backend ainda não está disponível'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
+          }
+        },
+        isLoading: _verificandoBackend,
+      );
+
+      if (continuarOffline == true && mounted) {
+        // Usuário escolheu continuar offline
+        await _offlineService.setModoOffline(true);
+        setState(() {
+          _isOfflineMode = true;
+        });
+        _loadUserData(skipPlano: true);
+      } else if (mounted) {
+        // Usuário cancelou ou backend ficou disponível
+        if (backendDisponivel) {
+          _loadUserData();
+        }
+      }
+    } else {
+      // Backend disponível
+      await _offlineService.setModoOffline(false);
+      if (mounted) {
+        setState(() {
+          _isOfflineMode = false;
+        });
+        _loadUserData();
+      }
+    }
+  }
+
+  Future<void> _loadUserData({bool skipPlano = false}) async {
     try {
       final userName = await _authService.getUserName();
       final parsedJwt = await _authService.getParsedAccessToken();
@@ -68,7 +199,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       // Try to load plan for any authenticated user (backend now allows all roles)
       // Only show plan card in UI for CUSTOMER role (handled in _buildRoleButtons)
-      await _loadUserPlano(showLoading: false);
+      // Skip plano if in offline mode
+      if (!skipPlano && !_isOfflineMode) {
+        await _loadUserPlano(showLoading: false);
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -149,6 +283,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _loadUserPlano({bool showLoading = true}) async {
+    // Se estiver em modo offline, não tenta carregar plano
+    if (_isOfflineMode) {
+      return;
+    }
+
     if (showLoading) {
       setState(() => _isRefreshing = true);
     } else {
@@ -161,16 +300,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
 
       if (response.success) {
+        // Se a requisição foi bem-sucedida, desativa modo offline
+        if (_isOfflineMode) {
+          await _offlineService.setModoOffline(false);
+          setState(() {
+            _isOfflineMode = false;
+          });
+        }
+        
         setState(() {
           _currentPlano = response.data;
           _hasPlano = response.data != null;
           _errorMessage = null;
         });
       } else {
+        // Verifica se é erro de conexão
+        final isConnectionError = response.message?.contains('Erro de conexão') ?? false;
+        if (isConnectionError && !_isOfflineMode) {
+          // Se for erro de conexão e não estiver em modo offline, tenta verificar backend
+          final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+          if (!backendDisponivel && mounted) {
+            // Backend não disponível - mostra dialog
+            final continuarOffline = await OfflineDialog.show(
+              context,
+              onContinuarOffline: () {
+                Navigator.of(context).pop(true);
+              },
+              onTentarNovamente: () async {
+                setState(() {
+                  _verificandoBackend = true;
+                });
+                
+                final disponivel = await _offlineService.verificarBackendDisponivel();
+                
+                setState(() {
+                  _verificandoBackend = false;
+                });
+
+                if (disponivel) {
+                  Navigator.of(context).pop(false);
+                  await _offlineService.setModoOffline(false);
+                  setState(() {
+                    _isOfflineMode = false;
+                  });
+                  // Tenta carregar plano novamente
+                  await _loadUserPlano(showLoading: showLoading);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Backend ainda não está disponível'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              },
+              isLoading: _verificandoBackend,
+            );
+
+            if (continuarOffline == true) {
+              await _offlineService.setModoOffline(true);
+              setState(() {
+                _isOfflineMode = true;
+              });
+            }
+          }
+        }
+        
         setState(() {
           _currentPlano = null;
           _hasPlano = false;
-          _errorMessage = response.message ?? 'Erro ao carregar plano';
+          if (!isConnectionError) {
+            _errorMessage = response.message ?? 'Erro ao carregar plano';
+          }
         });
       }
     } catch (e) {
@@ -1009,10 +1210,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Olá, ${_userName ?? 'Usuário'}!',
-                      style: AppTypography.headlineSmall,
-                      key: ValueKey(_userName),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Olá, ${_userName ?? 'Usuário'}!',
+                          style: AppTypography.headlineSmall,
+                          key: ValueKey(_userName),
+                        ),
+                        if (_isOfflineMode) ...[
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.wifi_off,
+                            color: Colors.orange,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'Offline',
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (_headerMessage != null)
                       Text(
@@ -1025,6 +1248,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
         ),
         actions: [
+          if (_isOfflineMode)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () async {
+                // Tenta reconectar
+                setState(() {
+                  _verificandoBackend = true;
+                });
+                
+                final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+                
+                setState(() {
+                  _verificandoBackend = false;
+                });
+
+                if (backendDisponivel) {
+                  await _offlineService.setModoOffline(false);
+                  setState(() {
+                    _isOfflineMode = false;
+                  });
+                  _loadUserData();
+                  
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Conectado ao servidor'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Backend ainda não está disponível'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: _buildUserAvatarButton(),
