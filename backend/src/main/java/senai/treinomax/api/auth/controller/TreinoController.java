@@ -208,4 +208,30 @@ public class TreinoController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    @PostMapping("/gerar")
+    @PreAuthorize("hasRole('PERSONAL')")
+    public ResponseEntity<?> gerarTreino(@RequestBody Map<String, Object> request) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> tiposTreino = (List<String>) request.get("tiposTreino");
+
+            if (tiposTreino == null || tiposTreino.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Lista de tipos de treino é obrigatória"));
+            }
+
+            // TODO: Implementar lógica de geração de treino com IA/algoritmo
+            // Por enquanto, retorna uma lista vazia de IDs de exercícios
+            // O algoritmo deve receber os tipos de treino e retornar IDs de exercícios adequados
+            List<UUID> exercicioIds = List.of(UUID.fromString("fda6fbfd-954c-4f29-b5d9-9c125ebbe402"));
+
+            log.info("Gerando treino para tipos: {}", tiposTreino);
+            log.warn("Endpoint /gerar ainda não implementado - retornando lista vazia");
+
+            return ResponseEntity.ok(exercicioIds);
+        } catch (Exception e) {
+            log.error("Erro ao gerar treino", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

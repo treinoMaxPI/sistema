@@ -102,6 +102,69 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
     });
   }
 
+  Future<void> _gerarTreino() async {
+    if (_tiposTreinoSelecionados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione pelo menos um tipo de treino'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final treinoService = TreinoService();
+    final response = await treinoService.gerarTreino(_tiposTreinoSelecionados);
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.success && response.data != null) {
+        // Populate the exercise list with the returned exercise IDs
+        setState(() {
+          _itens.clear();
+          for (int i = 0; i < response.data!.length; i++) {
+            final exercicioId = response.data![i];
+            final exercicio = _exerciciosDisponiveis.firstWhere(
+              (e) => e.id == exercicioId,
+              orElse: () => _exerciciosDisponiveis.isNotEmpty
+                  ? _exerciciosDisponiveis.first
+                  : Exercicio(id: '', nome: '', grupoMuscular: []),
+            );
+
+            _itens.add(ItemTreino(
+              exercicioId: exercicioId,
+              exercicioNome: exercicio.nome,
+              ordem: i + 1,
+              series: 3,
+              repeticoes: '10',
+            ));
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Treino gerado com ${response.data!.length} exercícios!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message ?? 'Erro ao gerar treino'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _criarTreino() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -371,36 +434,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
               ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                // Ao clicar, exibe um alerta
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      backgroundColor: colorScheme.surface,
-                      surfaceTintColor: Colors.transparent,
-                      title: Text(
-                        'Funcionalidade em desenvolvimento',
-                        style: TextStyle(color: colorScheme.onSurface),
-                      ),
-                      content: Text(
-                        'Algoritmo de gerar treino ainda não foi desenvolvido.',
-                        style: TextStyle(color: colorScheme.onSurface),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+              onPressed: _isLoading ? null : _gerarTreino,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey, // Cor diferente para destaque
+                backgroundColor: Colors.blueGrey,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
