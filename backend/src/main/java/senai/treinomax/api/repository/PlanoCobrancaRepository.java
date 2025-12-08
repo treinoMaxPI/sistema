@@ -51,39 +51,39 @@ public interface PlanoCobrancaRepository extends JpaRepository<PlanoCobranca, UU
     void atualizarValor(@Param("cobrancaId") UUID cobrancaId, @Param("valorCentavos") Integer valorCentavos);
 
     @Query("SELECT pc FROM PlanoCobranca pc WHERE pc.plano.id = :planoId AND pc.mesReferencia = :mesReferencia")
-    List<PlanoCobranca> findByPlanoAndMes(@Param("planoId") UUID planoId, @Param("mesReferencia") YearMonth mesReferencia);
+    List<PlanoCobranca> findByPlanoAndMes(@Param("planoId") UUID planoId,
+            @Param("mesReferencia") YearMonth mesReferencia);
 
     @Query("""
-        SELECT pc
-        FROM PlanoCobranca pc
-        WHERE pc.pago = false
-        AND pc.inadimplenciaProcessada = false
-        AND pc.dataVencimento < :dataAtual
-        ORDER BY pc.dataVencimento ASC
-    """)
+                SELECT pc
+                FROM PlanoCobranca pc
+                WHERE pc.pago = false
+                AND pc.inadimplenciaProcessada = false
+                AND pc.dataVencimento < :dataAtual
+                ORDER BY pc.dataVencimento ASC
+            """)
     Page<PlanoCobranca> findVencidasNaoProcessadas(
-        @Param("dataAtual") LocalDate dataAtual,
-        Pageable pageable
-    );
+            @Param("dataAtual") LocalDate dataAtual,
+            Pageable pageable);
 
     @Query("""
-        SELECT pc
-        FROM PlanoCobranca pc
-        WHERE pc.pago = true
-        AND pc.proximaCobrancaGerada = false
-        AND pc.dataVencimento < :dataAtual
-        ORDER BY pc.dataVencimento ASC
-    """)
+                SELECT pc
+                FROM PlanoCobranca pc
+                WHERE pc.pago = true
+                AND pc.proximaCobrancaGerada = false
+                AND pc.dataVencimento < :dataAtual
+                ORDER BY pc.dataVencimento ASC
+            """)
     Page<PlanoCobranca> findPagasComProximaNaoGerada(
-        @Param("dataAtual") LocalDate dataAtual,
-        Pageable pageable
-    );
+            @Param("dataAtual") LocalDate dataAtual,
+            Pageable pageable);
+
     @Query("""
-        SELECT pc
-        FROM PlanoCobranca pc
-        JOIN FETCH pc.usuario u
-        JOIN FETCH pc.plano p
-        ORDER BY pc.dataCriacao DESC
-    """)
+                SELECT pc
+                FROM PlanoCobranca pc
+                JOIN FETCH pc.usuario u
+                JOIN FETCH pc.plano p
+                ORDER BY pc.dataCriacao DESC
+            """)
     List<PlanoCobranca> findAllWithUsuarioAndPlano();
 }

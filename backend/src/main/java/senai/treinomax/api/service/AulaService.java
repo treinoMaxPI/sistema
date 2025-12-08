@@ -143,6 +143,14 @@ public class AulaService {
     }
 
     /**
+     * Lista aulas por plano.
+     */
+    @Transactional(readOnly = true)
+    public List<Aula> listarPorPlano(UUID planoId) {
+        return aulaRepository.findByCategoriaPlanosId(planoId);
+    }
+
+    /**
      * Deleta uma aula por id.
      */
     @Transactional

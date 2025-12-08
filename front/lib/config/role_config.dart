@@ -108,6 +108,13 @@ class RoleConfig {
         icon: Icons.campaign,
         color: Color(0xFF2196F3),
       ),
+      RoleButtonConfig(
+        route: '/customer/aulas',
+        title: 'Aulas Disponíveis',
+        description: 'Veja as aulas disponíveis',
+        icon: Icons.school,
+        color: Color(0xFF2196F3),
+      ),
     ],
   };
 

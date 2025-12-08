@@ -190,6 +190,29 @@ class AulaService {
     }
   }
 
+  Future<ApiResponse<List<AulaResponse>>> listarMinhasAulas() async {
+    try {
+      final token = await _getToken();
+      if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
+      final resp = await http.get(
+        Uri.parse('$baseUrl/minhas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (resp.statusCode == 200) {
+        final List<dynamic> data = json.decode(resp.body);
+        final list = data.map((e) => AulaResponse.fromJson(e)).toList();
+        return ApiResponse(success: true, data: list);
+      }
+      final error = json.decode(resp.body);
+      return ApiResponse(success: false, message: error['message'] ?? 'Erro ao listar suas aulas');
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erro de conexão: $e');
+    }
+  }
+
   Future<ApiResponse<AulaResponse>> criar(CriarAulaRequest req) async {
     try {
       final token = await _getToken();
