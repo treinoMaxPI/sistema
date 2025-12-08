@@ -101,7 +101,7 @@ class _TreinosPageState extends State<TreinosPage> {
   void _showCriarTreinoDialog() {
     final usuarioId = _usuarioSelecionado?.id;
     if (usuarioId == null) return;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -138,7 +138,7 @@ class _TreinosPageState extends State<TreinosPage> {
   void _showEditarTreinoDialog(Treino treino) {
     final usuarioId = _usuarioSelecionado?.id;
     if (usuarioId == null) return;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -153,34 +153,38 @@ class _TreinosPageState extends State<TreinosPage> {
   }
 
   void _showDeletarTreinoDialog(Treino treino) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text(
+        title: Text(
           'Confirmar Exclusão',
           style: TextStyle(
-            color: Colors.white,
+            color: colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o treino "${treino.nome}"? Esta ação não pode ser desfeita.',
-          style: const TextStyle(
-            color: Colors.grey,
+          style: TextStyle(
+            color: colorScheme.onSurface.withOpacity(0.7),
             fontSize: 16,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
             ),
           ),
           ElevatedButton(
@@ -202,7 +206,7 @@ class _TreinosPageState extends State<TreinosPage> {
   Future<void> _deletarTreino(Treino treino) async {
     final usuarioId = _usuarioSelecionado?.id;
     if (usuarioId == null) return;
-    
+
     final response = await _treinoService.deletarTreino(treino.id);
 
     if (response.success) {
@@ -244,26 +248,29 @@ class _TreinosPageState extends State<TreinosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: _usuarioSelecionado != null
             ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 onPressed: _voltarParaListaUsuarios,
               )
             : IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+                icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+                onPressed: () => Navigator.pop(context),
+              ),
         title: Text(
           _usuarioSelecionado != null
               ? 'Treinos - ${_usuarioSelecionado?.nome ?? ""}'
               : 'Treinos',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -271,9 +278,9 @@ class _TreinosPageState extends State<TreinosPage> {
       ),
       floatingActionButton: _usuarioSelecionado != null
           ? FloatingActionButton(
-        onPressed: _showCriarTreinoDialog,
-        backgroundColor: const Color(0xFFFF312E),
-        child: const Icon(Icons.add, color: Colors.white),
+              onPressed: _showCriarTreinoDialog,
+              backgroundColor: const Color(0xFFFF312E),
+              child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
       body: _usuarioSelecionado == null
@@ -283,129 +290,137 @@ class _TreinosPageState extends State<TreinosPage> {
   }
 
   Widget _buildListaUsuarios() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
-        children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
+      children: [
+        // Search Bar
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            style: TextStyle(color: colorScheme.onSurface),
+            decoration: InputDecoration(
               hintText: 'Buscar usuários...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
-                        onPressed: () {
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: const Color(0xFF1A1A1A),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFFF312E),
-                    width: 2,
-                  ),
+              hintStyle:
+                  TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
+              prefixIcon: Icon(Icons.search,
+                  color: colorScheme.onSurface.withOpacity(0.5)),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear,
+                          color: colorScheme.onSurface.withOpacity(0.5)),
+                      onPressed: () {
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: theme.brightness == Brightness.light
+                  ? Colors.white
+                  : colorScheme.surface,
+              hoverColor: Colors.transparent,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.outline),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Color(0xFFFF312E),
+                  width: 2,
                 ),
               ),
             ),
           ),
-          // Content
-          Expanded(
+        ),
+        // Content
+        Expanded(
           child: _isLoadingUsuarios
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFFFF312E),
-                    ),
-                  )
-                : _errorMessage != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: Colors.red,
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFFFF312E),
+                  ),
+                )
+              : _errorMessage != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _errorMessage!,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 16,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
                             onPressed: _carregarUsuarios,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF312E),
-                              ),
-                              child: const Text(
-                                'Tentar Novamente',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF312E),
                             ),
-                          ],
-                        ),
-                      )
+                            child: const Text(
+                              'Tentar Novamente',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   : _getUsuariosFiltrados().isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  _searchQuery.isNotEmpty
-                                      ? Icons.search_off
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _searchQuery.isNotEmpty
+                                    ? Icons.search_off
                                     : Icons.people_outline,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _searchQuery.isNotEmpty
+                                size: 64,
+                                color: colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _searchQuery.isNotEmpty
                                     ? 'Nenhum usuário encontrado'
                                     : 'Nenhum usuário cadastrado',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                style: TextStyle(
+                                  color: colorScheme.onSurface,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
-                            ),
-                          )
+                              ),
+                            ],
+                          ),
+                        )
                       : ListView.builder(
                           padding: const EdgeInsets.all(16),
                           itemCount: _getUsuariosFiltrados().length,
-                              itemBuilder: (context, index) {
+                          itemBuilder: (context, index) {
                             final usuario = _getUsuariosFiltrados()[index];
                             return _buildUsuarioCard(usuario);
                           },
-                          ),
-          ),
-        ],
+                        ),
+        ),
+      ],
     );
   }
 
@@ -422,64 +437,66 @@ class _TreinosPageState extends State<TreinosPage> {
   }
 
   Widget _buildUsuarioCard(UsuarioModel usuario) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-        color: const Color(0xFF1A1A1A),
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outline),
       ),
-        child: InkWell(
+      child: InkWell(
         onTap: () => _selecionarUsuario(usuario),
         borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-                          child: Row(
-              children: [
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
               CircleAvatar(
                 radius: 24,
                 backgroundColor: const Color(0xFFFF312E),
-              child: Text(
-                  usuario.nome.isNotEmpty
-                      ? usuario.nome[0].toUpperCase()
-                      : 'U',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                child: Text(
+                  usuario.nome.isNotEmpty ? usuario.nome[0].toUpperCase() : 'U',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
               const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                Text(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       usuario.nome,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-              ),
-                                const SizedBox(height: 4),
-                                Text(
-                      usuario.email,
-                                style: const TextStyle(
-                        color: Colors.grey,
-                                  fontSize: 14,
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                            ],
-                          ),
-                        ),
-              const Icon(
-                Icons.chevron_right,
-                        color: Colors.grey,
+                    const SizedBox(height: 4),
+                    Text(
+                      usuario.email,
+                      style: TextStyle(
+                        color: colorScheme.onSurface.withOpacity(0.7),
+                        fontSize: 14,
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: colorScheme.onSurface.withOpacity(0.6),
+              ),
               const SizedBox(width: 8),
               IconButton(
-            onPressed: () {
+                onPressed: () {
                   _criarTreinoParaUsuario(usuario);
                 },
                 icon: const Icon(
@@ -487,8 +504,8 @@ class _TreinosPageState extends State<TreinosPage> {
                   color: Color(0xFFFF312E),
                 ),
                 tooltip: 'Criar treino',
-          ),
-        ],
+              ),
+            ],
           ),
         ),
       ),
@@ -496,76 +513,84 @@ class _TreinosPageState extends State<TreinosPage> {
   }
 
   Widget _buildListaTreinos() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
-          children: [
+      children: [
         // Search Bar
-            Container(
+        Container(
           padding: const EdgeInsets.all(16),
           child: TextField(
             onChanged: (value) {
-    setState(() {
+              setState(() {
                 _searchQuery = value;
-          });
-        },
-            style: const TextStyle(color: Colors.white),
+              });
+            },
+            style: TextStyle(color: colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: 'Buscar treinos...',
-              hintStyle: const TextStyle(color: Colors.grey),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              hintStyle:
+                  TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
+              prefixIcon: Icon(Icons.search,
+                  color: colorScheme.onSurface.withOpacity(0.5)),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      icon: Icon(Icons.clear,
+                          color: colorScheme.onSurface.withOpacity(0.5)),
                       onPressed: () {
-    setState(() {
+                        setState(() {
                           _searchQuery = '';
                         });
                       },
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFF1A1A1A),
+              fillColor: theme.brightness == Brightness.light
+                  ? Colors.white
+                  : colorScheme.surface,
+              hoverColor: Colors.transparent,
               border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-                  enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[800]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.outline),
+              ),
+              focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
                   color: Color(0xFFFF312E),
                   width: 2,
                 ),
-                ),
               ),
             ),
+          ),
         ),
         // Content
         Expanded(
           child: _isLoadingTreinos
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFFF312E),
-                        ),
-                      )
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFFFF312E),
+                  ),
+                )
               : _errorMessage != null
                   ? Center(
-          child: Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+                        children: [
                           const Icon(
                             Icons.error_outline,
                             size: 64,
                             color: Colors.red,
-                ),
-                const SizedBox(height: 16),
-                Text(
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
                             _errorMessage!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 16,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -583,9 +608,9 @@ class _TreinosPageState extends State<TreinosPage> {
                             child: const Text(
                               'Tentar Novamente',
                               style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   : _treinosFiltrados.isEmpty
@@ -598,15 +623,15 @@ class _TreinosPageState extends State<TreinosPage> {
                                     ? Icons.search_off
                                     : Icons.fitness_center,
                                 size: 64,
-                                color: Colors.grey,
+                                color: colorScheme.onSurface.withOpacity(0.6),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 _searchQuery.isNotEmpty
                                     ? 'Nenhum treino encontrado'
                                     : 'Nenhum treino cadastrado',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: colorScheme.onSurface,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -638,50 +663,57 @@ class _TreinosPageState extends State<TreinosPage> {
   }
 
   Widget _buildTreinoCard(Treino treino) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      color: const Color(0xFF1A1A1A),
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outline),
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
         collapsedBackgroundColor: Colors.transparent,
         iconColor: const Color(0xFFFF312E),
-        collapsedIconColor: Colors.grey,
+        collapsedIconColor: colorScheme.onSurface.withOpacity(0.6),
         title: Row(
           children: [
             Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
                     treino.nome,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (treino.tipoTreino != null && treino.tipoTreino!.isNotEmpty)
+                  if (treino.tipoTreino != null &&
+                      treino.tipoTreino!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
-                    child: Text(
+                      child: Text(
                         treino.tipoTreino!,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: colorScheme.onSurface.withOpacity(0.7),
                           fontSize: 13,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: Colors.grey, size: 20),
-              color: const Color(0xFF1A1A1A),
+              icon: Icon(Icons.more_vert,
+                  color: colorScheme.onSurface.withOpacity(0.6), size: 20),
+              color: colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
               onSelected: (value) {
                 if (value == 'edit') {
                   _showEditarTreinoDialog(treino);
@@ -690,13 +722,14 @@ class _TreinosPageState extends State<TreinosPage> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
                   child: Row(
                     children: [
-                      Icon(Icons.edit, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
-                      Text('Editar', style: TextStyle(color: Colors.white)),
+                      Icon(Icons.edit, color: colorScheme.onSurface, size: 20),
+                      const SizedBox(width: 8),
+                      Text('Editar',
+                          style: TextStyle(color: colorScheme.onSurface)),
                     ],
                   ),
                 ),
@@ -716,13 +749,13 @@ class _TreinosPageState extends State<TreinosPage> {
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          children: [
             if (treino.descricao != null && treino.descricao!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 13,
                 ),
                 maxLines: 2,
@@ -731,110 +764,110 @@ class _TreinosPageState extends State<TreinosPage> {
             ],
             if (treino.nivel != null && treino.nivel!.isNotEmpty) ...[
               const SizedBox(height: 8),
-                Container(
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF312E).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                            child: Text(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF312E).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
                   treino.nivel!,
-                              style: const TextStyle(
-                                color: Color(0xFFFF312E),
+                  style: const TextStyle(
+                    color: Color(0xFFFF312E),
                     fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
             if (treino.itens.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
-                            children: [
-                  const Icon(
+                children: [
+                  Icon(
                     Icons.fitness_center,
                     size: 16,
-                    color: Colors.grey,
+                    color: colorScheme.onSurface.withOpacity(0.6),
                   ),
                   const SizedBox(width: 4),
-                              Text(
+                  Text(
                     '${treino.itens.length} ${treino.itens.length == 1 ? 'exercício' : 'exercícios'}',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                    style: TextStyle(
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ],
           ],
         ),
-            children: [
+        children: [
           if (treino.descricao != null && treino.descricao!.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
+              child: Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+              ),
+            ),
+          ],
           if (treino.itens.isNotEmpty) ...[
-            const Divider(color: Colors.grey),
+            Divider(color: colorScheme.outline),
             const SizedBox(height: 12),
-                  const Text(
+            Text(
               'Exercícios:',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              style: TextStyle(
+                color: colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 12),
             ...treino.itens.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
+                    children: [
+                      Container(
                         width: 28,
                         height: 28,
-                          decoration: BoxDecoration(
+                        decoration: BoxDecoration(
                           color: const Color(0xFFFF312E),
                           borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${item.ordem}',
-                              style: const TextStyle(
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${item.ordem}',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.exercicioNome ?? 'Exercício',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.exercicioNome ?? 'Exercício',
+                              style: TextStyle(
+                                color: colorScheme.onSurface,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
-                                ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
                               '${item.series} séries x ${item.repeticoes}',
-                              style: const TextStyle(
-                                color: Colors.grey,
+                              style: TextStyle(
+                                color: colorScheme.onSurface.withOpacity(0.7),
                                 fontSize: 13,
                               ),
                             ),
@@ -844,8 +877,9 @@ class _TreinosPageState extends State<TreinosPage> {
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
                                   'Descanso: ${item.tempoDescanso}',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.6),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -857,17 +891,18 @@ class _TreinosPageState extends State<TreinosPage> {
                                 child: Text(
                                   item.observacao!,
                                   style: TextStyle(
-                                    color: Colors.grey[600],
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.5),
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ),
                           ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
                 )),
           ],
         ],
@@ -875,4 +910,3 @@ class _TreinosPageState extends State<TreinosPage> {
     );
   }
 }
-

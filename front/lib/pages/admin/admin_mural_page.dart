@@ -25,7 +25,9 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
   @override
   void initState() {
     super.initState();
-    AuthService().getUserName().then((value){ if(mounted) setState(()=> _userName = value); });
+    AuthService().getUserName().then((value) {
+      if (mounted) setState(() => _userName = value);
+    });
     _carregarComunicados();
   }
 
@@ -55,8 +57,7 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
       isScrollControlled: true,
       builder: (context) => _NovoComunicadoSheet(
         onSalvar: (titulo, mensagem, publicado, imagemUrl) async {
-          final resp = await _muralService
-              .criar(CriarComunicadoRequest(
+          final resp = await _muralService.criar(CriarComunicadoRequest(
             titulo: titulo,
             mensagem: mensagem,
             publicado: publicado,
@@ -65,7 +66,8 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(resp.message ?? 'Erro ao criar comunicado')),
+                SnackBar(
+                    content: Text(resp.message ?? 'Erro ao criar comunicado')),
               );
             }
           }
@@ -87,8 +89,7 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
         initialPublicado: original.publicado,
         initialImagemUrl: original.imagemUrl,
         onSalvar: (titulo, mensagem, publicado, imagemUrl) async {
-          final resp = await _muralService
-              .atualizar(
+          final resp = await _muralService.atualizar(
             original.id,
             AtualizarComunicadoRequest(
               titulo: titulo,
@@ -99,7 +100,9 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(resp.message ?? 'Erro ao atualizar comunicado')),
+                SnackBar(
+                    content:
+                        Text(resp.message ?? 'Erro ao atualizar comunicado')),
               );
             }
           }
@@ -130,13 +133,20 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Mural da Academia'),
+        title: Text(
+          'Mural da Academia',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFFFF312E),
@@ -153,29 +163,31 @@ class _AdminMuralPageState extends State<AdminMuralPage> {
                 ? Center(
                     child: Text(
                       _errorMessage!,
-                      style: AppTypography.bodyMedium.copyWith(color: Colors.redAccent),
+                      style: AppTypography.bodyMedium
+                          .copyWith(color: Colors.redAccent),
                     ),
                   )
                 : _comunicados.isEmpty
-            ? _EmptyState(onCreate: _abrirNovoComunicado)
-            : ListView.separated(
-                itemCount: _comunicados.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final c = _comunicados[index];
-                  return _FeedPostCard(
-                    comunicado: c,
-                    onTogglePublish: () async {
-                      await _muralService.alterarStatus(c.id, !c.publicado);
-                      await _carregarComunicados();
-                    },
-                    onEdit: () => _editarComunicado(index),
-                    onDelete: () => _removerComunicado(index),
-                    formatDate: _formatDate,
-                    posterName: _userName ?? c.autorNome,
-                  );
-                },
-              )),
+                    ? _EmptyState(onCreate: _abrirNovoComunicado)
+                    : ListView.separated(
+                        itemCount: _comunicados.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final c = _comunicados[index];
+                          return _FeedPostCard(
+                            comunicado: c,
+                            onTogglePublish: () async {
+                              await _muralService.alterarStatus(
+                                  c.id, !c.publicado);
+                              await _carregarComunicados();
+                            },
+                            onEdit: () => _editarComunicado(index),
+                            onDelete: () => _removerComunicado(index),
+                            formatDate: _formatDate,
+                            posterName: _userName ?? c.autorNome,
+                          );
+                        },
+                      )),
       ),
     );
   }
@@ -203,16 +215,24 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.campaign, color: Colors.grey, size: 48),
-          const SizedBox(height: 8),
-          Text(
-            'Sem comunicados por enquanto',
-            style: AppTypography.bodyLarge,
+          Icon(
+            Icons.campaign,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            size: 48,
           ),
           const SizedBox(height: 8),
           Text(
-            'Clique em “Postar no Mural” para criar o primeiro aviso.',
-            style: AppTypography.caption,
+            'Sem comunicados por enquanto',
+            style: AppTypography.bodyLarge.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Clique em "Postar no Mural" para criar o primeiro aviso.',
+            style: AppTypography.caption.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -231,7 +251,9 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _NovoComunicadoSheet extends StatefulWidget {
-  final void Function(String titulo, String mensagem, bool publicado, String? imagemUrl) onSalvar;
+  final void Function(
+          String titulo, String mensagem, bool publicado, String? imagemUrl)
+      onSalvar;
   final String? initialTitulo;
   final String? initialMensagem;
   final bool initialPublicado;
@@ -278,142 +300,190 @@ class _NovoComunicadoSheetState extends State<_NovoComunicadoSheet> {
     return ModalSheet(
       child: SingleChildScrollView(
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Novo Comunicado',
-            style: AppTypography.titleLarge,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _tituloController,
-            cursorColor: Theme.of(context).colorScheme.primary,
-            decoration: InputDecoration(
-              labelText: 'Título',
-              labelStyle: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Novo Comunicado',
+              style: AppTypography.titleLarge.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _mensagemController,
-            maxLines: 5,
-            cursorColor: Theme.of(context).colorScheme.primary,
-            decoration: InputDecoration(
-              labelText: 'Mensagem',
-              labelStyle: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          _ImagePickerRow(
-            pickedBytes: _pickedBytes,
-            pickedFilename: _pickedFilename,
-            onPick: () async {
-              final result = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
-              if (result != null && result.files.isNotEmpty) {
-                final f = result.files.first;
-                if (f.bytes != null) {
-                  // Limite de tamanho: 5MB
-                  const int maxBytes = 5 * 1024 * 1024;
-                  if (f.size > maxBytes) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Arquivo muito grande. Tamanho máximo: 5MB.')),
-                      );
-                    }
-                    return;
-                  }
-                  setState(() {
-                    _pickedBytes = f.bytes!;
-                    _pickedFilename = f.name;
-                  });
-                }
-              }
-            },
-            onRemove: () => setState(() {
-              _pickedBytes = null;
-              _pickedFilename = null;
-            }),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Switch(
-                value: _publicado,
-                onChanged: (v) => setState(() => _publicado = v),
-                activeColor: const Color(0xFFFF312E),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _publicado ? 'Publicar agora' : 'Salvar como rascunho',
-                style: AppTypography.bodyMedium,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey[700]!),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Cancelar'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _tituloController,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              cursorColor: const Color(0xFFFF312E),
+              decoration: InputDecoration(
+                labelText: 'Título',
+                labelStyle: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      BorderSide(color: Theme.of(context).colorScheme.outline),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: const Color(0xFFFF312E)),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final titulo = _tituloController.text.trim();
-                    final mensagem = _mensagemController.text.trim();
-                    if (titulo.isEmpty || mensagem.isEmpty) return;
-                    setState(() => _saving = true);
-                    String? finalUrl;
-                    if (_pickedBytes != null && _pickedFilename != null) {
-                      final up = await _service.uploadImagem(_pickedBytes!, _pickedFilename!);
-                      if (up.success && up.data != null) {
-                        finalUrl = up.data;
-                      } else {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(up.message ?? 'Erro ao enviar imagem')),
-                          );
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _mensagemController,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              maxLines: 5,
+              cursorColor: const Color(0xFFFF312E),
+              decoration: InputDecoration(
+                labelText: 'Mensagem',
+                labelStyle: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      BorderSide(color: Theme.of(context).colorScheme.outline),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: const Color(0xFFFF312E)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ImagePickerRow(
+              pickedBytes: _pickedBytes,
+              pickedFilename: _pickedFilename,
+              onPick: () async {
+                final result = await FilePicker.platform
+                    .pickFiles(type: FileType.image, withData: true);
+                if (result != null && result.files.isNotEmpty) {
+                  final f = result.files.first;
+                  if (f.bytes != null) {
+                    // Limite de tamanho: 5MB
+                    const int maxBytes = 5 * 1024 * 1024;
+                    if (f.size > maxBytes) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'Arquivo muito grande. Tamanho máximo: 5MB.')),
+                        );
+                      }
+                      return;
+                    }
+                    setState(() {
+                      _pickedBytes = f.bytes!;
+                      _pickedFilename = f.name;
+                    });
+                  }
+                }
+              },
+              onRemove: () => setState(() {
+                _pickedBytes = null;
+                _pickedFilename = null;
+              }),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Switch(
+                  value: _publicado,
+                  onChanged: (v) => setState(() => _publicado = v),
+                  activeColor: const Color(0xFFFF312E),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _publicado ? 'Publicar agora' : 'Salvar como rascunho',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text('Cancelar'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final titulo = _tituloController.text.trim();
+                      final mensagem = _mensagemController.text.trim();
+                      if (titulo.isEmpty || mensagem.isEmpty) return;
+                      setState(() => _saving = true);
+                      String? finalUrl;
+                      if (_pickedBytes != null && _pickedFilename != null) {
+                        final up = await _service.uploadImagem(
+                            _pickedBytes!, _pickedFilename!);
+                        if (up.success && up.data != null) {
+                          finalUrl = up.data;
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      up.message ?? 'Erro ao enviar imagem')),
+                            );
+                          }
                         }
                       }
-                    }
-                    widget.onSalvar(titulo, mensagem, _publicado, finalUrl);
-                    if (mounted) Navigator.pop(context);
-                    setState(() => _saving = false);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF312E),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                      widget.onSalvar(titulo, mensagem, _publicado, finalUrl);
+                      if (mounted) Navigator.pop(context);
+                      setState(() => _saving = false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF312E),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: _saving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Salvar'),
                   ),
-                  child: _saving
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Salvar'),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -443,11 +513,13 @@ class _ImagePickerRow extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onPick,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1F1F1F),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
-              icon: const Icon(Icons.image, color: Colors.white),
+              icon: Icon(Icons.image,
+                  color: Theme.of(context).colorScheme.onSurface),
               label: const Text('Adicionar imagem'),
             ),
             const SizedBox(width: 12),
@@ -455,18 +527,20 @@ class _ImagePickerRow extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRemove,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.grey[700]!),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  side:
+                      BorderSide(color: Theme.of(context).colorScheme.outline),
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: Icon(Icons.close,
+                    color: Theme.of(context).colorScheme.onSurface),
                 label: const Text('Remover'),
               ),
           ],
         ),
         const SizedBox(height: 8),
-        if (pickedBytes != null)
-          _ResponsiveImagePreview(bytes: pickedBytes!),
+        if (pickedBytes != null) _ResponsiveImagePreview(bytes: pickedBytes!),
       ],
     );
   }
@@ -495,9 +569,17 @@ class _ResponsiveImagePreview extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.surface,
                   alignment: Alignment.center,
-                  child: Text('Falha ao pré-visualizar imagem', style: AppTypography.caption),
+                  child: Text(
+                    'Falha ao pré-visualizar imagem',
+                    style: AppTypography.caption.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                    ),
+                  ),
                 );
               },
             ),
@@ -531,8 +613,10 @@ class _FeedPostCard extends StatelessWidget {
     this.posterName,
   });
 
-  Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
-  Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
+  Color _cardColor(BuildContext context) =>
+      Theme.of(context).colorScheme.surface;
+  Color _borderColor(BuildContext context) =>
+      Theme.of(context).colorScheme.outline;
   Color get _accent => const Color(0xFFFF312E);
 
   @override
@@ -564,7 +648,8 @@ class _FeedPostCard extends StatelessWidget {
     );
   }
 
-  bool get _hasImage => (comunicado.imagemUrl != null && comunicado.imagemUrl!.trim().isNotEmpty);
+  bool get _hasImage =>
+      (comunicado.imagemUrl != null && comunicado.imagemUrl!.trim().isNotEmpty);
 
   Widget _buildHeader(BuildContext context) {
     final String initials = _initialsFrom(posterName ?? comunicado.titulo);
@@ -576,7 +661,10 @@ class _FeedPostCard extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
           child: Text(
             initials,
-            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -591,38 +679,59 @@ class _FeedPostCard extends StatelessWidget {
                       comunicado.titulo,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.bodyLarge,
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 6),
                   if ((posterName ?? comunicado.autorNome) != null)
                     Text(
                       (posterName ?? comunicado.autorNome)!,
-                      style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                      style: AppTypography.caption.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.7),
+                      ),
                     ),
                   const SizedBox(width: 6),
                   if (!comunicado.publicado)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
+                        color: Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: _borderColor(context)),
                       ),
-                      child: Text('Rascunho', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
+                      child: Text(
+                        'Rascunho',
+                        style: AppTypography.caption.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7),
+                        ),
+                      ),
                     ),
                 ],
               ),
               Text(
                 formatDate(comunicado.dataCriacao),
-                style: AppTypography.caption,
+                style: AppTypography.caption.copyWith(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
             ],
           ),
         ),
         PopupMenuButton<int>(
           color: _cardColor(context),
-          icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurface),
+          surfaceTintColor: Colors.transparent,
+          icon: Icon(Icons.more_horiz,
+              color: Theme.of(context).colorScheme.onSurface),
           onSelected: (val) {
             if (val == 1) {
               onEdit();
@@ -630,8 +739,17 @@ class _FeedPostCard extends StatelessWidget {
               showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Confirmar exclusão'),
-                  content: const Text('Você deseja confirmar essa exclusão?'),
+                  backgroundColor: Theme.of(ctx).colorScheme.surface,
+                  title: Text(
+                    'Confirmar exclusão',
+                    style:
+                        TextStyle(color: Theme.of(ctx).colorScheme.onSurface),
+                  ),
+                  content: Text(
+                    'Você deseja confirmar essa exclusão?',
+                    style:
+                        TextStyle(color: Theme.of(ctx).colorScheme.onSurface),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(ctx).pop(false),
@@ -654,13 +772,27 @@ class _FeedPostCard extends StatelessWidget {
             PopupMenuItem<int>(
               value: 1,
               child: Row(
-                children: [Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('Editar')],
+                children: [
+                  Icon(Icons.edit,
+                      color: Theme.of(context).colorScheme.onSurface),
+                  const SizedBox(width: 8),
+                  Text('Editar',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface)),
+                ],
               ),
             ),
             PopupMenuItem<int>(
               value: 2,
               child: Row(
-                children: [Icon(Icons.delete, color: Theme.of(context).colorScheme.onSurface), const SizedBox(width: 8), const Text('Excluir')],
+                children: [
+                  Icon(Icons.delete,
+                      color: Theme.of(context).colorScheme.onSurface),
+                  const SizedBox(width: 8),
+                  Text('Excluir',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface)),
+                ],
               ),
             ),
           ],
@@ -680,7 +812,8 @@ class _FeedPostCard extends StatelessWidget {
         final w = constraints.maxWidth;
         double ar = _aspectForWidth(w);
         final double desiredHeight = w / ar;
-        final double maxFeedHeight = 300; // limita altura no feed para imagens grandes
+        final double maxFeedHeight =
+            300; // limita altura no feed para imagens grandes
         final double height = math.min(desiredHeight, maxFeedHeight);
         return ClipRRect(
           borderRadius: BorderRadius.circular(12),
@@ -696,7 +829,7 @@ class _FeedPostCard extends StatelessWidget {
                     loadingBuilder: (context, child, progress) {
                       if (progress == null) return child;
                       return Container(
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.surface,
                         child: const Center(child: CircularProgressIndicator()),
                       );
                     },
@@ -707,9 +840,24 @@ class _FeedPostCard extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.broken_image, color: Colors.white54, size: 36),
+                              Icon(
+                                Icons.broken_image,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.5),
+                                size: 36,
+                              ),
                               const SizedBox(height: 8),
-                              Text('Falha ao carregar imagem (arquivo muito grande ou inválido)', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
+                              Text(
+                                'Falha ao carregar imagem (arquivo muito grande ou inválido)',
+                                style: AppTypography.caption.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -728,7 +876,9 @@ class _FeedPostCard extends StatelessWidget {
   Widget _buildBody(BuildContext context) {
     return Text(
       comunicado.mensagem,
-      style: AppTypography.bodyMedium,
+      style: AppTypography.bodyMedium.copyWith(
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
     );
   }
 
@@ -744,7 +894,9 @@ class _FeedPostCard extends StatelessWidget {
           ),
           label: Text(
             comunicado.publicado ? 'Publicado' : 'Rascunho',
-            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface),
+            style: AppTypography.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           style: TextButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -777,9 +929,19 @@ class _FeedPostCard extends StatelessWidget {
                         liked = newLiked;
                       });
                     },
-                    icon: Icon(liked ? Icons.favorite : Icons.favorite_border, color: liked ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.onSurface),
+                    icon: Icon(
+                      liked ? Icons.favorite : Icons.favorite_border,
+                      color: liked
+                          ? const Color(0xFFFF312E)
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
-                  Text('$count', style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    '$count',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -789,7 +951,8 @@ class _FeedPostCard extends StatelessWidget {
         IconButton(
           tooltip: 'Editar',
           onPressed: onEdit,
-          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
+          icon:
+              Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
         ),
         IconButton(
           tooltip: 'Excluir',
@@ -801,7 +964,8 @@ class _FeedPostCard extends StatelessWidget {
   }
 
   String _initialsFrom(String text) {
-    final parts = text.trim().split(RegExp(r"\s+")).where((e) => e.isNotEmpty).toList();
+    final parts =
+        text.trim().split(RegExp(r"\s+")).where((e) => e.isNotEmpty).toList();
     if (parts.isEmpty) return 'M';
     final first = parts.first.characters.take(1).toString().toUpperCase();
     String second = '';

@@ -28,9 +28,11 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   final _nivelController = TextEditingController();
   bool _isLoading = false;
   List<ItemTreino> _itens = [];
+
   final ExercicioService _exercicioService = ExercicioService();
   List<Exercicio> _exerciciosDisponiveis = [];
   bool _isLoadingExercicios = true;
+
   List<String> _tiposTreinoSelecionados = [];
 
   final List<String> _niveis = [
@@ -102,6 +104,7 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
 
   Future<void> _criarTreino() async {
     if (!_formKey.currentState!.validate()) return;
+
     if (_itens.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -171,6 +174,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return ModalSheet(
       child: Form(
         key: _formKey,
@@ -178,10 +184,10 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Criar Treino',
               style: TextStyle(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -189,18 +195,28 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _nomeController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nome do Treino *',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Nome é obrigatório';
@@ -209,10 +225,10 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
               },
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Tipo de Treino',
               style: TextStyle(
-                color: Colors.grey,
+                color: colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -235,18 +251,20 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                       }
                     });
                   },
-                  backgroundColor: Colors.black,
-                  selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
+                  backgroundColor: colorScheme.surface,
+                  selectedColor: const Color(0xFFFF312E).withOpacity(0.2),
                   checkmarkColor: const Color(0xFFFF312E),
                   labelStyle: TextStyle(
-                    color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                    color: isSelected
+                        ? const Color(0xFFFF312E)
+                        : colorScheme.onSurface,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                   side: BorderSide(
                     color: isSelected
                         ? const Color(0xFFFF312E)
-                        : Colors.grey[800]!,
+                        : colorScheme.outline,
                     width: 1.5,
                   ),
                 );
@@ -256,36 +274,55 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
             TextFormField(
               controller: _descricaoController,
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Descrição',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value:
                   _nivelController.text.isEmpty ? null : _nivelController.text,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nível',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              dropdownColor: const Color(0xFF1A1A1A),
-              style: const TextStyle(color: Colors.white),
+              dropdownColor: colorScheme.surface,
+              style: TextStyle(color: colorScheme.onSurface),
               items: _niveis.map((nivel) {
                 return DropdownMenuItem<String>(
                   value: nivel,
@@ -302,10 +339,10 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Exercícios',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -323,11 +360,12 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
               return _buildItemTreinoCard(item, index);
             }),
             if (_itens.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'Nenhum exercício adicionado',
-                  style: TextStyle(color: Colors.grey),
+                  style:
+                      TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -339,9 +377,16 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Funcionalidade em desenvolvimento'),
-                      content: const Text(
-                          'Algoritmo de gerar treino ainda não foi desenvolvido.'),
+                      backgroundColor: colorScheme.surface,
+                      surfaceTintColor: Colors.transparent,
+                      title: Text(
+                        'Funcionalidade em desenvolvimento',
+                        style: TextStyle(color: colorScheme.onSurface),
+                      ),
+                      content: Text(
+                        'Algoritmo de gerar treino ainda não foi desenvolvido.',
+                        style: TextStyle(color: colorScheme.onSurface),
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -424,6 +469,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   }
 
   Widget _buildItemTreinoCard(ItemTreino item, int index) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     Exercicio? exercicioSelecionado;
     if (item.exercicioId.isNotEmpty) {
       exercicioSelecionado = _exerciciosDisponiveis.firstWhere(
@@ -434,7 +482,11 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: const Color(0xFF1A1A1A),
+      color: colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outline),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -483,7 +535,7 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                               border: Border.all(
                                 color: item.exercicioId.isEmpty
                                     ? Colors.red.withOpacity(0.5)
-                                    : Colors.grey.withOpacity(0.3),
+                                    : colorScheme.outline,
                                 width: 1.5,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -501,8 +553,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                                             : item.exercicioNome ?? 'Exercício',
                                         style: TextStyle(
                                           color: item.exercicioId.isEmpty
-                                              ? Colors.grey
-                                              : Colors.white,
+                                              ? colorScheme.onSurface
+                                                  .withOpacity(0.5)
+                                              : colorScheme.onSurface,
                                           fontSize: 15,
                                           fontWeight: item.exercicioId.isEmpty
                                               ? FontWeight.normal
@@ -517,8 +570,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                                               const EdgeInsets.only(top: 4),
                                           child: Text(
                                             exercicioSelecionado!.descricao!,
-                                            style: const TextStyle(
-                                              color: Colors.grey,
+                                            style: TextStyle(
+                                              color: colorScheme.onSurface
+                                                  .withOpacity(0.7),
                                               fontSize: 12,
                                             ),
                                             maxLines: 1,
@@ -528,9 +582,9 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                                     ],
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.arrow_drop_down,
-                                  color: Colors.grey,
+                                  color: colorScheme.onSurface.withOpacity(0.6),
                                 ),
                               ],
                             ),
@@ -551,18 +605,28 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                 Expanded(
                   child: TextFormField(
                     initialValue: item.series.toString(),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Séries',
-                      labelStyle: TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                          color: colorScheme.onSurface.withOpacity(0.7)),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : colorScheme.surface,
+                      hoverColor: Colors.transparent,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outline),
                       ),
                       focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Color(0xFFFF312E)),
                       ),
                     ),
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: colorScheme.onSurface),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
                       final series = int.tryParse(value) ?? 3;
@@ -585,18 +649,28 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                 Expanded(
                   child: TextFormField(
                     initialValue: item.repeticoes,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Repetições',
-                      labelStyle: TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                          color: colorScheme.onSurface.withOpacity(0.7)),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : colorScheme.surface,
+                      hoverColor: Colors.transparent,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outline),
                       ),
                       focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Color(0xFFFF312E)),
                       ),
                     ),
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: colorScheme.onSurface),
                     onChanged: (value) {
                       setState(() {
                         _itens[index] = ItemTreino(
@@ -618,18 +692,28 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
             const SizedBox(height: 12),
             TextFormField(
               initialValue: item.tempoDescanso,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Tempo de Descanso',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
               onChanged: (value) {
                 setState(() {
                   _itens[index] = ItemTreino(
@@ -652,6 +736,7 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   }
 }
 
+// EditarTreinoDialog - Same pattern as CriarTreinoDialog
 class EditarTreinoDialog extends StatefulWidget {
   final Treino treino;
   final VoidCallback onTreinoAtualizado;
@@ -673,9 +758,11 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   late final TextEditingController _nivelController;
   bool _isLoading = false;
   List<ItemTreino> _itens = [];
+
   final ExercicioService _exercicioService = ExercicioService();
   List<Exercicio> _exerciciosDisponiveis = [];
   bool _isLoadingExercicios = true;
+
   List<String> _tiposTreinoSelecionados = [];
 
   final List<String> _niveis = [
@@ -691,6 +778,7 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   void initState() {
     super.initState();
     _nomeController = TextEditingController(text: widget.treino.nome);
+
     // Parse tipoTreino string para lista (ex: "A, B, C" -> ["A", "B", "C"])
     if (widget.treino.tipoTreino != null &&
         widget.treino.tipoTreino!.isNotEmpty) {
@@ -700,6 +788,7 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
           .where((e) => e.isNotEmpty)
           .toList();
     }
+
     _descricaoController =
         TextEditingController(text: widget.treino.descricao ?? '');
     _nivelController = TextEditingController(text: widget.treino.nivel ?? '');
@@ -793,6 +882,7 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
 
   Future<void> _atualizarTreino() async {
     if (!_formKey.currentState!.validate()) return;
+
     if (_itens.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -862,6 +952,9 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return ModalSheet(
       child: Form(
         key: _formKey,
@@ -869,10 +962,10 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Editar Treino',
               style: TextStyle(
-                color: Colors.white,
+                color: colorScheme.onSurface,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -880,18 +973,28 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _nomeController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nome do Treino *',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Nome é obrigatório';
@@ -900,10 +1003,10 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
               },
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Tipo de Treino',
               style: TextStyle(
-                color: Colors.grey,
+                color: colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -926,18 +1029,20 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                       }
                     });
                   },
-                  backgroundColor: Colors.black,
-                  selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
+                  backgroundColor: colorScheme.surface,
+                  selectedColor: const Color(0xFFFF312E).withOpacity(0.2),
                   checkmarkColor: const Color(0xFFFF312E),
                   labelStyle: TextStyle(
-                    color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                    color: isSelected
+                        ? const Color(0xFFFF312E)
+                        : colorScheme.onSurface,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                   side: BorderSide(
                     color: isSelected
                         ? const Color(0xFFFF312E)
-                        : Colors.grey[800]!,
+                        : colorScheme.outline,
                     width: 1.5,
                   ),
                 );
@@ -947,36 +1052,55 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
             TextFormField(
               controller: _descricaoController,
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Descrição',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value:
                   _nivelController.text.isEmpty ? null : _nivelController.text,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nível',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              dropdownColor: const Color(0xFF1A1A1A),
-              style: const TextStyle(color: Colors.white),
+              dropdownColor: colorScheme.surface,
+              style: TextStyle(color: colorScheme.onSurface),
               items: _niveis.map((nivel) {
                 return DropdownMenuItem<String>(
                   value: nivel,
@@ -993,10 +1117,10 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Exercícios',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1014,11 +1138,12 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
               return _buildItemTreinoCard(item, index);
             }),
             if (_itens.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'Nenhum exercício adicionado',
-                  style: TextStyle(color: Colors.grey),
+                  style:
+                      TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -1041,6 +1166,9 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   }
 
   Widget _buildItemTreinoCard(ItemTreino item, int index) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     Exercicio? exercicioSelecionado;
     if (item.exercicioId.isNotEmpty) {
       exercicioSelecionado = _exerciciosDisponiveis.firstWhere(
@@ -1057,7 +1185,11 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: const Color(0xFF1A1A1A),
+      color: colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colorScheme.outline),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -1106,7 +1238,7 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                               border: Border.all(
                                 color: item.exercicioId.isEmpty
                                     ? Colors.red.withOpacity(0.5)
-                                    : Colors.grey.withOpacity(0.3),
+                                    : colorScheme.outline,
                                 width: 1.5,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -1124,8 +1256,9 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                                             : item.exercicioNome ?? 'Exercício',
                                         style: TextStyle(
                                           color: item.exercicioId.isEmpty
-                                              ? Colors.grey
-                                              : Colors.white,
+                                              ? colorScheme.onSurface
+                                                  .withOpacity(0.5)
+                                              : colorScheme.onSurface,
                                           fontSize: 15,
                                           fontWeight: item.exercicioId.isEmpty
                                               ? FontWeight.normal
@@ -1140,8 +1273,9 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                                               const EdgeInsets.only(top: 4),
                                           child: Text(
                                             exercicioSelecionado!.descricao!,
-                                            style: const TextStyle(
-                                              color: Colors.grey,
+                                            style: TextStyle(
+                                              color: colorScheme.onSurface
+                                                  .withOpacity(0.7),
                                               fontSize: 12,
                                             ),
                                             maxLines: 1,
@@ -1151,9 +1285,9 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                                     ],
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.arrow_drop_down,
-                                  color: Colors.grey,
+                                  color: colorScheme.onSurface.withOpacity(0.6),
                                 ),
                               ],
                             ),
@@ -1174,18 +1308,28 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                 Expanded(
                   child: TextFormField(
                     initialValue: item.series.toString(),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Séries',
-                      labelStyle: TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                          color: colorScheme.onSurface.withOpacity(0.7)),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : colorScheme.surface,
+                      hoverColor: Colors.transparent,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outline),
                       ),
                       focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Color(0xFFFF312E)),
                       ),
                     ),
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: colorScheme.onSurface),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
                       final series = int.tryParse(value) ?? 3;
@@ -1208,18 +1352,28 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                 Expanded(
                   child: TextFormField(
                     initialValue: item.repeticoes,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Repetições',
-                      labelStyle: TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                          color: colorScheme.onSurface.withOpacity(0.7)),
+                      filled: true,
+                      fillColor: theme.brightness == Brightness.light
+                          ? Colors.white
+                          : colorScheme.surface,
+                      hoverColor: Colors.transparent,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outline),
                       ),
                       focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Color(0xFFFF312E)),
                       ),
                     ),
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: colorScheme.onSurface),
                     onChanged: (value) {
                       setState(() {
                         _itens[index] = ItemTreino(
@@ -1241,18 +1395,28 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
             const SizedBox(height: 12),
             TextFormField(
               initialValue: item.tempoDescanso,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Tempo de Descanso',
-                labelStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                labelStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                filled: true,
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
               onChanged: (value) {
                 setState(() {
                   _itens[index] = ItemTreino(
@@ -1324,11 +1488,14 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -1338,7 +1505,7 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[700],
+                color: colorScheme.onSurface.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1347,10 +1514,10 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Selecionar Exercício',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colorScheme.onSurface,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1358,7 +1525,8 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
                 const Spacer(),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: Colors.grey),
+                  icon: Icon(Icons.close,
+                      color: colorScheme.onSurface.withOpacity(0.6)),
                 ),
               ],
             ),
@@ -1368,28 +1536,33 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
             child: TextField(
               controller: _searchController,
               autofocus: true,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Buscar exercício...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle:
+                    TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
+                prefixIcon: Icon(Icons.search,
+                    color: colorScheme.onSurface.withOpacity(0.5)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        icon: Icon(Icons.clear,
+                            color: colorScheme.onSurface.withOpacity(0.5)),
                         onPressed: () {
                           _searchController.clear();
                         },
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.black.withOpacity(0.3),
+                fillColor: theme.brightness == Brightness.light
+                    ? Colors.white
+                    : colorScheme.surface,
+                hoverColor: Colors.transparent,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1412,15 +1585,15 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
                               ? Icons.fitness_center
                               : Icons.search_off,
                           size: 64,
-                          color: Colors.grey,
+                          color: colorScheme.onSurface.withOpacity(0.6),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           _searchController.text.isEmpty
                               ? 'Nenhum exercício disponível'
                               : 'Nenhum exercício encontrado',
-                          style: const TextStyle(
-                            color: Colors.grey,
+                          style: TextStyle(
+                            color: colorScheme.onSurface.withOpacity(0.7),
                             fontSize: 16,
                           ),
                         ),
@@ -1434,6 +1607,7 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
                       final exercicio = _exerciciosFiltrados[index];
                       final isSelected =
                           widget.exercicioAtual?.id == exercicio.id;
+
                       return InkWell(
                         onTap: () => Navigator.pop(context, exercicio),
                         borderRadius: BorderRadius.circular(12),
@@ -1442,12 +1616,12 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFFFF312E).withOpacity(0.2)
-                                : Colors.black.withOpacity(0.3),
+                                ? const Color(0xFFFF312E).withOpacity(0.1)
+                                : colorScheme.surface,
                             border: Border.all(
                               color: isSelected
                                   ? const Color(0xFFFF312E)
-                                  : Colors.grey.withOpacity(0.2),
+                                  : colorScheme.outline,
                               width: isSelected ? 2 : 1,
                             ),
                             borderRadius: BorderRadius.circular(12),
@@ -1463,7 +1637,7 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
                                       style: TextStyle(
                                         color: isSelected
                                             ? const Color(0xFFFF312E)
-                                            : Colors.white,
+                                            : colorScheme.onSurface,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -1473,8 +1647,9 @@ class _ExercicioSelectionModalState extends State<_ExercicioSelectionModal> {
                                       const SizedBox(height: 4),
                                       Text(
                                         exercicio.descricao!,
-                                        style: const TextStyle(
-                                          color: Colors.grey,
+                                        style: TextStyle(
+                                          color: colorScheme.onSurface
+                                              .withOpacity(0.7),
                                           fontSize: 13,
                                         ),
                                         maxLines: 2,
