@@ -54,6 +54,7 @@ public class SecurityConfig {
                                 "/webjars/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/mural/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/aulas/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())

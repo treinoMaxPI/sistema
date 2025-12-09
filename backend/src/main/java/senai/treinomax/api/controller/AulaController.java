@@ -5,7 +5,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.connector.Response;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -143,5 +146,14 @@ public class AulaController {
         log.warn("Recebendo requisição para upload de imagem de aula");
         String path = aulaService.salvarImagem(file);
         return ResponseEntity.ok(path);
+    }
+
+    @GetMapping("/uploads/{filename}")
+    public ResponseEntity<Resource> downloadImagem(@PathVariable String filename) {
+        Resource file = aulaService.carregarImagem(filename);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(file);
     }
 }
