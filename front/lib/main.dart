@@ -4,7 +4,6 @@ import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
-import 'package:gym_management/pages/admin/admin_relatorios_page.dart';
 import 'package:gym_management/pages/personal/meus_treinos_page.dart';
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
 import 'package:gym_management/pages/personal/personal_mural_page.dart';
@@ -17,7 +16,6 @@ import 'package:gym_management/pages/customer/mural_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 import 'notifiers/theme_mode_notifier.dart';
 import 'notifiers/text_scale_notifier.dart';
-import 'pages/agenda_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -70,7 +68,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/admin/planos': (context) => const AdminPlanosPage(),
         '/admin/mural': (context) => const AdminMuralPage(),
         '/admin/clientes': (context) => const AdminClientesPage(),
-        '/admin/relatorios': (context) => const AdminRelatoriosPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const MeusTreinosPage(),
@@ -80,7 +77,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),
-        '/agenda': (context) => const AgendaPage(),
       },
     );
   }

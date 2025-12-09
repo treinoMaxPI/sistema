@@ -48,13 +48,6 @@ class RoleConfig {
         icon: Icons.class_,
         color: Color(0xFF4CAF50),
       ),
-      RoleButtonConfig(
-        route: '/agenda',
-        title: 'Agenda',
-        description: 'Calendário e observações do dia',
-        icon: Icons.calendar_month,
-        color: Color(0xFF4CAF50),
-      ),
     ],
     Role.ADMIN: [
       RoleButtonConfig(
@@ -78,20 +71,6 @@ class RoleConfig {
         icon: Icons.group,
         color: Color(0xFFFF312E),
       ),
-      RoleButtonConfig(
-        route: '/admin/relatorios',
-        title: 'Relatórios',
-        description: 'Entradas/Saídas e Pagamentos',
-        icon: Icons.insights,
-        color: Color(0xFFFF312E),
-      ),
-      RoleButtonConfig(
-        route: '/agenda',
-        title: 'Agenda',
-        description: 'Calendário e observações do dia',
-        icon: Icons.calendar_month,
-        color: Color(0xFFFF312E),
-      ),
     ],
     Role.CUSTOMER: [
       RoleButtonConfig(
@@ -106,13 +85,6 @@ class RoleConfig {
         title: 'Mural da Academia',
         description: 'Veja avisos e novidades',
         icon: Icons.campaign,
-        color: Color(0xFF2196F3),
-      ),
-      RoleButtonConfig(
-        route: '/agenda',
-        title: 'Agenda',
-        description: 'Calendário e observações do dia',
-        icon: Icons.calendar_month,
         color: Color(0xFF2196F3),
       ),
     ],
