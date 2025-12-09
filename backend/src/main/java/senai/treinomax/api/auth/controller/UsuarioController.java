@@ -22,7 +22,7 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @GetMapping
-    @PreAuthorize("hasRole('PERSONAL')")
+    @PreAuthorize("hasAnyRole('ADMIN','PERSONAL')")
     public ResponseEntity<?> listarUsuarios() {
         try {
             List<Usuario> usuarios = usuarioService.listarTodos();
@@ -43,4 +43,6 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    
 }

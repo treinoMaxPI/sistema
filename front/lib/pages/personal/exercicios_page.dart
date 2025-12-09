@@ -105,7 +105,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
               await _deletarExercicio(exercicio);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: const Color(0xFF4CAF50),
               foregroundColor: Colors.white,
             ),
             child: const Text('Excluir'),
@@ -133,7 +133,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.message ?? 'Erro ao excluir exercício'),
-            backgroundColor: Colors.red,
+           backgroundColor: const Color(0xFF4CAF50),
           ),
         );
       }
@@ -157,19 +157,22 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final outline = Theme.of(context).colorScheme.outline;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: surface,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Gerenciar Exercícios',
           style: TextStyle(
-            color: Colors.white,
+            color: onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -177,7 +180,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCriarExercicioDialog,
-        backgroundColor: const Color(0xFFFF312E),
+        backgroundColor: const Color(0xFF4CAF50),
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Column(
@@ -191,14 +194,14 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                   _searchQuery = value;
                 });
               },
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: onSurface),
               decoration: InputDecoration(
                 hintText: 'Buscar exercícios...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        icon: Icon(Icons.clear, color: Colors.grey[600]),
                         onPressed: () {
                           setState(() {
                             _searchQuery = '';
@@ -207,14 +210,14 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFF1A1A1A),
+                fillColor: surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
+                  borderSide: BorderSide(color: outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -247,8 +250,8 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                             const SizedBox(height: 16),
                             Text(
                               _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: onSurface,
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -257,7 +260,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                             ElevatedButton(
                               onPressed: _carregarExercicios,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF312E),
+                                backgroundColor: const Color(0xFF4CAF50),
                               ),
                               child: const Text(
                                 'Tentar Novamente',
@@ -277,15 +280,15 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                                       ? Icons.search_off
                                       : Icons.fitness_center,
                                   size: 64,
-                                  color: Colors.grey,
+                                  color: Colors.grey[600],
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchQuery.isNotEmpty
                                       ? 'Nenhum exercício encontrado'
                                       : 'Nenhum exercício cadastrado',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: onSurface,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -295,8 +298,8 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                                   _searchQuery.isNotEmpty
                                       ? 'Tente buscar com outros termos'
                                       : 'Adicione seu primeiro exercício',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
                                     fontSize: 14,
                                   ),
                                 ),
@@ -304,8 +307,8 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
                             ),
                           )
                         : RefreshIndicator(
-                            onRefresh: _carregarExercicios,
-                            color: const Color(0xFFFF312E),
+                          onRefresh: _carregarExercicios,
+                          color: const Color(0xFFFF312E),
                             child: ListView.builder(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -370,7 +373,7 @@ class _ExercicioCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: grupoColor.withOpacity(0.3),
@@ -378,7 +381,7 @@ class _ExercicioCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: grupoColor.withOpacity(0.1),
+            color: grupoColor.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -420,8 +423,8 @@ class _ExercicioCard extends StatelessWidget {
                         children: [
                           Text(
                             exercicio.nome,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -453,11 +456,11 @@ class _ExercicioCard extends StatelessWidget {
                     ),
                     // Botões de ação
                     PopupMenuButton<String>(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.more_vert,
-                        color: Colors.grey,
+                        color: Colors.grey[700],
                       ),
-                      color: const Color(0xFF1A1A1A),
+                      color: Theme.of(context).colorScheme.surface,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -469,23 +472,23 @@ class _ExercicioCard extends StatelessWidget {
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'editar',
                           child: Row(
                             children: [
                               Icon(Icons.edit, color: Colors.blue, size: 20),
                               SizedBox(width: 8),
-                              Text('Editar', style: TextStyle(color: Colors.white)),
+                              Text('Editar', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                             ],
                           ),
                         ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'deletar',
                           child: Row(
                             children: [
                               Icon(Icons.delete, color: Colors.red, size: 20),
                               SizedBox(width: 8),
-                              Text('Excluir', style: TextStyle(color: Colors.white)),
+                              Text('Excluir', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                             ],
                           ),
                         ),
@@ -543,7 +546,7 @@ class _ExercicioCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -566,8 +569,8 @@ class _ExercicioCard extends StatelessWidget {
             Expanded(
               child: Text(
                 exercicio.nome,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -599,10 +602,10 @@ class _ExercicioCard extends StatelessWidget {
               if (exercicio.descricao != null &&
                   exercicio.descricao!.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Descrição',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -610,8 +613,8 @@ class _ExercicioCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   exercicio.descricao!,
-                  style: const TextStyle(
-                    color: Colors.grey,
+                  style: TextStyle(
+                    color: Colors.grey[700],
                     fontSize: 14,
                   ),
                 ),
@@ -619,10 +622,10 @@ class _ExercicioCard extends StatelessWidget {
               if (exercicio.videoUrl != null &&
                   exercicio.videoUrl!.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Vídeo',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -661,9 +664,9 @@ class _ExercicioCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Fechar',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey[700]),
             ),
           ),
           ElevatedButton(
@@ -672,7 +675,7 @@ class _ExercicioCard extends StatelessWidget {
               onEditar();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF312E),
+              backgroundColor: const Color(0xFF4CAF50),
               foregroundColor: Colors.white,
             ),
             child: const Text('Editar'),
@@ -785,11 +788,11 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Criar Novo Exercício',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -800,13 +803,13 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nomeController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                decoration: InputDecoration(
                   labelText: 'Nome do Exercício *',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -826,10 +829,10 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Grupos Musculares *',
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: Colors.grey[700],
                   fontSize: 14,
                 ),
               ),
@@ -851,15 +854,15 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
                         }
                       });
                     },
-                    backgroundColor: Colors.black,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
                     checkmarkColor: const Color(0xFFFF312E),
                     labelStyle: TextStyle(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                      color: isSelected ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.onSurface,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     side: BorderSide(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
+                      color: isSelected ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.outline,
                       width: 1.5,
                     ),
                   );
@@ -876,14 +879,14 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descricaoController,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Descrição',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -899,18 +902,18 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _videoUrlController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                decoration: InputDecoration(
                   labelText: 'URL do Vídeo',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF312E)),
                   ),
-                  prefixIcon: Icon(Icons.play_circle_outline, color: Colors.grey),
+                  prefixIcon: Icon(Icons.play_circle_outline, color: Colors.grey[700]),
                 ),
                 validator: (value) {
                   if (value != null && value.trim().isNotEmpty) {
@@ -932,10 +935,11 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey[900],
-                        disabledForegroundColor: Colors.grey[600],
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                        disabledBackgroundColor: Theme.of(context).colorScheme.surface,
+                        disabledForegroundColor: Colors.grey[500],
+                        side: BorderSide(color: Theme.of(context).colorScheme.outline),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -949,10 +953,10 @@ class _CriarExercicioDialogState extends State<CriarExercicioDialog> {
                     child: ElevatedButton(
                       onPressed: (_isLoading || _gruposSelecionados.isEmpty) ? null : _criarExercicio,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF312E),
+                        backgroundColor: const Color(0xFF4CAF50),
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey[800],
-                        disabledForegroundColor: Colors.grey[600],
+                        disabledBackgroundColor: Theme.of(context).colorScheme.surface,
+                        disabledForegroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -1097,11 +1101,11 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Editar Exercício',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1112,13 +1116,13 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _nomeController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                decoration: InputDecoration(
                   labelText: 'Nome do Exercício *',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -1138,10 +1142,10 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Grupos Musculares *',
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: Colors.grey[700],
                   fontSize: 14,
                 ),
               ),
@@ -1163,15 +1167,15 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
                         }
                       });
                     },
-                    backgroundColor: Colors.black,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     selectedColor: const Color(0xFFFF312E).withOpacity(0.3),
                     checkmarkColor: const Color(0xFFFF312E),
                     labelStyle: TextStyle(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.white,
+                      color: isSelected ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.onSurface,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     side: BorderSide(
-                      color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!,
+                      color: isSelected ? const Color(0xFFFF312E) : Theme.of(context).colorScheme.outline,
                       width: 1.5,
                     ),
                   );
@@ -1188,14 +1192,14 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descricaoController,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Descrição',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -1211,18 +1215,18 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _videoUrlController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                decoration: InputDecoration(
                   labelText: 'URL do Vídeo',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: Colors.grey[700]),
                   border: OutlineInputBorder(),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF312E)),
                   ),
-                  prefixIcon: Icon(Icons.play_circle_outline, color: Colors.grey),
+                  prefixIcon: Icon(Icons.play_circle_outline, color: Colors.grey[700]),
                 ),
                 validator: (value) {
                   if (value != null && value.trim().isNotEmpty) {
@@ -1244,10 +1248,11 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey[900],
-                        disabledForegroundColor: Colors.grey[600],
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        foregroundColor: Theme.of(context).colorScheme.onSurface,
+                        disabledBackgroundColor: Theme.of(context).colorScheme.surface,
+                        disabledForegroundColor: Colors.grey[500],
+                        side: BorderSide(color: Theme.of(context).colorScheme.outline),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -1263,8 +1268,8 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF312E),
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey[800],
-                        disabledForegroundColor: Colors.grey[600],
+                        disabledBackgroundColor: Theme.of(context).colorScheme.surface,
+                        disabledForegroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -1291,4 +1296,3 @@ class _EditarExercicioDialogState extends State<EditarExercicioDialog> {
     );
   }
 }
-

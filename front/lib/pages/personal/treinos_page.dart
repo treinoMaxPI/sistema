@@ -156,31 +156,31 @@ class _TreinosPageState extends State<TreinosPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text(
+        title: Text(
           'Confirmar Exclusão',
           style: TextStyle(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o treino "${treino.nome}"? Esta ação não pode ser desfeita.',
-          style: const TextStyle(
-            color: Colors.grey,
+          style: TextStyle(
+            color: Colors.grey[700],
             fontSize: 16,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey[700]),
             ),
           ),
           ElevatedButton(
@@ -244,26 +244,29 @@ class _TreinosPageState extends State<TreinosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final outline = Theme.of(context).colorScheme.outline;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: surface,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: surface,
         elevation: 0,
         leading: _usuarioSelecionado != null
             ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: Icon(Icons.arrow_back, color: onSurface),
                 onPressed: _voltarParaListaUsuarios,
               )
             : IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           _usuarioSelecionado != null
               ? 'Treinos - ${_usuarioSelecionado?.nome ?? ""}'
               : 'Treinos',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -294,14 +297,14 @@ class _TreinosPageState extends State<TreinosPage> {
                   _searchQuery = value;
                 });
               },
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
               hintText: 'Buscar usuários...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        icon: Icon(Icons.clear, color: Colors.grey[600]),
                         onPressed: () {
                           setState(() {
                             _searchQuery = '';
@@ -310,14 +313,14 @@ class _TreinosPageState extends State<TreinosPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFF1A1A1A),
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -350,8 +353,8 @@ class _TreinosPageState extends State<TreinosPage> {
                             const SizedBox(height: 16),
                             Text(
                               _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -380,15 +383,15 @@ class _TreinosPageState extends State<TreinosPage> {
                                       ? Icons.search_off
                                     : Icons.people_outline,
                                   size: 64,
-                                  color: Colors.grey,
+                                  color: Colors.grey[600],
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchQuery.isNotEmpty
                                     ? 'Nenhum usuário encontrado'
                                     : 'Nenhum usuário cadastrado',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -424,7 +427,7 @@ class _TreinosPageState extends State<TreinosPage> {
   Widget _buildUsuarioCard(UsuarioModel usuario) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-        color: const Color(0xFF1A1A1A),
+        color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -442,8 +445,8 @@ class _TreinosPageState extends State<TreinosPage> {
                   usuario.nome.isNotEmpty
                       ? usuario.nome[0].toUpperCase()
                       : 'U',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -456,8 +459,8 @@ class _TreinosPageState extends State<TreinosPage> {
                             children: [
                 Text(
                       usuario.nome,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurface,
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -465,17 +468,17 @@ class _TreinosPageState extends State<TreinosPage> {
                                 const SizedBox(height: 4),
                                 Text(
                       usuario.email,
-                                style: const TextStyle(
-                        color: Colors.grey,
+                                style: TextStyle(
+                        color: Colors.grey[700],
                                   fontSize: 14,
                       ),
                     ),
                             ],
                           ),
                         ),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
-                        color: Colors.grey,
+                        color: Colors.grey[700],
                       ),
               const SizedBox(width: 8),
               IconButton(
@@ -507,14 +510,14 @@ class _TreinosPageState extends State<TreinosPage> {
                 _searchQuery = value;
           });
         },
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: 'Buscar treinos...',
-              hintStyle: const TextStyle(color: Colors.grey),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              hintStyle: TextStyle(color: Colors.grey[600]),
+              prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      icon: Icon(Icons.clear, color: Colors.grey[600]),
                       onPressed: () {
     setState(() {
                           _searchQuery = '';
@@ -523,14 +526,14 @@ class _TreinosPageState extends State<TreinosPage> {
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFF1A1A1A),
+              fillColor: Theme.of(context).colorScheme.surface,
               border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
                   enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[800]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -562,9 +565,9 @@ class _TreinosPageState extends State<TreinosPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                            _errorMessage!,
-                style: const TextStyle(
-                  color: Colors.white,
+                          _errorMessage!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
                             ),
                             textAlign: TextAlign.center,
@@ -598,15 +601,15 @@ class _TreinosPageState extends State<TreinosPage> {
                                     ? Icons.search_off
                                     : Icons.fitness_center,
                                 size: 64,
-                                color: Colors.grey,
+                                color: Colors.grey[600],
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 _searchQuery.isNotEmpty
                                     ? 'Nenhum treino encontrado'
                                     : 'Nenhum treino cadastrado',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -640,7 +643,7 @@ class _TreinosPageState extends State<TreinosPage> {
   Widget _buildTreinoCard(Treino treino) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      color: const Color(0xFF1A1A1A),
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -650,7 +653,7 @@ class _TreinosPageState extends State<TreinosPage> {
       backgroundColor: Colors.transparent,
         collapsedBackgroundColor: Colors.transparent,
         iconColor: const Color(0xFFFF312E),
-        collapsedIconColor: Colors.grey,
+        collapsedIconColor: Colors.grey[700],
         title: Row(
           children: [
             Expanded(
@@ -659,8 +662,8 @@ class _TreinosPageState extends State<TreinosPage> {
             children: [
                   Text(
                     treino.nome,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -670,8 +673,8 @@ class _TreinosPageState extends State<TreinosPage> {
                       padding: const EdgeInsets.only(top: 4),
                     child: Text(
                         treino.tipoTreino!,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: Colors.grey[700],
                           fontSize: 13,
                       ),
                     ),
@@ -680,8 +683,8 @@ class _TreinosPageState extends State<TreinosPage> {
               ),
             ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: Colors.grey, size: 20),
-              color: const Color(0xFF1A1A1A),
+              icon: Icon(Icons.more_vert, color: Colors.grey[700], size: 20),
+              color: Theme.of(context).colorScheme.surface,
               onSelected: (value) {
                 if (value == 'edit') {
                   _showEditarTreinoDialog(treino);
@@ -690,17 +693,17 @@ class _TreinosPageState extends State<TreinosPage> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
                   child: Row(
                     children: [
-                      Icon(Icons.edit, color: Colors.white, size: 20),
+                      Icon(Icons.edit, color: Colors.blue, size: 20),
                       SizedBox(width: 8),
-                      Text('Editar', style: TextStyle(color: Colors.white)),
+                      Text('Editar', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     children: [
@@ -721,8 +724,8 @@ class _TreinosPageState extends State<TreinosPage> {
               const SizedBox(height: 4),
               Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Colors.grey[700],
                   fontSize: 13,
                 ),
                 maxLines: 2,
@@ -785,10 +788,10 @@ class _TreinosPageState extends State<TreinosPage> {
           if (treino.itens.isNotEmpty) ...[
             const Divider(color: Colors.grey),
             const SizedBox(height: 12),
-                  const Text(
+                  Text(
               'Exercícios:',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -809,8 +812,8 @@ class _TreinosPageState extends State<TreinosPage> {
                           child: Center(
                             child: Text(
                               '${item.ordem}',
-                              style: const TextStyle(
-                              color: Colors.white,
+                              style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -824,8 +827,8 @@ class _TreinosPageState extends State<TreinosPage> {
                             children: [
                               Text(
                                 item.exercicioNome ?? 'Exercício',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w500,
                                 ),
@@ -833,8 +836,8 @@ class _TreinosPageState extends State<TreinosPage> {
                               const SizedBox(height: 4),
                               Text(
                               '${item.series} séries x ${item.repeticoes}',
-                              style: const TextStyle(
-                                color: Colors.grey,
+                              style: TextStyle(
+                                color: Colors.grey[700],
                                 fontSize: 13,
                               ),
                             ),
@@ -844,8 +847,8 @@ class _TreinosPageState extends State<TreinosPage> {
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
                                   'Descanso: ${item.tempoDescanso}',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
                                     fontSize: 12,
                                   ),
                                 ),
@@ -857,7 +860,7 @@ class _TreinosPageState extends State<TreinosPage> {
                                 child: Text(
                                   item.observacao!,
                                   style: TextStyle(
-                                    color: Colors.grey[600],
+                                    color: Colors.grey[700],
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic,
                                   ),
@@ -875,4 +878,3 @@ class _TreinosPageState extends State<TreinosPage> {
     );
   }
 }
-

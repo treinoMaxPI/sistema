@@ -234,19 +234,22 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final outline = Theme.of(context).colorScheme.outline;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: surface,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Meus Treinos',
           style: TextStyle(
-            color: Colors.white,
+            color: onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -263,14 +266,14 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                   _searchQuery = value;
                 });
               },
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: onSurface),
               decoration: InputDecoration(
                 hintText: 'Buscar treinos...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        icon: Icon(Icons.clear, color: Colors.grey[600]),
                         onPressed: () {
                           setState(() {
                             _searchQuery = '';
@@ -279,19 +282,19 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFF1A1A1A),
+                fillColor: surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
+                  borderSide: BorderSide(color: outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(
-                    color: Color(0xFFFF312E),
+                    color: Color(0xFF2196F3),
                     width: 2,
                   ),
                 ),
@@ -303,7 +306,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFFFF312E),
+                      color: Color(0xFF2196F3),
                     ),
                   )
                 : _errorMessage != null
@@ -319,8 +322,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                             const SizedBox(height: 16),
                             Text(
                               _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: onSurface,
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -329,7 +332,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                             ElevatedButton(
                               onPressed: _carregarTreinos,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF312E),
+                                backgroundColor: const Color(0xFF2196F3),
                               ),
                               child: const Text(
                                 'Tentar Novamente',
@@ -349,25 +352,25 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                       ? Icons.search_off
                                       : Icons.fitness_center,
                                   size: 64,
-                                  color: Colors.grey,
+                                  color: Colors.grey[600],
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchQuery.isNotEmpty
                                       ? 'Nenhum treino encontrado'
                                       : 'Nenhum treino cadastrado',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: onSurface,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 if (_searchQuery.isEmpty) ...[
                                   const SizedBox(height: 8),
-                                  const Text(
+                                  Text(
                                     'Seu personal trainer ainda não criou treinos para você.',
                                     style: TextStyle(
-                                      color: Colors.grey,
+                                      color: Colors.grey[600],
                                       fontSize: 14,
                                     ),
                                     textAlign: TextAlign.center,
@@ -382,7 +385,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               await _carregarUltimoTreino();
                               await _carregarHistorico();
                             },
-                            color: const Color(0xFFFF312E),
+                            color: const Color(0xFF2196F3),
                             child: ListView.builder(
                               padding: const EdgeInsets.all(16),
                               itemCount: _treinosFiltrados.length,
@@ -413,7 +416,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
       barrierDismissible: false,
       builder: (context) => const Center(
         child: CircularProgressIndicator(
-          color: Color(0xFFFF312E),
+          color: Color(0xFF2196F3),
         ),
       ),
     );
@@ -523,7 +526,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         backgroundColor: Colors.transparent,
         collapsedBackgroundColor: Colors.transparent,
-        iconColor: const Color(0xFFFF312E),
+        iconColor: const Color(0xFF2196F3),
         collapsedIconColor: Colors.grey,
         title: Row(
           children: [
@@ -676,7 +679,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
             Container(
               margin: const EdgeInsets.only(left: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFF312E),
+                color: const Color(0xFF2196F3),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: IconButton(
@@ -707,13 +710,13 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF312E).withOpacity(0.2),
+                  color: const Color(0xFF2196F3).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   treino.nivel!,
                   style: const TextStyle(
-                    color: Color(0xFFFF312E),
+                    color: Color(0xFF2196F3),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -776,7 +779,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF312E),
+                          color: const Color(0xFF2196F3),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Center(
@@ -813,7 +816,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                     onPressed: () => _mostrarVideo(item.exercicioVideoUrl!),
                                     icon: const Icon(
                                       Icons.play_circle_outline,
-                                      color: Color(0xFFFF312E),
+                                      color: Color(0xFF2196F3),
                                       size: 28,
                                     ),
                                     tooltip: 'Ver vídeo do exercício',
@@ -968,11 +971,11 @@ class _VideoDialog extends StatelessWidget {
                           return Container(
                             height: 300,
                             color: Colors.black,
-                            child: const Center(
+                              child: const Center(
                               child: CircularProgressIndicator(
-                                color: Color(0xFFFF312E),
+                                color: Color(0xFF2196F3),
                               ),
-                            ),
+                              ),
                           );
                         },
                         errorBuilder: (context, error, stackTrace) {
@@ -1072,7 +1075,7 @@ class _VideoDialog extends StatelessWidget {
                   // Usar url_launcher package se necessário
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF312E),
+                  backgroundColor: const Color(0xFF2196F3),
                 ),
                 child: const Text(
                   'Abrir vídeo',
@@ -1086,4 +1089,3 @@ class _VideoDialog extends StatelessWidget {
     }
   }
 }
-

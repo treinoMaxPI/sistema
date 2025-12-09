@@ -87,5 +87,26 @@ public class DashboardController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/planos")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<java.util.List<senai.treinomax.api.dto.response.PlanoResponse>> listarPlanosParaRelatorio() {
+        try {
+            var planos = planoRepository.findAll();
+            var resposta = planos.stream()
+                .map(plano -> new senai.treinomax.api.dto.response.PlanoResponse(
+                    plano.getId(),
+                    plano.getNome(),
+                    plano.getDescricao(),
+                    plano.getAtivo(),
+                    plano.getPrecoCentavos()
+                ))
+                .collect(java.util.stream.Collectors.toList());
+            return ResponseEntity.ok(resposta);
+        } catch (Exception e) {
+            log.error("Erro ao listar planos para relatório", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
     
 }
