@@ -5,6 +5,7 @@ import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
 import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
+import 'package:gym_management/pages/admin/admin_personals_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
 import 'package:gym_management/pages/personal/meus_treinos_page.dart' as personal;
@@ -79,6 +80,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/admin/mural': (context) => const AdminMuralPage(),
         '/admin/dashboard': (context) => const AdminDashboardPage(),
         '/admin/clientes': (context) => const AdminClientesPage(),
+        '/admin/personals': (context) => const AdminPersonalsPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const TreinosPage(),
