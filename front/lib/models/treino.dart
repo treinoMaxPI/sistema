@@ -79,7 +79,6 @@ class Treino {
   final String nome;
   final String? tipoTreino; // Ex: "A", "B", "C", "Empurrar", "Puxar", "Leg Day"
   final String? descricao;
-  final String? nivel;
   final List<ItemTreino> itens;
   final String? usuarioId;
   final String? usuarioNome; // Nome do usuário para exibição
@@ -89,7 +88,6 @@ class Treino {
     required this.nome,
     this.tipoTreino,
     this.descricao,
-    this.nivel,
     required this.itens,
     this.usuarioId,
     this.usuarioNome,
@@ -133,7 +131,6 @@ class Treino {
         nome: json['nome']?.toString() ?? '',
         tipoTreino: json['tipoTreino']?.toString(),
         descricao: json['descricao']?.toString(),
-        nivel: json['nivel']?.toString(),
         itens: itens,
         usuarioId: usuarioId,
         usuarioNome: usuarioNome,
@@ -150,7 +147,6 @@ class Treino {
       'id': id,
       'nome': nome,
       if (descricao != null && descricao!.isNotEmpty) 'descricao': descricao,
-      if (nivel != null && nivel!.isNotEmpty) 'nivel': nivel,
       'itens': itens.map((item) => item.toJson()).toList(),
     };
   }
@@ -160,7 +156,6 @@ class CriarTreinoRequest {
   final String nome;
   final String? tipoTreino;
   final String? descricao;
-  final String? nivel;
   final List<ItemTreino> itens;
   final String usuarioId; // Obrigatório para Personal criar treino para aluno
 
@@ -168,7 +163,6 @@ class CriarTreinoRequest {
     required this.nome,
     this.tipoTreino,
     this.descricao,
-    this.nivel,
     required this.itens,
     required this.usuarioId,
   });
@@ -178,7 +172,6 @@ class CriarTreinoRequest {
       'nome': nome,
       if (tipoTreino != null && tipoTreino!.isNotEmpty) 'tipoTreino': tipoTreino,
       if (descricao != null && descricao!.isNotEmpty) 'descricao': descricao,
-      if (nivel != null && nivel!.isNotEmpty) 'nivel': nivel,
       'itens': itens.map((item) => item.toJson()).toList(),
       'usuarioId': usuarioId,
     };
@@ -189,14 +182,12 @@ class AtualizarTreinoRequest {
   final String nome;
   final String? tipoTreino;
   final String? descricao;
-  final String? nivel;
   final List<ItemTreino> itens;
 
   AtualizarTreinoRequest({
     required this.nome,
     this.tipoTreino,
     this.descricao,
-    this.nivel,
     required this.itens,
   });
 
@@ -205,7 +196,6 @@ class AtualizarTreinoRequest {
       'nome': nome,
       if (tipoTreino != null && tipoTreino!.isNotEmpty) 'tipoTreino': tipoTreino,
       if (descricao != null && descricao!.isNotEmpty) 'descricao': descricao,
-      if (nivel != null && nivel!.isNotEmpty) 'nivel': nivel,
       'itens': itens.map((item) => item.toJson()).toList(),
     };
   }

@@ -44,5 +44,27 @@ public class UsuarioController {
         }
     }
 
-    
+    @GetMapping("/admin/todos")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> listarTodosUsuarios() {
+        try {
+            List<Usuario> usuarios = usuarioService.listarTodos();
+            return ResponseEntity.ok(usuarios);
+        } catch (Exception e) {
+            log.error("Erro ao listar todos os usuários", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}/personal")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> promoverParaPersonal(@PathVariable java.util.UUID id) {
+        try {
+            usuarioService.promoverParaPersonal(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Erro ao promover usuário para personal", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

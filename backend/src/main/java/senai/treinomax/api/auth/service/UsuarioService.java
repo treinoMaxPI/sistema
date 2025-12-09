@@ -191,4 +191,13 @@ public class UsuarioService {
         log.debug("Listando todos os usuários");
         return usuarioRepository.findAll();
     }
+
+    @Transactional
+    public void promoverParaPersonal(UUID id) {
+        log.info("Promovendo usuário com ID {} para PERSONAL", id);
+        Usuario usuario = buscarPorId(id);
+        usuario.addRole(senai.treinomax.api.auth.model.Role.PERSONAL);
+        usuarioRepository.save(usuario);
+        log.info("Usuário {} promovido para PERSONAL com sucesso", usuario.getEmail());
+    }
 }

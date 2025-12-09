@@ -2,6 +2,7 @@ package senai.treinomax.api.controller;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.auth.service.UsuarioService;
+import senai.treinomax.api.dto.request.CategoriaRequest;
+import senai.treinomax.api.dto.response.CategoriaResponse;
 import senai.treinomax.api.model.Categoria;
 import senai.treinomax.api.service.CategoriaService;
 
@@ -31,43 +34,59 @@ public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
+    private CategoriaResponse toCategoriaResponse(Categoria categoria) {
+        return new CategoriaResponse(
+                categoria.getId(),
+                categoria.getNome(),
+                categoria.getPlanos());
+    }
+
     private final UsuarioService usuarioService;
+
     @PostMapping
     @PreAuthorize("hasRole('PERSONAL')")
-    public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria) {
+    public ResponseEntity<CategoriaResponse> criar(@Valid @RequestBody CategoriaRequest categoria) {
         log.warn("Recebendo requisição para criar categoria");
-        
 
-        Categoria salva = categoriaService.salvar(categoria);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
+        String userEmail = SecurityUtils.getCurrentUserEmail();
+        var usuario = usuarioService.buscarPorEmail(userEmail);
+        UUID usuarioId = usuario.getId();
+
+        Categoria salva = categoriaService.salvar(categoria, usuarioId);
+
+        CategoriaResponse categoriaResponse = toCategoriaResponse(salva);
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaResponse);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
-    public ResponseEntity<Categoria> buscarPorId(@PathVariable String id) {
+    public ResponseEntity<CategoriaResponse> buscarPorId(@PathVariable String id) {
         log.warn("Recebendo requisição para buscar categoria {}", id);
         Categoria categoria = categoriaService.buscarPorId(id);
-        return ResponseEntity.ok(categoria);
+        CategoriaResponse categoriaResponse = toCategoriaResponse(categoria);
+        return ResponseEntity.ok(categoriaResponse);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'PERSONAL')")
-    public ResponseEntity<List<Categoria>> listarTodas() {
+    public ResponseEntity<List<CategoriaResponse>> listarTodas() {
         log.warn("Recebendo requisição para listar todas as categorias");
         List<Categoria> categorias = categoriaService.listarTodas();
-        return ResponseEntity.ok(categorias);
+        List<CategoriaResponse> categoriaResponses = categorias.stream()
+                .map(this::toCategoriaResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(categoriaResponses);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PERSONAL')")
-    public ResponseEntity<Categoria> atualizar(@PathVariable String id,
-                                               @Valid @RequestBody Categoria categoria) {
+    public ResponseEntity<CategoriaResponse> atualizar(@PathVariable String id,
+            @Valid @RequestBody CategoriaRequest categoria) {
         log.warn("Recebendo requisição para atualizar categoria {}", id);
 
-        categoria.setId(UUID.fromString(id));
+        Categoria atualizada = categoriaService.atualizar(id, categoria);
 
-        Categoria atualizada = categoriaService.salvar(categoria);
-        return ResponseEntity.ok(atualizada);
+        return ResponseEntity.ok(toCategoriaResponse(atualizada));
     }
 
     @DeleteMapping("/{id}")

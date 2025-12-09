@@ -75,7 +75,7 @@ class _MinhasCobrancasPageState extends State<MinhasCobrancasPage> {
               ? Center(
                   child: Text(
                     'Nenhuma cobrança encontrada.',
-                    style: AppTypography.bodyMedium.copyWith(
+                    style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -94,50 +94,35 @@ class _MinhasCobrancasPageState extends State<MinhasCobrancasPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
-                                color: Theme.of(context).colorScheme.outline,
-                                width: 1,
-                              ),
+                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                                  width: 1),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Plano: ${cobranca.planoNome}',
-                                    style: AppTypography.titleSmall.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    ),
-                                  ),
+                                  Text('Plano: ${cobranca.planoNome}',
+                                      style: AppTypography.titleSmall.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      )),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Mês Referência: ${cobranca.mesReferencia}',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    ),
-                                  ),
+                                      'Mês Referência: ${cobranca.mesReferencia}',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      )),
+                                  const SizedBox(height: 4),
+                                  Text('Valor: ${cobranca.valorFormatado}',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      )),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Valor: ${cobranca.valorFormatado}',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Vencimento: ${cobranca.dataVencimentoFormatada}',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    ),
-                                  ),
+                                      'Vencimento: ${cobranca.dataVencimentoFormatada}',
+                                      style: AppTypography.bodyMedium.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      )),
                                   const SizedBox(height: 4),
                                   Text(
                                       'Status: ${cobranca.pago ? 'Pago' : 'Pendente'}',
@@ -148,25 +133,18 @@ class _MinhasCobrancasPageState extends State<MinhasCobrancasPage> {
                                   if (cobranca.pago) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Data Pagamento: ${cobranca.dataPagamentoFormatada}',
-                                      style: AppTypography.bodySmall.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                      ),
-                                    ),
+                                        'Data Pagamento: ${cobranca.dataPagamentoFormatada}',
+                                        style: AppTypography.bodySmall.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                        )),
                                   ],
                                   if (cobranca.observacoes != null &&
                                       cobranca.observacoes!.isNotEmpty) ...[
                                     const SizedBox(height: 4),
-                                    Text(
-                                      'Observações: ${cobranca.observacoes}',
-                                      style: AppTypography.bodySmall.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                      ),
-                                    ),
+                                    Text('Observações: ${cobranca.observacoes}',
+                                        style: AppTypography.bodySmall.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                        )),
                                   ],
                                 ],
                               ),
@@ -196,22 +174,20 @@ class _MinhasCobrancasPageState extends State<MinhasCobrancasPage> {
             icon: Icon(Icons.arrow_back,
                 color: _currentPage > 0 && !_isLoading
                     ? const Color(0xFFFF312E)
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
             onPressed: _currentPage > 0 && !_isLoading
                 ? () => _fetchCobrancas(_currentPage - 1)
                 : null,
           ),
-          Text(
-            'Página ${_currentPage + 1} de $_totalPages',
-            style: AppTypography.bodyMedium.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
+          Text('Página ${_currentPage + 1} de $_totalPages',
+              style: AppTypography.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              )),
           IconButton(
             icon: Icon(Icons.arrow_forward,
                 color: _currentPage < _totalPages - 1 && !_isLoading
                     ? const Color(0xFFFF312E)
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
             onPressed: _currentPage < _totalPages - 1 && !_isLoading
                 ? () => _fetchCobrancas(_currentPage + 1)
                 : null,

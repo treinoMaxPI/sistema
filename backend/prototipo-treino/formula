@@ -1,0 +1,5 @@
+\begin{array}{l}
+N_{g} = \sqrt[\left ( P_{t0} + P_{t1} + P_{t2} \right )]{N_{t0}^{P_{t0}} * N_{t1}^{P_{t1}} * N_{t2}^{P_{t2}}}
+\\
+N_{t0} = 2
+\end{array}

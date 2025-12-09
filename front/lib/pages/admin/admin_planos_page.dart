@@ -700,10 +700,10 @@ class _EditarPlanoDialogState extends State<EditarPlanoDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Editar Plano',
-              style: TextStyle(
-                color: Colors.white,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -711,13 +711,13 @@ class _EditarPlanoDialogState extends State<EditarPlanoDialog> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _nomeController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              decoration: InputDecoration(
                 labelText: 'Nome do Plano',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -736,14 +736,14 @@ class _EditarPlanoDialogState extends State<EditarPlanoDialog> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _descricaoController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Descrição',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
@@ -905,10 +905,10 @@ class _AtualizarPrecoDialogState extends State<AtualizarPrecoDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Atualizar Preço',
-              style: TextStyle(
-                color: Colors.white,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -916,15 +916,15 @@ class _AtualizarPrecoDialogState extends State<AtualizarPrecoDialog> {
             const SizedBox(height: 16),
             Text(
               'Plano: ${widget.plano.nome}',
-              style: const TextStyle(
-                color: Colors.grey,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 16,
               ),
             ),
             const SizedBox(height: 24),
             TextFormField(
               controller: _precoController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               keyboardType: TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
@@ -938,18 +938,18 @@ class _AtualizarPrecoDialogState extends State<AtualizarPrecoDialog> {
                   );
                 }
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Novo Preço (R\$)',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 border: OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF312E)),
                 ),
                 prefixText: 'R\$ ',
-                prefixStyle: TextStyle(color: Colors.white),
+                prefixStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 hintText: '0,00',
               ),
               validator: (value) {

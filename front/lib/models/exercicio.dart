@@ -1,44 +1,79 @@
+class AtivacaoMuscular {
+  final String id;
+  final String grupoMuscular;
+  final int? peso;
+
+  AtivacaoMuscular({
+    required this.id,
+    required this.grupoMuscular,
+    this.peso,
+  });
+
+  factory AtivacaoMuscular.fromJson(Map<String, dynamic> json) {
+    return AtivacaoMuscular(
+      id: json['id'],
+      grupoMuscular: json['grupoMuscular'],
+      peso: json['peso'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'grupoMuscular': grupoMuscular,
+      'peso': peso,
+    };
+  }
+
+  String get displayText {
+    return grupoMuscular;
+  }
+
+  String get displayTextWithScore {
+    if (peso != null) {
+      return '$grupoMuscular ($peso)';
+    }
+    return grupoMuscular;
+  }
+}
+
 class Exercicio {
   final String id;
   final String nome;
   final String? descricao;
-  final List<String> grupoMuscular; // Lista de grupos musculares
+  final List<AtivacaoMuscular> ativacaoMuscular;
   final String? videoUrl;
 
   Exercicio({
     required this.id,
     required this.nome,
     this.descricao,
-    required this.grupoMuscular,
+    required this.ativacaoMuscular,
     this.videoUrl,
   });
 
   factory Exercicio.fromJson(Map<String, dynamic> json) {
-    // Se vier como lista de objetos AtivacaoMuscular
-    List<String> grupos = [];
+    List<AtivacaoMuscular> ativacoes = [];
     if (json['ativacaoMuscular'] != null) {
-      final ativacoes = json['ativacaoMuscular'] as List;
-      grupos = ativacoes.map((ativacao) {
-        if (ativacao is Map && ativacao['grupoMuscular'] != null) {
-          return ativacao['grupoMuscular'].toString();
+      final ativacoesList = json['ativacaoMuscular'] as List;
+      ativacoes = ativacoesList.map((ativacao) {
+        if (ativacao is Map) {
+          return AtivacaoMuscular.fromJson(ativacao as Map<String, dynamic>);
         }
-        return ativacao.toString();
+
+        return AtivacaoMuscular(
+          id: '',
+          grupoMuscular: ativacao.toString(),
+          peso: null,
+        );
       }).toList();
-    } else if (json['grupoMuscular'] != null) {
-      // Se vier como lista direta
-      if (json['grupoMuscular'] is List) {
-        grupos = (json['grupoMuscular'] as List).map((e) => e.toString()).toList();
-      } else {
-        // Se vier como string única (compatibilidade)
-        grupos = [json['grupoMuscular'].toString()];
-      }
     }
-    
+
     return Exercicio(
       id: json['id'],
       nome: json['nome'],
       descricao: json['descricao'],
-      grupoMuscular: grupos,
+      ativacaoMuscular: ativacoes,
       videoUrl: json['videoUrl'],
     );
   }
@@ -48,22 +83,30 @@ class Exercicio {
       'id': id,
       'nome': nome,
       'descricao': descricao,
-      'grupoMuscular': grupoMuscular,
+      'ativacaoMuscular': ativacaoMuscular.map((a) => a.toJson()).toList(),
       'videoUrl': videoUrl,
     };
   }
-  
-  // Helper para exibir grupos musculares
+
   String get grupoMuscularDisplay {
-    if (grupoMuscular.isEmpty) return 'N/A';
-    return grupoMuscular.join(', ');
+    if (ativacaoMuscular.isEmpty) return 'N/A';
+    return ativacaoMuscular.map((a) => a.displayText).join(', ');
+  }
+
+  String get grupoMuscularDisplayWithScore {
+    if (ativacaoMuscular.isEmpty) return 'N/A';
+    return ativacaoMuscular.map((a) => a.displayTextWithScore).join(', ');
+  }
+
+  List<String> get grupoMuscular {
+    return ativacaoMuscular.map((a) => a.grupoMuscular).toList();
   }
 }
 
 class CriarExercicioRequest {
   final String nome;
   final String? descricao;
-  final List<String> grupoMuscular; // Lista de grupos musculares
+  final List<String> grupoMuscular;
   final String? videoUrl;
 
   CriarExercicioRequest({
@@ -77,22 +120,21 @@ class CriarExercicioRequest {
     final Map<String, dynamic> json = {
       'nome': nome,
     };
-    
-    // Enviar como lista de objetos AtivacaoMuscular
+
     if (grupoMuscular.isNotEmpty) {
-      json['ativacaoMuscular'] = grupoMuscular.map((grupo) => 
-        <String, dynamic>{'grupoMuscular': grupo}
-      ).toList();
+      json['ativacaoMuscular'] = grupoMuscular
+          .map((grupo) => <String, dynamic>{'grupoMuscular': grupo})
+          .toList();
     }
-    
+
     if (descricao != null && descricao!.isNotEmpty) {
       json['descricao'] = descricao;
     }
-    
+
     if (videoUrl != null && videoUrl!.isNotEmpty) {
       json['videoUrl'] = videoUrl;
     }
-    
+
     return json;
   }
 }
@@ -100,7 +142,7 @@ class CriarExercicioRequest {
 class AtualizarExercicioRequest {
   final String nome;
   final String? descricao;
-  final List<String> grupoMuscular; // Lista de grupos musculares
+  final List<String> grupoMuscular;
   final String? videoUrl;
 
   AtualizarExercicioRequest({
@@ -114,23 +156,21 @@ class AtualizarExercicioRequest {
     final Map<String, dynamic> json = {
       'nome': nome,
     };
-    
-    // Enviar como lista de objetos AtivacaoMuscular
+
     if (grupoMuscular.isNotEmpty) {
-      json['ativacaoMuscular'] = grupoMuscular.map((grupo) => 
-        <String, dynamic>{'grupoMuscular': grupo}
-      ).toList();
+      json['ativacaoMuscular'] = grupoMuscular
+          .map((grupo) => <String, dynamic>{'grupoMuscular': grupo})
+          .toList();
     }
-    
+
     if (descricao != null && descricao!.isNotEmpty) {
       json['descricao'] = descricao;
     }
-    
+
     if (videoUrl != null && videoUrl!.isNotEmpty) {
       json['videoUrl'] = videoUrl;
     }
-    
+
     return json;
   }
 }
-

@@ -147,21 +147,21 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        title: const Text(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(
           'Sair do treino?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        content: const Text(
+        content: Text(
           'O treino não será marcado como finalizado. Você pode continuar depois.',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
             ),
           ),
           TextButton(
@@ -203,12 +203,12 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.black,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: Icon(Icons.close, color: Theme.of(context).appBarTheme.foregroundColor),
             onPressed: _sairSemFinalizar,
           ),
           title: Column(
@@ -216,16 +216,16 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
             children: [
               Text(
                 widget.treino.nome,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).appBarTheme.foregroundColor,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 'Exercício ${_exercicioAtualIndex + 1} de $_totalExercicios',
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontSize: 12,
                 ),
               ),
@@ -240,8 +240,8 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                   const SizedBox(width: 4),
                   Text(
                     _calcularTempoTotal(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).appBarTheme.foregroundColor,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -259,7 +259,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
               margin: const EdgeInsets.symmetric(horizontal: 0),
               child: LinearProgressIndicator(
                 value: _progressoGeral,
-                backgroundColor: Colors.grey[800],
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF312E)),
               ),
             ),
@@ -285,9 +285,9 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black,
-            const Color(0xFF1A1A1A),
-            Colors.black,
+            Theme.of(context).scaffoldBackgroundColor,
+            Theme.of(context).colorScheme.surface,
+            Theme.of(context).scaffoldBackgroundColor,
           ],
         ),
       ),
@@ -298,10 +298,10 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Título
-              const Text(
+              Text(
                 'TEMPO DE DESCANSO',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 2,
@@ -330,7 +330,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                           height: size,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.grey[900]?.withOpacity(0.3),
+                            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                             border: Border.all(
                               color: const Color(0xFFFF312E).withOpacity(0.2),
                               width: 2,
@@ -360,7 +360,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                             Text(
                               _formatarTempo(_tempoDescanso),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: fontSize,
                                 fontWeight: FontWeight.bold,
                                 height: 1.0,
@@ -370,7 +370,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                             Text(
                               'segundos',
                               style: TextStyle(
-                                color: Colors.grey,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 fontSize: fontSize * 0.3,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -390,7 +390,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                 width: double.infinity,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: Colors.grey[800],
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(3),
                 ),
                 child: FractionallySizedBox(
@@ -413,13 +413,13 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                 child: ElevatedButton(
                   onPressed: _pularDescanso,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[800],
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
-                        color: Colors.grey[700]!,
+                        color: Theme.of(context).colorScheme.outline,
                         width: 1,
                       ),
                     ),
@@ -449,10 +449,10 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[900]?.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.grey[800]!,
+                    color: Theme.of(context).colorScheme.outline,
                     width: 1,
                   ),
                 ),
@@ -461,7 +461,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: Colors.grey[400],
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                       size: 18,
                     ),
                     const SizedBox(width: 8),
@@ -469,7 +469,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                       child: Text(
                         'Aproveite para se hidratar e se preparar para a próxima série',
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
@@ -499,7 +499,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: const Color(0xFFFF312E).withOpacity(0.3),
@@ -536,8 +536,8 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                         children: [
                           Text(
                             _exercicioAtual.exercicioNome ?? 'Exercício',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -545,8 +545,8 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                           const SizedBox(height: 8),
                           Text(
                             'Série $_serieAtual de $_totalSeries',
-                            style: const TextStyle(
-                              color: Colors.grey,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                               fontSize: 16,
                             ),
                           ),
@@ -583,7 +583,7 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[900],
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -597,8 +597,8 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                         Expanded(
                           child: Text(
                             _exercicioAtual.observacao!,
-                            style: const TextStyle(
-                              color: Colors.grey,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                               fontSize: 14,
                             ),
                           ),
@@ -617,8 +617,8 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
                     icon: const Icon(Icons.play_circle_outline),
                     label: const Text('Ver demonstração'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ],
@@ -681,16 +681,16 @@ class _ExecutarTreinoPageState extends State<ExecutarTreinoPage> {
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.grey,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             fontSize: 12,
           ),
         ),

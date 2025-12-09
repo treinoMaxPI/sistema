@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/treino.dart';
 import 'usuario_service.dart';
+import 'offline_service.dart';
 
 class ApiResponse<T> {
   final bool success;
@@ -18,6 +19,7 @@ class ApiResponse<T> {
 
 class TreinoService {
   static const String baseUrl = 'http://localhost:8080/api/treino';
+  final OfflineService _offlineService = OfflineService();
 
   Future<String?> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,6 +30,12 @@ class TreinoService {
     try {
       final token = await _getAccessToken();
       if (token == null) {
+        // Se não tem token, verifica se está em modo offline
+        final isOffline = await _offlineService.isModoOffline();
+        if (isOffline) {
+          final treinosCache = await _offlineService.carregarTreinosCache();
+          return ApiResponse(success: true, data: treinosCache);
+        }
         return ApiResponse(
           success: false,
           message: 'Token de acesso não encontrado',
@@ -44,7 +52,7 @@ class TreinoService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         try {
@@ -61,6 +69,10 @@ class TreinoService {
               })
               .whereType<Treino>()
               .toList();
+
+          // Salva no cache quando conseguir buscar do backend
+          await _offlineService.salvarTreinosCache(treinos);
+          await _offlineService.setModoOffline(false);
 
           return ApiResponse(success: true, data: treinos);
         } catch (e) {
@@ -79,6 +91,18 @@ class TreinoService {
         );
       }
     } catch (e) {
+      // Erro de conexão - verifica se está em modo offline
+      final isOffline = await _offlineService.isModoOffline();
+      if (isOffline) {
+        final treinosCache = await _offlineService.carregarTreinosCache();
+        return ApiResponse(
+          success: true,
+          data: treinosCache,
+          message: 'Modo offline - dados do cache',
+        );
+      }
+      
+      // Se não está em modo offline, retorna erro de conexão
       return ApiResponse(
         success: false,
         message: 'Erro de conexão: $e',
@@ -276,6 +300,41 @@ class TreinoService {
 
   Future<ApiResponse<Map<String, dynamic>>> iniciarTreino(String treinoId) async {
     try {
+      // Verifica se está em modo offline
+      final isOffline = await _offlineService.isModoOffline();
+      
+      if (isOffline) {
+        // Busca o treino do cache para obter o nome
+        final treinosCache = await _offlineService.carregarTreinosCache();
+        final treino = treinosCache.firstWhere(
+          (t) => t.id == treinoId,
+          orElse: () => Treino(
+            id: treinoId,
+            nome: 'Treino',
+            itens: [],
+          ),
+        );
+
+        // Salva execução offline
+        final execucaoId = await _offlineService.salvarExecucaoIniciadaOffline(
+          treinoId,
+          treino.nome,
+        );
+
+        return ApiResponse(
+          success: true,
+          data: {
+            'id': execucaoId,
+            'treino': {
+              'id': treinoId,
+              'nome': treino.nome,
+            },
+            'dataInicio': DateTime.now().toIso8601String(),
+            'finalizada': false,
+          },
+        );
+      }
+
       final token = await _getAccessToken();
       if (token == null) {
         return ApiResponse(
@@ -290,7 +349,7 @@ class TreinoService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -303,6 +362,50 @@ class TreinoService {
         );
       }
     } catch (e) {
+      // Se for erro de conexão e não estiver em modo offline, tenta usar modo offline
+      final isOffline = await _offlineService.isModoOffline();
+      if (!isOffline) {
+        // Verifica se é erro de conexão
+        final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+        if (!backendDisponivel) {
+          // Backend não disponível, tenta salvar offline
+          try {
+            final treinosCache = await _offlineService.carregarTreinosCache();
+            final treino = treinosCache.firstWhere(
+              (t) => t.id == treinoId,
+              orElse: () => Treino(
+                id: treinoId,
+                nome: 'Treino',
+                itens: [],
+              ),
+            );
+
+            final execucaoId = await _offlineService.salvarExecucaoIniciadaOffline(
+              treinoId,
+              treino.nome,
+            );
+
+            return ApiResponse(
+              success: true,
+              data: {
+                'id': execucaoId,
+                'treino': {
+                  'id': treinoId,
+                  'nome': treino.nome,
+                },
+                'dataInicio': DateTime.now().toIso8601String(),
+                'finalizada': false,
+              },
+            );
+          } catch (e2) {
+            return ApiResponse(
+              success: false,
+              message: 'Erro de conexão: $e',
+            );
+          }
+        }
+      }
+      
       return ApiResponse(
         success: false,
         message: 'Erro de conexão: $e',
@@ -312,6 +415,45 @@ class TreinoService {
 
   Future<ApiResponse<Map<String, dynamic>>> finalizarTreino(String execucaoId) async {
     try {
+      // Verifica se está em modo offline
+      final isOffline = await _offlineService.isModoOffline();
+      
+      if (isOffline) {
+        // Finaliza execução offline
+        await _offlineService.finalizarExecucaoOffline(execucaoId);
+        
+        // Busca a execução finalizada
+        final execucoesFinalizadasJson = await SharedPreferences.getInstance()
+            .then((prefs) => prefs.getString('execucoes_finalizadas_offline'));
+        
+        if (execucoesFinalizadasJson != null && execucoesFinalizadasJson.isNotEmpty) {
+          final execucoes = json.decode(execucoesFinalizadasJson) as List;
+          try {
+            final execucao = execucoes.firstWhere(
+              (e) => e['id'] == execucaoId,
+            ) as Map<String, dynamic>?;
+            
+            if (execucao != null) {
+              return ApiResponse(
+                success: true,
+                data: execucao,
+              );
+            }
+          } catch (e) {
+            // Execução não encontrada, continua com resposta padrão
+          }
+        }
+
+        return ApiResponse(
+          success: true,
+          data: {
+            'id': execucaoId,
+            'finalizada': true,
+            'dataFim': DateTime.now().toIso8601String(),
+          },
+        );
+      }
+
       final token = await _getAccessToken();
       if (token == null) {
         return ApiResponse(
@@ -326,7 +468,7 @@ class TreinoService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -339,6 +481,32 @@ class TreinoService {
         );
       }
     } catch (e) {
+      // Se for erro de conexão e não estiver em modo offline, tenta usar modo offline
+      final isOffline = await _offlineService.isModoOffline();
+      if (!isOffline) {
+        // Verifica se é erro de conexão
+        final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+        if (!backendDisponivel) {
+          // Backend não disponível, tenta finalizar offline
+          try {
+            await _offlineService.finalizarExecucaoOffline(execucaoId);
+            return ApiResponse(
+              success: true,
+              data: {
+                'id': execucaoId,
+                'finalizada': true,
+                'dataFim': DateTime.now().toIso8601String(),
+              },
+            );
+          } catch (e2) {
+            return ApiResponse(
+              success: false,
+              message: 'Erro de conexão: $e',
+            );
+          }
+        }
+      }
+      
       return ApiResponse(
         success: false,
         message: 'Erro de conexão: $e',
@@ -403,6 +571,18 @@ class TreinoService {
 
   Future<ApiResponse<Map<String, dynamic>?>> buscarExecucaoAtiva() async {
     try {
+      // Verifica se está em modo offline
+      final isOffline = await _offlineService.isModoOffline();
+      
+      if (isOffline) {
+        // Busca execução ativa offline
+        final execucaoAtiva = await _offlineService.buscarExecucaoAtivaOffline();
+        if (execucaoAtiva != null) {
+          return ApiResponse(success: true, data: execucaoAtiva);
+        }
+        return ApiResponse(success: true, data: null);
+      }
+
       final token = await _getAccessToken();
       if (token == null) {
         return ApiResponse(
@@ -417,7 +597,7 @@ class TreinoService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final body = response.body.trim();
@@ -431,12 +611,60 @@ class TreinoService {
         // Trata 404 como "não há execução ativa" (compatibilidade)
         return ApiResponse(success: true, data: null);
       } else {
-        final errorData = response.body.isNotEmpty 
-            ? json.decode(response.body) 
+        final errorData = response.body.isNotEmpty
+            ? json.decode(response.body)
             : <String, dynamic>{};
         return ApiResponse(
           success: false,
           message: errorData['message'] ?? 'Erro ao buscar execução ativa',
+        );
+      }
+    } catch (e) {
+      // Se for erro de conexão, tenta buscar offline
+      final isOffline = await _offlineService.isModoOffline();
+      if (isOffline) {
+        final execucaoAtiva = await _offlineService.buscarExecucaoAtivaOffline();
+        if (execucaoAtiva != null) {
+          return ApiResponse(success: true, data: execucaoAtiva);
+        }
+        return ApiResponse(success: true, data: null);
+      }
+      
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<List<String>>> gerarTreino(List<String> tiposTreino) async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/gerar'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({'tiposTreino': tiposTreino}),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final List<String> exercicioIds = data.cast<String>();
+        return ApiResponse(success: true, data: exercicioIds);
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao gerar treino',
         );
       }
     } catch (e) {

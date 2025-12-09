@@ -41,11 +41,11 @@ class RoleConfig {
         icon: Icons.campaign,
         color: Color(0xFF4CAF50),
       ),
-       RoleButtonConfig(
+      RoleButtonConfig(
         route: '/personal/aulas',
         title: 'Gerenciar Aulas',
         description: 'Crie e edite aulas',
-        icon: Icons.class_,
+        icon: Icons.school,
         color: Color(0xFF4CAF50),
       ),
       RoleButtonConfig(
@@ -55,15 +55,15 @@ class RoleConfig {
         icon: Icons.class_,
         color: Color(0xFF4CAF50),
       ),
-      RoleButtonConfig(
-        route: '/agenda',
-        title: 'Agenda',
-        description: 'Calendário e observações do dia',
-        icon: Icons.calendar_month,
-        color: Color(0xFF4CAF50),
-      ),
     ],
     Role.ADMIN: [
+      RoleButtonConfig(
+        route: '/admin/dashboard',
+        title: 'Dashboard',
+        description: 'Visualizar estatísticas e métricas',
+        icon: Icons.dashboard,
+        color: Color(0xFFFF312E),
+      ),
       RoleButtonConfig(
         route: '/admin/planos',
         title: 'Planos',
@@ -86,17 +86,10 @@ class RoleConfig {
         color: Color(0xFFFF312E),
       ),
       RoleButtonConfig(
-        route: '/admin/relatorios',
-        title: 'Relatórios',
-        description: 'Entradas/Saídas e Pagamentos',
-        icon: Icons.insights,
-        color: Color(0xFFFF312E),
-      ),
-      RoleButtonConfig(
-        route: '/agenda',
-        title: 'Agenda',
-        description: 'Calendário e observações do dia',
-        icon: Icons.calendar_month,
+        route: '/admin/personals',
+        title: 'Personals',
+        description: 'Gerenciar personals',
+        icon: Icons.badge,
         color: Color(0xFFFF312E),
       ),
     ],
@@ -123,10 +116,10 @@ class RoleConfig {
         color: Color(0xFF2196F3),
       ),
       RoleButtonConfig(
-        route: '/agenda',
-        title: 'Agenda',
-        description: 'Calendário e observações do dia',
-        icon: Icons.calendar_month,
+        route: '/customer/aulas',
+        title: 'Aulas Disponíveis',
+        description: 'Veja as aulas disponíveis',
+        icon: Icons.school,
         color: Color(0xFF2196F3),
       ),
     ],

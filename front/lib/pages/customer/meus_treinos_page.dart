@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+// Removido: import 'dart:html' as html if (dart.library.html) 'dart:html';
+// Removido: import 'dart:ui_web' as ui_web if (dart.library.html) 'dart:ui_web';
+import 'package:url_launcher/url_launcher.dart'; // Import para abrir URLs
 import '../../services/treino_service.dart';
+import '../../services/offline_service.dart';
 import '../../models/treino.dart';
 import '../../models/execucao_treino.dart';
+import '../../widgets/offline_dialog.dart';
 import 'executar_treino_page.dart';
-
-// Para web - imports condicionais
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html if (dart.library.html) 'dart:html';
-// ignore: avoid_web_libraries_in_flutter  
-import 'dart:ui_web' as ui_web if (dart.library.html) 'dart:ui_web';
 
 class MeusTreinosPage extends StatefulWidget {
   const MeusTreinosPage({super.key});
@@ -20,6 +18,7 @@ class MeusTreinosPage extends StatefulWidget {
 
 class _MeusTreinosPageState extends State<MeusTreinosPage> {
   final TreinoService _treinoService = TreinoService();
+  final OfflineService _offlineService = OfflineService();
   List<Treino> _treinos = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -28,13 +27,134 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   bool _temTreinoAtivo = false; // Se há um treino em andamento
   Map<String, DateTime?> _ultimaExecucaoPorTreino = {}; // Mapa: treinoId -> última data de execução finalizada
   String? _proximoTreinoId; // ID do próximo treino a ser executado
+  bool _isOfflineMode = false;
+  bool _verificandoBackend = false;
 
   @override
   void initState() {
     super.initState();
-    _carregarTreinos();
-    _carregarUltimoTreino();
-    _carregarHistorico();
+    _verificarBackendECarregar();
+    _iniciarVerificacaoPeriodica();
+  }
+
+  void _iniciarVerificacaoPeriodica() {
+    // Verifica a cada 30 segundos se o backend voltou
+    Future.delayed(const Duration(seconds: 30), () {
+      if (mounted && _isOfflineMode) {
+        _verificarSeBackendVoltou();
+        _iniciarVerificacaoPeriodica(); // Continua verificando
+      }
+    });
+  }
+
+  Future<void> _verificarSeBackendVoltou() async {
+    if (!_isOfflineMode) return;
+    
+    final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+    if (backendDisponivel && mounted) {
+      await _offlineService.setModoOffline(false);
+      setState(() {
+        _isOfflineMode = false;
+      });
+      
+      // Recarrega os dados
+      _carregarTreinos();
+      _carregarUltimoTreino();
+      _carregarHistorico();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Conectado ao servidor'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _verificarBackendECarregar() async {
+    // Verifica se já está em modo offline
+    final isOffline = await _offlineService.isModoOffline();
+    if (isOffline) {
+      setState(() {
+        _isOfflineMode = true;
+      });
+      _carregarTreinos();
+      return;
+    }
+
+    // Tenta verificar se o backend está disponível
+    setState(() {
+      _verificandoBackend = true;
+    });
+
+    final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+    
+    setState(() {
+      _verificandoBackend = false;
+    });
+
+    if (!backendDisponivel && mounted) {
+      // Backend não disponível - mostra dialog
+      final continuarOffline = await OfflineDialog.show(
+        context,
+        onContinuarOffline: () {
+          Navigator.of(context).pop(true);
+        },
+        onTentarNovamente: () async {
+          setState(() {
+            _verificandoBackend = true;
+          });
+          
+          final disponivel = await _offlineService.verificarBackendDisponivel();
+          
+          setState(() {
+            _verificandoBackend = false;
+          });
+
+          if (disponivel) {
+            Navigator.of(context).pop(false);
+            await _offlineService.setModoOffline(false);
+            setState(() {
+              _isOfflineMode = false;
+            });
+            _carregarTreinos();
+          } else {
+            // Ainda não disponível, mas não fecha o dialog
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Backend ainda não está disponível'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        },
+        isLoading: _verificandoBackend,
+      );
+
+      if (continuarOffline == true) {
+        // Usuário escolheu continuar offline
+        await _offlineService.setModoOffline(true);
+        setState(() {
+          _isOfflineMode = true;
+        });
+        _carregarTreinos();
+      } else {
+        // Usuário cancelou ou backend ficou disponível
+        if (backendDisponivel) {
+          _carregarTreinos();
+        }
+      }
+    } else {
+      // Backend disponível
+      await _offlineService.setModoOffline(false);
+      setState(() {
+        _isOfflineMode = false;
+      });
+      _carregarTreinos();
+      _carregarUltimoTreino();
+      _carregarHistorico();
+    }
   }
 
   Future<void> _carregarTreinos() async {
@@ -45,12 +165,21 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
 
     // Para CUSTOMER, o backend já filtra automaticamente pelos treinos do usuário logado
     final response = await _treinoService.listarTodos();
-    
+
     print('Response success: ${response.success}');
     print('Response data: ${response.data}');
     print('Response data type: ${response.data?.runtimeType}');
+    print('Is offline mode: $_isOfflineMode');
 
     if (response.success && response.data != null) {
+      // Se a requisição foi bem-sucedida, desativa modo offline
+      if (_isOfflineMode) {
+        await _offlineService.setModoOffline(false);
+        setState(() {
+          _isOfflineMode = false;
+        });
+      }
+      
       final data = response.data;
       if (data != null && data is List<Treino>) {
         // O serviço já retorna List<Treino>, então podemos usar diretamente
@@ -77,9 +206,9 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               return null;
             }
           }).whereType<Treino>().toList();
-          
+
           print('Treinos convertidos: ${treinos.length}');
-          
+
           setState(() {
             _treinos = treinos;
             _isLoading = false;
@@ -110,16 +239,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   Future<void> _carregarUltimoTreino() async {
     try {
       final response = await _treinoService.buscarExecucaoAtiva();
-      
+
       if (response.success && response.data != null) {
         final execucao = response.data;
         if (execucao != null && execucao is Map && execucao.isNotEmpty) {
-          final treinoId = execucao['treino'] != null 
-              ? (execucao['treino'] is Map 
+          final treinoId = execucao['treino'] != null
+              ? (execucao['treino'] is Map
                   ? execucao['treino']['id']?.toString()
                   : execucao['treino'].toString())
               : null;
-          
+
           if (treinoId != null && treinoId.isNotEmpty) {
             if (mounted) {
               setState(() {
@@ -166,24 +295,24 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   Future<void> _carregarHistorico() async {
     try {
       final response = await _treinoService.listarHistorico();
-      
+
       if (response.success && response.data != null) {
         final historico = response.data;
         if (historico != null && historico is List && historico.isNotEmpty) {
           // Criar mapa de última execução por treino (apenas finalizadas)
           final Map<String, DateTime?> ultimaExecucao = {};
-          
+
           for (var item in historico) {
             if (item is Map && item.isNotEmpty) {
               try {
                 final execucao = ExecucaoTreino.fromJson(item);
                 // Só considerar execuções finalizadas com treinoId válido
-                if (execucao.treinoId.isNotEmpty && 
-                    execucao.finalizada && 
+                if (execucao.treinoId.isNotEmpty &&
+                    execucao.finalizada &&
                     execucao.dataFim != null) {
                   final treinoId = execucao.treinoId;
                   // Se não tem data ainda ou esta é mais recente, atualizar
-                  if (!ultimaExecucao.containsKey(treinoId) || 
+                  if (!ultimaExecucao.containsKey(treinoId) ||
                       ultimaExecucao[treinoId] == null ||
                       (execucao.dataFim != null && ultimaExecucao[treinoId] != null &&
                        execucao.dataFim!.isAfter(ultimaExecucao[treinoId]!))) {
@@ -196,7 +325,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               }
             }
           }
-          
+
           if (mounted) {
             setState(() {
               _ultimaExecucaoPorTreino = ultimaExecucao;
@@ -224,11 +353,9 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
     return _treinos.where((treino) {
       final nome = treino.nome.toLowerCase();
       final descricao = treino.descricao?.toLowerCase() ?? '';
-      final nivel = treino.nivel?.toLowerCase() ?? '';
       final query = _searchQuery.toLowerCase();
       return nome.contains(query) ||
-          descricao.contains(query) ||
-          nivel.contains(query);
+          descricao.contains(query);
     }).toList();
   }
 
@@ -238,22 +365,89 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final outline = Theme.of(context).colorScheme.outline;
     return Scaffold(
-      backgroundColor: surface,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: surface,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: onSurface),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).appBarTheme.foregroundColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Meus Treinos',
-          style: TextStyle(
-            color: onSurface,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Text(
+              'Meus Treinos',
+              style: TextStyle(
+                color: Theme.of(context).appBarTheme.foregroundColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_isOfflineMode) ...[
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.wifi_off,
+                color: Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: 4),
+              const Text(
+                'Offline',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ],
+          ],
         ),
+        actions: [
+          if (_isOfflineMode)
+            IconButton(
+              icon: Icon(Icons.refresh, color: Theme.of(context).appBarTheme.foregroundColor),
+              onPressed: () async {
+                // Tenta reconectar
+                setState(() {
+                  _verificandoBackend = true;
+                });
+                
+                final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+                
+                setState(() {
+                  _verificandoBackend = false;
+                });
+
+                if (backendDisponivel) {
+                  await _offlineService.setModoOffline(false);
+                  setState(() {
+                    _isOfflineMode = false;
+                  });
+                  _carregarTreinos();
+                  _carregarUltimoTreino();
+                  _carregarHistorico();
+                  
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Conectado ao servidor'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Backend ainda não está disponível'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -266,14 +460,14 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                   _searchQuery = value;
                 });
               },
-              style: TextStyle(color: onSurface),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Buscar treinos...',
-                hintStyle: TextStyle(color: Colors.grey[600]),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear, color: Colors.grey[600]),
+                        icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
                         onPressed: () {
                           setState(() {
                             _searchQuery = '';
@@ -282,14 +476,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: surface,
+                fillColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.surfaceVariant,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: outline),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -323,7 +519,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                             Text(
                               _errorMessage!,
                               style: TextStyle(
-                                color: onSurface,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -352,7 +548,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                       ? Icons.search_off
                                       : Icons.fitness_center,
                                   size: 64,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
@@ -360,7 +556,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                       ? 'Nenhum treino encontrado'
                                       : 'Nenhum treino cadastrado',
                                   style: TextStyle(
-                                    color: onSurface,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -370,7 +566,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                   Text(
                                     'Seu personal trainer ainda não criou treinos para você.',
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                       fontSize: 14,
                                     ),
                                     textAlign: TextAlign.center,
@@ -381,11 +577,29 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                           )
                         : RefreshIndicator(
                             onRefresh: () async {
-                              await _carregarTreinos();
-                              await _carregarUltimoTreino();
-                              await _carregarHistorico();
+                              if (_isOfflineMode) {
+                                // Tenta reconectar quando em modo offline
+                                final backendDisponivel = await _offlineService.verificarBackendDisponivel();
+                                if (backendDisponivel) {
+                                  await _offlineService.setModoOffline(false);
+                                  setState(() {
+                                    _isOfflineMode = false;
+                                  });
+                                  await _carregarTreinos();
+                                  await _carregarUltimoTreino();
+                                  await _carregarHistorico();
+                                } else {
+                                  // Ainda offline, apenas recarrega do cache
+                                  await _carregarTreinos();
+                                }
+                              } else {
+                                // Modo online normal
+                                await _carregarTreinos();
+                                await _carregarUltimoTreino();
+                                await _carregarHistorico();
+                              }
                             },
-                            color: const Color(0xFF2196F3),
+                            color: const Color(0xFFFF312E),
                             child: ListView.builder(
                               padding: const EdgeInsets.all(16),
                               itemCount: _treinosFiltrados.length,
@@ -395,7 +609,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                 final isProximoTreino = _proximoTreinoId == treino.id;
                                 final ultimaExecucao = _ultimaExecucaoPorTreino[treino.id];
                                 return _buildTreinoCard(
-                                  treino, 
+                                  treino,
                                   isUltimoTreino: isUltimoTreino,
                                   isProximoTreino: isProximoTreino,
                                   ultimaExecucao: ultimaExecucao,
@@ -430,7 +644,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
         final data = response.data;
         if (data != null && data is Map && data['id'] != null) {
           final execucaoId = data['id'].toString();
-          
+
           // Navegar para a tela de execução
           final resultado = await Navigator.push(
             context,
@@ -467,19 +681,28 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
     }
   }
 
-  void _mostrarVideo(String videoUrl) {
-    showDialog(
-      context: context,
-      builder: (context) => _VideoDialog(videoUrl: videoUrl),
-    );
+  Future<void> _mostrarVideo(String videoUrl) async {
+    final uri = Uri.parse(videoUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Não foi possível abrir o vídeo: $videoUrl'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   String _formatarData(DateTime? data) {
     if (data == null) return '';
-    
+
     final agora = DateTime.now();
     final diferenca = agora.difference(data);
-    
+
     if (diferenca.inDays == 0) {
       if (diferenca.inHours == 0) {
         if (diferenca.inMinutes == 0) {
@@ -509,25 +732,25 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      color: const Color(0xFF1A1A1A),
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isUltimoTreino 
+        side: isUltimoTreino
             ? BorderSide(
-                color: _temTreinoAtivo 
-                    ? const Color(0xFFFF312E) 
+                color: _temTreinoAtivo
+                    ? const Color(0xFFFF312E)
                     : const Color(0xFF4CAF50),
                 width: 2,
               )
-            : BorderSide.none,
+            : BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         backgroundColor: Colors.transparent,
         collapsedBackgroundColor: Colors.transparent,
-        iconColor: const Color(0xFF2196F3),
-        collapsedIconColor: Colors.grey,
+        iconColor: const Color(0xFFFF312E),
+        collapsedIconColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         title: Row(
           children: [
             Expanded(
@@ -539,8 +762,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       Expanded(
                         child: Text(
                           treino.nome,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -558,16 +781,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               width: 1,
                             ),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.next_plan,
                                 size: 14,
                                 color: Color(0xFF2196F3),
                               ),
-                              const SizedBox(width: 4),
-                              const Text(
+                              SizedBox(width: 4),
+                              Text(
                                 'Próximo',
                                 style: TextStyle(
                                   color: Color(0xFF2196F3),
@@ -584,12 +807,12 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _temTreinoAtivo 
+                            color: _temTreinoAtivo
                                 ? const Color(0xFFFF312E).withOpacity(0.2)
                                 : const Color(0xFF4CAF50).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _temTreinoAtivo 
+                              color: _temTreinoAtivo
                                   ? const Color(0xFFFF312E)
                                   : const Color(0xFF4CAF50),
                               width: 1,
@@ -601,7 +824,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               Icon(
                                 _temTreinoAtivo ? Icons.play_circle : Icons.check_circle,
                                 size: 14,
-                                color: _temTreinoAtivo 
+                                color: _temTreinoAtivo
                                     ? const Color(0xFFFF312E)
                                     : const Color(0xFF4CAF50),
                               ),
@@ -609,7 +832,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                               Text(
                                 _temTreinoAtivo ? 'Em andamento' : 'Último treino',
                                 style: TextStyle(
-                                  color: _temTreinoAtivo 
+                                  color: _temTreinoAtivo
                                       ? const Color(0xFFFF312E)
                                       : const Color(0xFF4CAF50),
                                   fontSize: 11,
@@ -627,8 +850,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         treino.tipoTreino!,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           fontSize: 13,
                         ),
                       ),
@@ -637,16 +860,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.history,
                           size: 14,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Última vez: ${_formatarData(ultimaExecucao)}',
-                          style: const TextStyle(
-                            color: Colors.grey,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -656,16 +879,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline,
                           size: 14,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         ),
                         const SizedBox(width: 4),
-                        const Text(
+                        Text(
                           'Nunca executado',
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -697,46 +920,28 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               const SizedBox(height: 4),
               Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontSize: 13,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            if (treino.nivel != null && treino.nivel!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2196F3).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  treino.nivel!,
-                  style: const TextStyle(
-                    color: Color(0xFF2196F3),
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
             if (treino.itens.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.fitness_center,
                     size: 16,
-                    color: Colors.grey,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${treino.itens.length} ${treino.itens.length == 1 ? 'exercício' : 'exercícios'}',
-                    style: const TextStyle(
-                      color: Colors.grey,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       fontSize: 12,
                     ),
                   ),
@@ -751,20 +956,20 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
                 ),
               ),
             ),
           ],
           if (treino.itens.isNotEmpty) ...[
-            const Divider(color: Colors.grey),
+            Divider(color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Exercícios:',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -803,8 +1008,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                 Expanded(
                                   child: Text(
                                     item.exercicioNome ?? 'Exercício',
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -828,8 +1033,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                             const SizedBox(height: 4),
                             Text(
                               '${item.series} séries x ${item.repeticoes}',
-                              style: const TextStyle(
-                                color: Colors.grey,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 fontSize: 13,
                               ),
                             ),
@@ -840,21 +1045,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                 child: Text(
                                   'Descanso: ${item.tempoDescanso}',
                                   style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            if (item.observacao != null &&
-                                item.observacao!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  item.observacao!,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                    fontStyle: FontStyle.italic,
+                                    color: Color(0xFF4CAF50),
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -863,7 +1055,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       ),
                     ],
                   ),
-                )),
+                )).toList(),
           ],
         ],
       ),
@@ -871,221 +1063,5 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   }
 }
 
-// Dialog para exibir vídeo do exercício
-class _VideoDialog extends StatelessWidget {
-  final String videoUrl;
-
-  const _VideoDialog({required this.videoUrl});
-
-  bool _isImageOrGif(String url) {
-    final lowerUrl = url.toLowerCase();
-    return lowerUrl.endsWith('.gif') ||
-        lowerUrl.endsWith('.jpg') ||
-        lowerUrl.endsWith('.jpeg') ||
-        lowerUrl.endsWith('.png') ||
-        lowerUrl.endsWith('.webp') ||
-        lowerUrl.contains('.gif') ||
-        lowerUrl.contains('image/');
-  }
-
-  String _getEmbedUrl(String url) {
-    // Se for imagem ou GIF, retornar a URL original
-    if (_isImageOrGif(url)) {
-      return url;
-    }
-    
-    // Se for YouTube
-    if (url.contains('youtube.com/watch?v=')) {
-      final videoId = url.split('v=')[1].split('&')[0];
-      return 'https://www.youtube.com/embed/$videoId';
-    }
-    // Se for YouTube short link
-    if (url.contains('youtu.be/')) {
-      final videoId = url.split('youtu.be/')[1].split('?')[0];
-      return 'https://www.youtube.com/embed/$videoId';
-    }
-    // Se for Vimeo
-    if (url.contains('vimeo.com/')) {
-      final videoId = url.split('vimeo.com/')[1].split('?')[0];
-      return 'https://player.vimeo.com/video/$videoId';
-    }
-    // Se já for uma URL de embed, retornar como está
-    if (url.contains('embed') || url.contains('player')) {
-      return url;
-    }
-    // Caso contrário, tentar usar como iframe direto
-    return url;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final embedUrl = _getEmbedUrl(videoUrl);
-    final isImage = _isImageOrGif(videoUrl);
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(
-                    isImage ? 'Demonstração do Exercício' : 'Vídeo do Exercício',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            // Video/Image player
-            isImage
-                ? Container(
-                    constraints: const BoxConstraints(
-                      maxHeight: 500,
-                      maxWidth: double.infinity,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        embedUrl,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 300,
-                            color: Colors.black,
-                              child: const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF2196F3),
-                              ),
-                              ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 300,
-                            color: Colors.black,
-                            child: const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: Colors.red,
-                                    size: 48,
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Erro ao carregar imagem',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  )
-                : AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Container(
-                      color: Colors.black,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: _buildVideoPlayer(embedUrl),
-                      ),
-                    ),
-                  ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideoPlayer(String embedUrl) {
-    if (kIsWeb) {
-      // Para web, criar iframe HTML
-      final String viewType = 'iframe-${embedUrl.hashCode}';
-      
-      // Registrar o viewType (registrar sempre, pois pode ser reutilizado)
-      ui_web.platformViewRegistry.registerViewFactory(
-        viewType,
-        (int viewId) {
-          final iframe = html.IFrameElement()
-            ..src = embedUrl
-            ..style.border = 'none'
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..allowFullscreen = true
-            ..allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-          return iframe;
-        },
-      );
-      
-      // Usar HtmlElementView do Flutter (disponível apenas em web)
-      return SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: HtmlElementView(viewType: viewType),
-      );
-    } else {
-      // Para mobile, mostrar botão para abrir em navegador
-      return Container(
-        color: Colors.black,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.play_circle_filled,
-                size: 64,
-                color: Color(0xFFFF312E),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Vídeo disponível',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // Abrir vídeo em navegador externo
-                  // Usar url_launcher package se necessário
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2196F3),
-                ),
-                child: const Text(
-                  'Abrir vídeo',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-}
+// REMOVIDO a classe _VideoDialog original porque usava dart:html/dart:ui_web
+// e a funcionalidade foi substituída por url_launcher.

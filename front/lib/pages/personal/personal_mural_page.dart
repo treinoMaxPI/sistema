@@ -288,16 +288,18 @@ class _NovoComunicadoSheetState extends State<_NovoComunicadoSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _tituloController,
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-            cursorColor: Colors.white,
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            cursorColor: const Color(0xFF4CAF50),
             decoration: InputDecoration(
               labelText: 'Título',
-              labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+              labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
               filled: true,
-              fillColor: Colors.black.withOpacity(0.3),
+              fillColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[800]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
             ),
           ),
@@ -305,16 +307,18 @@ class _NovoComunicadoSheetState extends State<_NovoComunicadoSheet> {
           TextField(
             controller: _mensagemController,
             maxLines: 5,
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-            cursorColor: Colors.white,
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            cursorColor: const Color(0xFF4CAF50),
             decoration: InputDecoration(
               labelText: 'Mensagem',
-              labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+              labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
               filled: true,
-              fillColor: Colors.black.withOpacity(0.3),
+              fillColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[800]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
             ),
           ),
@@ -370,8 +374,8 @@ class _NovoComunicadoSheetState extends State<_NovoComunicadoSheet> {
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey[700]!),
-                    foregroundColor: Colors.white,
+                    side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Text('Cancelar'),
@@ -444,11 +448,11 @@ class _ImagePickerRow extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onPick,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1F1F1F),
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
-              icon: const Icon(Icons.image, color: Colors.white),
+              icon: Icon(Icons.image, color: Theme.of(context).colorScheme.onSurface),
               label: const Text('Adicionar imagem'),
             ),
             const SizedBox(width: 12),
@@ -456,14 +460,19 @@ class _ImagePickerRow extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRemove,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.grey[700]!),
-                  foregroundColor: Colors.white,
+                  side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
                 label: const Text('Remover'),
               ),
           ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Tamanho máximo: 5MB',
+          style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
         ),
         const SizedBox(height: 8),
         if (pickedBytes != null)
@@ -574,10 +583,10 @@ class _FeedPostCard extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: Colors.grey[800],
+          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
           child: Text(
             initials,
-            style: AppTypography.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: 10),
@@ -606,11 +615,11 @@ class _FeedPostCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.grey[900],
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: _borderColor(context)),
                       ),
-                      child: Text('Rascunho', style: AppTypography.caption.copyWith(color: Colors.white70)),
+                      child: Text('Rascunho', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
                     ),
                 ],
               ),

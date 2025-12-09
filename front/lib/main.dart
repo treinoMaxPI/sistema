@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
 import 'package:gym_management/pages/admin/admin_mural_page.dart';
+import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
-import 'package:gym_management/pages/admin/admin_relatorios_page.dart';
+import 'package:gym_management/pages/admin/admin_personals_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
+import 'package:gym_management/pages/personal/meus_treinos_page.dart' as personal;
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
 import 'package:gym_management/pages/personal/personal_mural_page.dart';
 import 'screens/login_screen.dart';
@@ -15,11 +17,11 @@ import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
 import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
 import 'package:gym_management/pages/customer/mural_page.dart';
-import 'package:gym_management/pages/customer/meus_treinos_page.dart';
+import 'package:gym_management/pages/customer/meus_treinos_page.dart' as customer;
+import 'package:gym_management/pages/customer/customer_aulas_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 import 'notifiers/theme_mode_notifier.dart';
 import 'notifiers/text_scale_notifier.dart';
-import 'pages/agenda_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -36,8 +38,10 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(themeModeProvider.notifier).loadFromPrefs());
-    Future.microtask(() => ref.read(textScaleProvider.notifier).loadFromPrefs());
+    Future.microtask(
+        () => ref.read(themeModeProvider.notifier).loadFromPrefs());
+    Future.microtask(
+        () => ref.read(textScaleProvider.notifier).loadFromPrefs());
   }
 
   @override
@@ -50,17 +54,20 @@ class _MyAppState extends ConsumerState<MyApp> {
       themeMode: mode,
       theme: ThemeData.light(useMaterial3: true).copyWith(
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(backgroundColor: Colors.white, foregroundColor: Colors.black),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white, foregroundColor: Colors.black),
       ),
       darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
         scaffoldBackgroundColor: Colors.black,
-        appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Colors.white),
+        appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.black, foregroundColor: Colors.white),
       ),
       home: const AuthWrapper(),
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         return MediaQuery(
-          data: mq.copyWith(textScaleFactor: ref.read(textScaleProvider.notifier).factor()),
+          data: mq.copyWith(
+              textScaleFactor: ref.read(textScaleProvider.notifier).factor()),
           child: child ?? const SizedBox.shrink(),
         );
       },
@@ -71,8 +78,9 @@ class _MyAppState extends ConsumerState<MyApp> {
         // Admin routes
         '/admin/planos': (context) => const AdminPlanosPage(),
         '/admin/mural': (context) => const AdminMuralPage(),
+        '/admin/dashboard': (context) => const AdminDashboardPage(),
         '/admin/clientes': (context) => const AdminClientesPage(),
-        '/admin/relatorios': (context) => const AdminRelatoriosPage(),
+        '/admin/personals': (context) => const AdminPersonalsPage(),
         // Personal trainer routes
         '/personal/aulas': (context) => const PersonalAulasPage(),
         '/personal/treinos': (context) => const TreinosPage(),
@@ -80,11 +88,11 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/personal/categorias': (context) => const PersonalCategoriasPage(),
         '/personal/exercicios': (context) => const ExerciciosPage(),
         // Customer routes
-        '/customer/treinos': (context) => const MeusTreinosPage(),
+        '/customer/treinos': (context) => const customer.MeusTreinosPage(),
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),
-        '/agenda': (context) => const AgendaPage(),
+        '/customer/aulas': (context) => const CustomerAulasPage(),
       },
     );
   }
