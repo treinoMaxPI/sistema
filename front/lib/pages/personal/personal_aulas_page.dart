@@ -172,7 +172,7 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
         title: const Text('Aulas'),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFF312E),
+        backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
         onPressed: _abrirNovaAula,
         icon: const Icon(Icons.add),
@@ -246,7 +246,7 @@ class _EmptyStateAulas extends StatelessWidget {
           ElevatedButton(
             onPressed: onCreate,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF312E),
+              backgroundColor: const Color(0xFF4CAF50),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
@@ -425,7 +425,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
               title: Text('Aula Recorrente?', style: AppTypography.bodyMedium),
               value: _isRecorrente,
               onChanged: (val) => setState(() => _isRecorrente = val),
-              activeColor: const Color(0xFFFF312E),
+              activeColor: const Color(0xFF4CAF50),
               contentPadding: EdgeInsets.zero,
             ),
             if (_isRecorrente) ...[
@@ -515,7 +515,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                   child: ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF312E),
+                      backgroundColor: const Color(0xFF4CAF50),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
@@ -630,7 +630,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
       label: Text(label),
       selected: isSelected,
       onSelected: (val) => setState(() => _selectedDays[index] = val),
-      selectedColor: const Color(0xFFFF312E),
+      selectedColor: const Color(0xFF4CAF50),
       checkmarkColor: Colors.white,
       labelStyle: AppTypography.bodySmall.copyWith(
         color:
@@ -643,7 +643,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
             color: isSelected
-                ? const Color(0xFFFF312E)
+                ? const Color(0xFF4CAF50)
                 : colorScheme.outline.withOpacity(0.5)),
       ),
     );
@@ -880,7 +880,7 @@ class _AulaCard extends StatelessWidget {
 
   Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
   Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
-  Color get _accent => const Color(0xFFFF312E);
+  Color get _accent => const Color(0xFF4CAF50);
 
   @override
   Widget build(BuildContext context) {
