@@ -15,6 +15,18 @@ class CategoriaService {
     return headers;
   }
 
+  String _extractErrorMessage(http.Response res) {
+    try {
+      final body = jsonDecode(res.body);
+      if (body is Map && body.containsKey('message')) {
+        return body['message'] as String;
+      }
+    } catch (_) {
+      // If JSON parsing fails, return a generic message
+    }
+    return 'Erro ao processar requisição';
+  }
+
   Future<List<Categoria>> listarTodas([String? token]) async {
     final uri = Uri.parse('$baseUrl/api/categorias');
     final res = await http.get(uri, headers: _headers(token));
@@ -24,7 +36,7 @@ class CategoriaService {
       return data.map((e) => Categoria.fromJson(e as Map<String, dynamic>)).toList();
     }
 
-    throw Exception('Falha ao listar categorias: ${res.statusCode} - ${res.body}');
+    throw Exception(_extractErrorMessage(res));
   }
 
   Future<Categoria> buscarPorId(String id, [String? token]) async {
@@ -36,7 +48,7 @@ class CategoriaService {
       return Categoria.fromJson(data);
     }
 
-    throw Exception('Falha ao buscar categoria: ${res.statusCode} - ${res.body}');
+    throw Exception(_extractErrorMessage(res));
   }
 
   Future<Categoria> criar(Categoria categoria, String token) async {
@@ -48,7 +60,7 @@ class CategoriaService {
       return Categoria.fromJson(data);
     }
 
-    throw Exception('Falha ao criar categoria: ${res.statusCode} - ${res.body}');
+    throw Exception(_extractErrorMessage(res));
   }
 
   Future<Categoria> atualizar(String id, Categoria categoria, String token) async {
@@ -60,7 +72,7 @@ class CategoriaService {
       return Categoria.fromJson(data);
     }
 
-    throw Exception('Falha ao atualizar categoria: ${res.statusCode} - ${res.body}');
+    throw Exception(_extractErrorMessage(res));
   }
 
   Future<void> deletar(String id, String token) async {
@@ -71,6 +83,6 @@ class CategoriaService {
       return;
     }
 
-    throw Exception('Falha ao deletar categoria: ${res.statusCode} - ${res.body}');
+    throw Exception(_extractErrorMessage(res));
   }
 }

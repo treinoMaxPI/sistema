@@ -2,6 +2,7 @@ package senai.treinomax.api.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +37,9 @@ public class AulaService {
     private final AulaRepository aulaRepository;
     private final UsuarioService usuarioService;
     private final CategoriaRepository categoriaRepository;
+
+    @Value("${upload.directory}")
+    private String uploadDirectory;
 
     /**
      * Salva (cria) uma aula.
@@ -139,6 +146,14 @@ public class AulaService {
     }
 
     /**
+     * Lista aulas por plano.
+     */
+    @Transactional(readOnly = true)
+    public List<Aula> listarPorPlano(UUID planoId) {
+        return aulaRepository.findByCategoriaPlanosId(planoId);
+    }
+
+    /**
      * Deleta uma aula por id.
      */
     @Transactional
@@ -169,7 +184,7 @@ public class AulaService {
         }
 
         try {
-            Path uploadDir = Paths.get("uploads", "aulas");
+            Path uploadDir = Paths.get(uploadDirectory, "aulas");
             Files.createDirectories(uploadDir);
 
             String original = file.getOriginalFilename();
@@ -181,12 +196,32 @@ public class AulaService {
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            String relative = "/uploads/aulas/" + filename;
-            log.info("Imagem salva em {}", relative);
+            String relative = "/api/aulas/uploads/" + filename;
+            log.info("Imagem salva com sucesso!");
+            log.info("  - Path absoluto: {}", target.toAbsolutePath());
+            log.info("  - Path relativo (URL): {}", relative);
             return relative;
         } catch (IOException e) {
             log.error("Erro ao salvar imagem de aula", e);
             throw new RuntimeException("Erro ao salvar imagem", e);
+        }
+    }
+
+    /**
+     * Carrega a imagem do disco.
+     */
+    public Resource carregarImagem(String filename) {
+        try {
+            Path filePath = Paths.get(uploadDirectory, "aulas", filename);
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Não foi possível ler o arquivo: " + filename);
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Erro: " + e.getMessage());
         }
     }
 

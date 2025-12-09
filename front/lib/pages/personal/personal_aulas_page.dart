@@ -59,7 +59,21 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(resp.message ?? 'Erro ao criar aula')),
+                SnackBar(
+                  content: Text('Erro: ${resp.message ?? 'Erro ao criar aula'}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Aula criada com sucesso!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
               );
             }
           }
@@ -88,7 +102,21 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
           if (!resp.success) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(resp.message ?? 'Erro ao atualizar aula')),
+                SnackBar(
+                  content: Text('Erro: ${resp.message ?? 'Erro ao atualizar aula'}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Aula atualizada com sucesso!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
               );
             }
           }
@@ -104,7 +132,21 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
     if (!resp.success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(resp.message ?? 'Erro ao excluir aula')),
+          SnackBar(
+            content: Text('Erro: ${resp.message ?? 'Erro ao excluir aula'}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aula deletada com sucesso!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
         );
       }
     }
@@ -541,20 +583,38 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     final duracaoStr = _duracaoController.text.trim();
     
     if (titulo.isEmpty || descricao.isEmpty || duracaoStr.isEmpty || _selectedCategoriaId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha todos os campos obrigatórios')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Preencha todos os campos obrigatórios'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
       return;
     }
 
     final duracao = int.tryParse(duracaoStr);
     if (duracao == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Duração inválida')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Duração inválida'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
       return;
     }
 
     AgendamentoRequest agendamento;
     if (_isRecorrente) {
       if (!_selectedDays.contains(true) || _recorrenteTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione pelo menos um dia e o horário')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Selecione pelo menos um dia e o horário'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
         return;
       }
       final minutes = _recorrenteTime!.hour * 60 + _recorrenteTime!.minute;
@@ -571,7 +631,13 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
       );
     } else {
       if (_selectedDate == null || _selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione a data e horário')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Selecione a data e horário'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
         return;
       }
       final dt = DateTime(
@@ -593,7 +659,15 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
       final up = await _service.uploadImagem(_pickedBytes!, _pickedFilename!);
       if (up.success && up.data != null) finalUrl = up.data;
       else {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(up.message ?? 'Erro ao enviar imagem')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro: ${up.message ?? 'Erro ao enviar imagem'}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
 
@@ -650,6 +724,11 @@ class _ImagePickerRow extends StatelessWidget {
                 label: const Text('Remover'),
               ),
           ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Tamanho máximo: 5MB',
+          style: AppTypography.caption.copyWith(color: Colors.white54),
         ),
         const SizedBox(height: 8),
         if (pickedBytes != null) _ResponsiveImagePreview(bytes: pickedBytes!),

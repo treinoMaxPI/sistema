@@ -41,7 +41,7 @@ public class Categoria {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "categorias_planos", joinColumns = @JoinColumn(name = "categoria_id"), inverseJoinColumns = @JoinColumn(name = "plano_id"))
     private List<Plano> planos;
 

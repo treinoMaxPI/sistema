@@ -1,9 +1,14 @@
 package senai.treinomax.api.controller;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.catalina.connector.Response;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +26,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import senai.treinomax.api.auth.config.SecurityUtils;
+import senai.treinomax.api.auth.model.Usuario;
+import senai.treinomax.api.auth.repository.UsuarioRepository;
 import senai.treinomax.api.auth.service.UsuarioService;
 import senai.treinomax.api.dto.request.AulaRequest;
 import senai.treinomax.api.dto.response.AgendamentoResponse;
@@ -37,6 +44,7 @@ public class AulaController {
 
     private final AulaService aulaService;
     private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
 
     private AulaResponse toResponse(Aula aula) {
         CategoriaResponse categoriaResponse = new CategoriaResponse(
@@ -100,6 +108,21 @@ public class AulaController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/minhas")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
+    public ResponseEntity<List<AulaResponse>> listarAulasDoAluno() {
+        Usuario user = SecurityUtils.getCurrentUser(usuarioRepository);
+        if (user.getPlano() == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        UUID planoId = user.getPlano().getId();
+        List<Aula> aulas = aulaService.listarPorPlano(planoId);
+        List<AulaResponse> responses = aulas.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PERSONAL')")
     public ResponseEntity<AulaResponse> atualizar(@PathVariable String id,
@@ -123,5 +146,14 @@ public class AulaController {
         log.warn("Recebendo requisição para upload de imagem de aula");
         String path = aulaService.salvarImagem(file);
         return ResponseEntity.ok(path);
+    }
+
+    @GetMapping("/uploads/{filename}")
+    public ResponseEntity<Resource> downloadImagem(@PathVariable String filename) {
+        Resource file = aulaService.carregarImagem(filename);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(file);
     }
 }

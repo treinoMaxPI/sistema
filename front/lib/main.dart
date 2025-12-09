@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_management/pages/personal/personal_aulas_page.dart';
 import 'package:gym_management/pages/admin/admin_planos_page.dart';
@@ -16,6 +16,7 @@ import 'services/auth_service.dart';
 import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
 import 'package:gym_management/pages/customer/mural_page.dart';
 import 'package:gym_management/pages/customer/meus_treinos_page.dart';
+import 'package:gym_management/pages/customer/customer_aulas_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 import 'notifiers/theme_mode_notifier.dart';
 import 'notifiers/text_scale_notifier.dart';
@@ -88,6 +89,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),
+        '/customer/aulas': (context) => const CustomerAulasPage(),
       },
     );
   }

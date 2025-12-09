@@ -4,6 +4,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import senai.treinomax.api.auth.model.Role;
+import senai.treinomax.api.auth.model.Usuario;
+import senai.treinomax.api.auth.repository.UsuarioRepository;
 import senai.treinomax.api.auth.service.CustomUserDetailsService;
 
 import java.util.Collection;
@@ -17,7 +19,7 @@ public class SecurityUtils {
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities();
-        
+
         return authorities.contains(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
@@ -25,7 +27,7 @@ public class SecurityUtils {
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities();
-        
+
         for (Role role : roles) {
             if (authorities.contains(new SimpleGrantedAuthority("ROLE_" + role.name()))) {
                 return true;
@@ -38,7 +40,7 @@ public class SecurityUtils {
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities();
-        
+
         for (Role role : roles) {
             if (!authorities.contains(new SimpleGrantedAuthority("ROLE_" + role.name()))) {
                 return false;
@@ -51,7 +53,7 @@ public class SecurityUtils {
         Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities();
-        
+
         return authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .filter(authority -> authority.startsWith("ROLE_"))
@@ -70,6 +72,12 @@ public class SecurityUtils {
             return ((CustomUserDetailsService.CustomUserDetails) principal).getId();
         }
         throw new IllegalStateException("Current user is not an instance of CustomUserDetails");
+    }
+
+    public static Usuario getCurrentUser(UsuarioRepository repository) {
+        UUID userId = getCurrentUserId();
+        return repository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found with ID: " + userId));
     }
 
     public static boolean isAuthenticated() {

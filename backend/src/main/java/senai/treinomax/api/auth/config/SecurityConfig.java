@@ -41,18 +41,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .anonymous(anonymous -> anonymous.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
                                 "/api/auth/**",
                                 "/verify-email",
-                                "/admin-login",
+                                "/admin-login/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/mural/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/aulas/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
