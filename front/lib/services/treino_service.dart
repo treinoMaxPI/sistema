@@ -611,8 +611,8 @@ class TreinoService {
         // Trata 404 como "não há execução ativa" (compatibilidade)
         return ApiResponse(success: true, data: null);
       } else {
-        final errorData = response.body.isNotEmpty 
-            ? json.decode(response.body) 
+        final errorData = response.body.isNotEmpty
+            ? json.decode(response.body)
             : <String, dynamic>{};
         return ApiResponse(
           success: false,
@@ -630,6 +630,44 @@ class TreinoService {
         return ApiResponse(success: true, data: null);
       }
       
+      return ApiResponse(
+        success: false,
+        message: 'Erro de conexão: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<List<String>>> gerarTreino(List<String> tiposTreino) async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Token de acesso não encontrado',
+        );
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/gerar'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({'tiposTreino': tiposTreino}),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final List<String> exercicioIds = data.cast<String>();
+        return ApiResponse(success: true, data: exercicioIds);
+      } else {
+        final errorData = json.decode(response.body);
+        return ApiResponse(
+          success: false,
+          message: errorData['message'] ?? 'Erro ao gerar treino',
+        );
+      }
+    } catch (e) {
       return ApiResponse(
         success: false,
         message: 'Erro de conexão: $e',

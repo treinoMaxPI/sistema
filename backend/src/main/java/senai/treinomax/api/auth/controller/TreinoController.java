@@ -1,5 +1,6 @@
 package senai.treinomax.api.auth.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -8,10 +9,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import senai.treinomax.api.auth.config.SecurityUtils;
 import senai.treinomax.api.auth.model.Treino;
+import senai.treinomax.api.dto.request.GerarTreinoRequest;
+import senai.treinomax.api.geradortreino.GeradorTreino;
 import senai.treinomax.api.service.TreinoService;
 import senai.treinomax.api.service.ExecucaoTreinoService;
 import senai.treinomax.api.auth.model.ExecucaoTreino;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,7 @@ public class TreinoController {
 
     private final TreinoService treinoService;
     private final ExecucaoTreinoService execucaoTreinoService;
+    private final GeradorTreino geradorTreino;
 
     @PostMapping
     @PreAuthorize("hasRole('PERSONAL')")
@@ -205,6 +210,21 @@ public class TreinoController {
             return ResponseEntity.ok(historico);
         } catch (Exception e) {
             log.error("Erro ao buscar histórico", e);
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/gerar")
+    @PreAuthorize("hasRole('PERSONAL')")
+    public ResponseEntity<?> gerarTreino(@Valid @RequestBody GerarTreinoRequest request) {
+        try {
+            log.info("Gerando treino para tipos: {}", request.getTiposTreino());
+
+            Collection<UUID> exercicioIds = this.geradorTreino.gerarTreino(request.getTiposTreino());
+
+            return ResponseEntity.ok(exercicioIds);
+        } catch (Exception e) {
+            log.error("Erro ao gerar treino", e);
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
