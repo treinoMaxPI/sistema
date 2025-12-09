@@ -241,7 +241,7 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
         title: const Text('Categorias'),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFF312E),
+        backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
         onPressed: () => _abrirNovaCategoria(),
         icon: const Icon(Icons.add),
@@ -261,6 +261,7 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
                 : _categorias.isEmpty
                     ? _EmptyStateCategorias(onCreate: () => _abrirNovaCategoria())
                     : ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 80),
                         itemCount: _categorias.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
@@ -437,7 +438,7 @@ class _CategoriaCard extends StatelessWidget {
 
   Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
   Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
-  Color get _accent => const Color(0xFFFF312E);
+  Color get _accent => const Color(0xFF4CAF50);
 
   @override
   Widget build(BuildContext context) {

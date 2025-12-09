@@ -193,6 +193,7 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
                 : _aulas.isEmpty
                     ? _EmptyStateAulas(onCreate: _abrirNovaAula)
                     : ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 80),
                         itemCount: _aulas.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {

@@ -159,6 +159,7 @@ class _PersonalMuralPageState extends State<PersonalMuralPage> {
                 : _comunicados.isEmpty
             ? _EmptyState(onCreate: _abrirNovoComunicado)
             : ListView.separated(
+                padding: const EdgeInsets.only(bottom: 80),
                 itemCount: _comunicados.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
