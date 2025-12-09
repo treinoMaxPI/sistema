@@ -821,4 +821,5 @@ class _FeedPostCard extends StatelessWidget {
     if (w < 800) return 3 / 4; // tablet
     return 16 / 9; // telas maiores
   }
+
 }

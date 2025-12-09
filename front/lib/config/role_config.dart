@@ -84,7 +84,7 @@ class RoleConfig {
         description: 'Visualizar clientes',
         icon: Icons.group,
         color: Color(0xFFFF312E),
-      )
+      ),
     ],
     Role.CUSTOMER: [
       RoleButtonConfig(

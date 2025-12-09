@@ -7,6 +7,7 @@ import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
+import 'package:gym_management/pages/personal/meus_treinos_page.dart';
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
 import 'package:gym_management/pages/personal/personal_mural_page.dart';
 import 'screens/login_screen.dart';
