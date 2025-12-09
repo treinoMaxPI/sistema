@@ -45,7 +45,7 @@ class RoleConfig {
         route: '/personal/aulas',
         title: 'Gerenciar Aulas',
         description: 'Crie e edite aulas',
-        icon: Icons.class_,
+        icon: Icons.school,
         color: Color(0xFF4CAF50),
       ),
       RoleButtonConfig(
@@ -84,7 +84,14 @@ class RoleConfig {
         description: 'Visualizar clientes',
         icon: Icons.group,
         color: Color(0xFFFF312E),
-      )
+      ),
+      RoleButtonConfig(
+        route: '/admin/personals',
+        title: 'Personals',
+        description: 'Gerenciar personals',
+        icon: Icons.badge,
+        color: Color(0xFFFF312E),
+      ),
     ],
     Role.CUSTOMER: [
       RoleButtonConfig(

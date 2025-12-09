@@ -8,12 +8,17 @@ class RoleSelectionNotifier extends StateNotifier<SelectedRoleState> {
 
   void initializeRole(JwtPayload? parsedJwt) {
     if (parsedJwt != null && parsedJwt.roles.isNotEmpty) {
-      if (state == null) {
+      // Always update state if it's null or not in the new user's roles
+      if (state == null || !parsedJwt.roles.contains(state)) {
         state = parsedJwt.roles.first;
       }
     } else {
       state = null;
     }
+  }
+
+  void clear() {
+    state = null;
   }
 
   void selectRole(Role newRole) {

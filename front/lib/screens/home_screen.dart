@@ -218,6 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     if (confirm == true) {
+      ref.read(selectedRoleProvider.notifier).clear();
       await _authService.logout();
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');

@@ -54,7 +54,7 @@ class UsuarioResponse {
       id: json['id'],
       nome: json['nome'],
       email: json['email'],
-      login: json['login'],
+      login: json['login'] ?? json['email'],
       roles: (json['roles'] as List?)?.map((e) => e.toString()).toList(),
     );
   }
@@ -138,6 +138,29 @@ class UsuarioService {
     }
   }
 
+  Future<ApiResponse<List<UsuarioResponse>>> listarTodosAdmin() async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
+      
+      final resp = await http.get(
+        Uri.parse('$baseUrl/admin/todos'),
+        headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      );
+
+      if (resp.statusCode == 200) {
+        final List<dynamic> data = _safeDecodeList(resp.body);
+        final list = data.map((e) => UsuarioResponse.fromJson(e as Map<String, dynamic>)).toList();
+        return ApiResponse(success: true, data: list);
+      } else {
+        final error = _safeDecode(resp.body);
+        return ApiResponse(success: false, message: error['message'] ?? 'Erro ao listar todos os usuários');
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erro de conexão: $e');
+    }
+  }
+
   Future<ApiResponse<void>> atualizarLogin(String id, String novoLogin) async {
     try {
       final token = await _getAccessToken();
@@ -184,6 +207,25 @@ class UsuarioService {
         if (resp.statusCode == 200) return ApiResponse(success: true);
         final error = _safeDecode(resp.body);
         return ApiResponse(success: false, message: error['message'] ?? 'Erro ao resetar senha');
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erro de conexão: $e');
+    }
+  }
+
+  Future<ApiResponse<void>> promoverParaPersonal(String id) async {
+    try {
+      final token = await _getAccessToken();
+      if (token == null) return ApiResponse(success: false, message: 'Token de acesso não encontrado');
+      final resp = await http.put(
+        Uri.parse('$baseUrl/$id/personal'),
+        headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      );
+      if (resp.statusCode == 200) {
+        return ApiResponse(success: true);
+      } else {
+        final error = _safeDecode(resp.body);
+        return ApiResponse(success: false, message: error['message'] ?? 'Erro ao promover para personal');
       }
     } catch (e) {
       return ApiResponse(success: false, message: 'Erro de conexão: $e');
