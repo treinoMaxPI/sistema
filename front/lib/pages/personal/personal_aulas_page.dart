@@ -60,7 +60,8 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Erro: ${resp.message ?? 'Erro ao criar aula'}'),
+                  content:
+                      Text('Erro: ${resp.message ?? 'Erro ao criar aula'}'),
                   backgroundColor: Colors.red,
                   duration: const Duration(seconds: 3),
                 ),
@@ -93,7 +94,6 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
         initialTitulo: original.titulo,
         initialMensagem: original.descricao,
         initialImagemUrl: original.imagemUrl,
-
         initialCategoriaId: original.categoria?['id'],
         initialDuracao: original.duracao,
         initialAgendamento: original.agendamento,
@@ -103,7 +103,8 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Erro: ${resp.message ?? 'Erro ao atualizar aula'}'),
+                  content:
+                      Text('Erro: ${resp.message ?? 'Erro ao atualizar aula'}'),
                   backgroundColor: Colors.red,
                   duration: const Duration(seconds: 3),
                 ),
@@ -155,14 +156,17 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon:
+              Icon(Icons.arrow_back, color: theme.appBarTheme.foregroundColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Aulas'),
@@ -182,7 +186,8 @@ class _PersonalAulasPageState extends State<PersonalAulasPage> {
                 ? Center(
                     child: Text(
                       _errorMessage!,
-                      style: AppTypography.bodyMedium.copyWith(color: Colors.redAccent),
+                      style: AppTypography.bodyMedium
+                          .copyWith(color: colorScheme.error),
                     ),
                   )
                 : _aulas.isEmpty
@@ -223,15 +228,19 @@ class _EmptyStateAulas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.school, color: Colors.grey, size: 48),
+          Icon(Icons.school,
+              color: colorScheme.onSurface.withOpacity(0.6), size: 48),
           const SizedBox(height: 8),
           Text('Sem aulas por enquanto', style: AppTypography.bodyLarge),
           const SizedBox(height: 8),
-          Text('Clique em “Nova Aula” para criar a primeira aula.', style: AppTypography.caption),
+          Text('Clique em "Nova Aula" para criar a primeira aula.',
+              style: AppTypography.caption),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onCreate,
@@ -278,7 +287,8 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
   Uint8List? _pickedBytes;
   String? _pickedFilename;
   final AulaService _service = AulaService();
-  final CategoriaService _categoriaService = CategoriaService(baseUrl: 'http://localhost:8080');
+  final CategoriaService _categoriaService =
+      CategoriaService(baseUrl: 'http://localhost:8080');
   List<Categoria> _categorias = [];
   String? _selectedCategoriaId;
   bool _saving = false;
@@ -296,9 +306,10 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     super.initState();
     _tituloController = TextEditingController(text: widget.initialTitulo);
     _descricaoController = TextEditingController(text: widget.initialMensagem);
-    _duracaoController = TextEditingController(text: widget.initialDuracao?.toString() ?? '');
+    _duracaoController =
+        TextEditingController(text: widget.initialDuracao?.toString() ?? '');
     _selectedCategoriaId = widget.initialCategoriaId;
-    
+
     if (widget.initialAgendamento != null) {
       final ag = widget.initialAgendamento!;
       _isRecorrente = ag.recorrente;
@@ -310,7 +321,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
         _selectedDays[4] = ag.sexta ?? false;
         _selectedDays[5] = ag.sabado ?? false;
         _selectedDays[6] = ag.domingo ?? false;
-        
+
         if (ag.horarioRecorrente != null) {
           final hr = ag.horarioRecorrente!;
           _recorrenteTime = TimeOfDay(hour: hr ~/ 60, minute: hr % 60);
@@ -354,53 +365,63 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return ModalSheet(
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Nova Aula', style: AppTypography.titleLarge),
+            Text('Nova Aula', style: AppTypography.titleLarge),
             const SizedBox(height: 16),
             TextField(
               controller: _tituloController,
-              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-              cursorColor: Colors.white,
-              decoration: _inputDecoration('Título'),
+              style: AppTypography.bodyMedium
+                  .copyWith(color: colorScheme.onSurface),
+              cursorColor: colorScheme.primary,
+              decoration: _inputDecoration('Título', theme),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _selectedCategoriaId,
-              dropdownColor: const Color(0xFF1E1E1E),
-              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-              decoration: _inputDecoration('Categoria'),
-              items: _categorias.map((c) => DropdownMenuItem(
-                value: c.id,
-                child: Text(c.nome),
-              )).toList(),
+              dropdownColor:
+                  isDark ? const Color(0xFF1E1E1E) : colorScheme.surface,
+              style: AppTypography.bodyMedium
+                  .copyWith(color: colorScheme.onSurface),
+              decoration: _inputDecoration('Categoria', theme),
+              items: _categorias
+                  .map((c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(c.nome),
+                      ))
+                  .toList(),
               onChanged: (val) => setState(() => _selectedCategoriaId = val),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _descricaoController,
               maxLines: 3,
-              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-              cursorColor: Colors.white,
-              decoration: _inputDecoration('Descrição'),
+              style: AppTypography.bodyMedium
+                  .copyWith(color: colorScheme.onSurface),
+              cursorColor: colorScheme.primary,
+              decoration: _inputDecoration('Descrição', theme),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _duracaoController,
               keyboardType: TextInputType.number,
-              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-              cursorColor: Colors.white,
-              decoration: _inputDecoration('Duração (minutos)'),
+              style: AppTypography.bodyMedium
+                  .copyWith(color: colorScheme.onSurface),
+              cursorColor: colorScheme.primary,
+              decoration: _inputDecoration('Duração (minutos)', theme),
             ),
             const SizedBox(height: 16),
-            const Text('Agendamento', style: AppTypography.bodyLarge),
+            Text('Agendamento', style: AppTypography.bodyLarge),
             const SizedBox(height: 8),
             SwitchListTile(
-              title: const Text('Aula Recorrente?', style: AppTypography.bodyMedium),
+              title: Text('Aula Recorrente?', style: AppTypography.bodyMedium),
               value: _isRecorrente,
               onChanged: (val) => setState(() => _isRecorrente = val),
               activeColor: const Color(0xFFFF312E),
@@ -446,14 +467,17 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
               pickedBytes: _pickedBytes,
               pickedFilename: _pickedFilename,
               onPick: () async {
-                final result = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+                final result = await FilePicker.platform
+                    .pickFiles(type: FileType.image, withData: true);
                 if (result != null && result.files.isNotEmpty) {
                   final f = result.files.first;
                   if (f.bytes != null) {
                     const int maxBytes = 5 * 1024 * 1024;
                     if (f.size > maxBytes) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Arquivo muito grande. Tamanho máximo: 5MB.')));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Arquivo muito grande. Tamanho máximo: 5MB.')));
                       }
                       return;
                     }
@@ -476,8 +500,10 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey[700]!),
-                      foregroundColor: Colors.white,
+                      side: BorderSide(
+                        color: isDark ? Colors.grey[700]! : Colors.grey[400]!,
+                      ),
+                      foregroundColor: colorScheme.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text('Cancelar'),
@@ -492,7 +518,12 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: _saving ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Salvar'),
+                    child: _saving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('Salvar'),
                   ),
                 ),
               ],
@@ -503,20 +534,41 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     );
   }
 
-  InputDecoration _inputDecoration(String label) {
+  InputDecoration _inputDecoration(String label, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+      labelStyle: AppTypography.bodySmall.copyWith(
+        color: isDark ? Colors.grey[400] : Colors.grey[700],
+      ),
       filled: true,
-      fillColor: Colors.black.withOpacity(0.3),
+      fillColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey[800]!),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.primary),
       ),
     );
   }
 
-  Widget _buildDatePicker({required String label, required DateTime? date, required ValueChanged<DateTime> onPick}) {
+  Widget _buildDatePicker(
+      {required String label,
+      required DateTime? date,
+      required ValueChanged<DateTime> onPick}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: () async {
         final now = DateTime.now();
@@ -529,16 +581,24 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
         if (d != null) onPick(d);
       },
       child: InputDecorator(
-        decoration: _inputDecoration(label),
+        decoration: _inputDecoration(label, theme),
         child: Text(
-          date != null ? '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}' : 'Selecione a data',
-          style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+          date != null
+              ? '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}'
+              : 'Selecione a data',
+          style:
+              AppTypography.bodyMedium.copyWith(color: colorScheme.onSurface),
         ),
       ),
     );
   }
 
-  Widget _buildTimePicker({required String label, required TimeOfDay? time, required ValueChanged<TimeOfDay> onPick}) {
+  Widget _buildTimePicker(
+      {required String label,
+      required TimeOfDay? time,
+      required ValueChanged<TimeOfDay> onPick}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: () async {
         final t = await showTimePicker(
@@ -548,16 +608,22 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
         if (t != null) onPick(t);
       },
       child: InputDecorator(
-        decoration: _inputDecoration(label),
+        decoration: _inputDecoration(label, theme),
         child: Text(
-          time != null ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}' : 'Selecione o horário',
-          style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+          time != null
+              ? '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'
+              : 'Selecione o horário',
+          style:
+              AppTypography.bodyMedium.copyWith(color: colorScheme.onSurface),
         ),
       ),
     );
   }
 
   Widget _buildDayToggle(String label, int index) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _selectedDays[index];
     return FilterChip(
       label: Text(label),
@@ -566,13 +632,18 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
       selectedColor: const Color(0xFFFF312E),
       checkmarkColor: Colors.white,
       labelStyle: AppTypography.bodySmall.copyWith(
-        color: isSelected ? Colors.white : Colors.white70,
+        color:
+            isSelected ? Colors.white : colorScheme.onSurface.withOpacity(0.7),
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
-      backgroundColor: Colors.black.withOpacity(0.3),
+      backgroundColor:
+          isDark ? Colors.black.withOpacity(0.3) : colorScheme.surfaceVariant,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: isSelected ? const Color(0xFFFF312E) : Colors.grey[800]!),
+        side: BorderSide(
+            color: isSelected
+                ? const Color(0xFFFF312E)
+                : colorScheme.outline.withOpacity(0.5)),
       ),
     );
   }
@@ -581,8 +652,11 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     final titulo = _tituloController.text.trim();
     final descricao = _descricaoController.text.trim();
     final duracaoStr = _duracaoController.text.trim();
-    
-    if (titulo.isEmpty || descricao.isEmpty || duracaoStr.isEmpty || _selectedCategoriaId == null) {
+
+    if (titulo.isEmpty ||
+        descricao.isEmpty ||
+        duracaoStr.isEmpty ||
+        _selectedCategoriaId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha todos os campos obrigatórios'),
@@ -657,7 +731,8 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     String? finalUrl;
     if (_pickedBytes != null && _pickedFilename != null) {
       final up = await _service.uploadImagem(_pickedBytes!, _pickedFilename!);
-      if (up.success && up.data != null) finalUrl = up.data;
+      if (up.success && up.data != null)
+        finalUrl = up.data;
       else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -692,10 +767,17 @@ class _ImagePickerRow extends StatelessWidget {
   final VoidCallback onPick;
   final VoidCallback onRemove;
 
-  const _ImagePickerRow({required this.pickedBytes, required this.pickedFilename, required this.onPick, required this.onRemove});
+  const _ImagePickerRow(
+      {required this.pickedBytes,
+      required this.pickedFilename,
+      required this.onPick,
+      required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -704,11 +786,12 @@ class _ImagePickerRow extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onPick,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1F1F1F),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                backgroundColor: colorScheme.surfaceVariant,
+                foregroundColor: colorScheme.onSurface,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
-              icon: const Icon(Icons.image, color: Colors.white),
+              icon: Icon(Icons.image, color: colorScheme.onSurface),
               label: const Text('Adicionar imagem'),
             ),
             const SizedBox(width: 12),
@@ -716,11 +799,12 @@ class _ImagePickerRow extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRemove,
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.grey[700]!),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  side: BorderSide(color: colorScheme.outline),
+                  foregroundColor: colorScheme.onSurface,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: const Icon(Icons.close),
                 label: const Text('Remover'),
               ),
           ],
@@ -728,7 +812,7 @@ class _ImagePickerRow extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Tamanho máximo: 5MB',
-          style: AppTypography.caption.copyWith(color: Colors.white54),
+          style: AppTypography.caption.copyWith(color: colorScheme.onSurface.withOpacity(0.6)),
         ),
         const SizedBox(height: 8),
         if (pickedBytes != null) _ResponsiveImagePreview(bytes: pickedBytes!),
@@ -759,10 +843,12 @@ class _ResponsiveImagePreview extends StatelessWidget {
               bytes,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
+                final colorScheme = Theme.of(context).colorScheme;
                 return Container(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.surface,
                   alignment: Alignment.center,
-                  child: Text('Falha ao pré-visualizar imagem', style: AppTypography.caption),
+                  child: Text('Falha ao pré-visualizar imagem',
+                      style: AppTypography.caption.copyWith(color: colorScheme.onSurface.withOpacity(0.7))),
                 );
               },
             ),
@@ -785,19 +871,23 @@ class _AulaCard extends StatelessWidget {
   final VoidCallback onDelete;
   final String Function(String) formatDate;
 
-  const _AulaCard({required this.aula, required this.onEdit, required this.onDelete, required this.formatDate});
+  const _AulaCard(
+      {required this.aula,
+      required this.onEdit,
+      required this.onDelete,
+      required this.formatDate});
 
-  Color get _cardColor => const Color(0xFF121212);
-  Color get _borderColor => const Color(0xFF1E1E1E);
+  Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
+  Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
   Color get _accent => const Color(0xFFFF312E);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardColor,
+        color: _cardColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _borderColor),
+        border: Border.all(color: _borderColor(context)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -811,9 +901,13 @@ class _AulaCard extends StatelessWidget {
               children: [
                 _buildHeader(context),
                 const SizedBox(height: 8),
-                Text(aula.descricao, style: AppTypography.bodyMedium.copyWith(color: Colors.white70), maxLines: 3, overflow: TextOverflow.ellipsis),
+                Text(aula.descricao,
+                    style: AppTypography.bodyMedium
+                        .copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 16),
-                _buildInfoRow(),
+                _buildInfoRow(context),
                 const SizedBox(height: 16),
                 _buildActions(context),
               ],
@@ -824,7 +918,8 @@ class _AulaCard extends StatelessWidget {
     );
   }
 
-  bool get _hasImage => (aula.imagemUrl != null && aula.imagemUrl!.trim().isNotEmpty);
+  bool get _hasImage =>
+      (aula.imagemUrl != null && aula.imagemUrl!.trim().isNotEmpty);
 
   Widget _buildImage(BuildContext context) {
     String url = aula.imagemUrl!;
@@ -840,13 +935,20 @@ class _AulaCard extends StatelessWidget {
         fit: BoxFit.cover,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
-          return Container(color: Colors.black, child: const Center(child: CircularProgressIndicator()));
+          return Container(
+              color: Theme.of(context).colorScheme.surface,
+              child: const Center(child: CircularProgressIndicator()));
         },
         errorBuilder: (context, error, stackTrace) {
+          final colorScheme = Theme.of(context).colorScheme;
           return Container(
-            color: Colors.black,
+            color: colorScheme.surface,
             child: Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.broken_image, color: Colors.white54, size: 36), const SizedBox(height: 8), Text('Erro ao carregar imagem', style: AppTypography.caption)]),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.broken_image, color: colorScheme.onSurface.withOpacity(0.5), size: 36),
+                const SizedBox(height: 8),
+                Text('Erro ao carregar imagem', style: AppTypography.caption.copyWith(color: colorScheme.onSurface.withOpacity(0.7)))
+              ]),
             ),
           );
         },
@@ -860,7 +962,8 @@ class _AulaCard extends StatelessWidget {
         Expanded(
           child: Text(
             aula.titulo,
-            style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+            style:
+                AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
         ),
         if (aula.categoria != null)
@@ -873,41 +976,45 @@ class _AulaCard extends StatelessWidget {
             ),
             child: Text(
               aula.categoria!['nome'],
-              style: AppTypography.caption.copyWith(color: _accent, fontWeight: FontWeight.bold),
+              style: AppTypography.caption
+                  .copyWith(color: _accent, fontWeight: FontWeight.bold),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildInfoRow() {
+  Widget _buildInfoRow(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildIconText(Icons.timer, '${aula.duracao} min'),
+        _buildIconText(context, Icons.timer, '${aula.duracao} min'),
         const SizedBox(height: 4),
         if (aula.agendamento != null) ...[
           if (aula.agendamento!.recorrente)
-            _buildIconText(Icons.repeat, _formatRecurrence(aula.agendamento!))
+            _buildIconText(context, Icons.repeat, _formatRecurrence(aula.agendamento!))
           else if (aula.agendamento!.dataExata != null)
-            _buildIconText(Icons.calendar_today, _formatExactDate(aula.agendamento!.dataExata!)),
-          
+            _buildIconText(context, Icons.calendar_today,
+                _formatExactDate(aula.agendamento!.dataExata!)),
           if (aula.agendamento!.horarioRecorrente != null)
-             _buildIconText(Icons.access_time, _formatTime(aula.agendamento!.horarioRecorrente!))
+            _buildIconText(context, Icons.access_time,
+                _formatTime(aula.agendamento!.horarioRecorrente!))
           else if (aula.agendamento!.dataExata != null)
-             _buildIconText(Icons.access_time, _formatTimeFromDate(aula.agendamento!.dataExata!)),
+            _buildIconText(context, Icons.access_time,
+                _formatTimeFromDate(aula.agendamento!.dataExata!)),
         ],
       ],
     );
   }
 
-  Widget _buildIconText(IconData icon, String text) {
+  Widget _buildIconText(BuildContext context, IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: Colors.white54),
+        Icon(icon, size: 16, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
         const SizedBox(width: 8),
-        Text(text, style: AppTypography.bodySmall.copyWith(color: Colors.white70)),
+        Text(text,
+            style: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
       ],
     );
   }
@@ -921,7 +1028,7 @@ class _AulaCard extends StatelessWidget {
     if (ag.sexta == true) days.add('Sex');
     if (ag.sabado == true) days.add('Sáb');
     if (ag.domingo == true) days.add('Dom');
-    
+
     if (days.isEmpty) return 'Recorrente';
     return days.join(', ');
   }
@@ -958,7 +1065,7 @@ class _AulaCard extends StatelessWidget {
           onPressed: onEdit,
           icon: const Icon(Icons.edit, size: 18),
           label: const Text('Editar'),
-          style: TextButton.styleFrom(foregroundColor: Colors.white70),
+          style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
         ),
         const SizedBox(width: 8),
         TextButton.icon(
@@ -970,6 +1077,4 @@ class _AulaCard extends StatelessWidget {
       ],
     );
   }
-
-
 }

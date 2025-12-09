@@ -183,14 +183,14 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(c.nome, style: AppTypography.titleMedium.copyWith(color: Colors.white)),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(c.nome, style: AppTypography.titleMedium.copyWith(color: Theme.of(context).colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (c.planos != null && c.planos!.isNotEmpty) ...[
-              Text('Planos vinculados:', style: AppTypography.bodyMedium.copyWith(color: Colors.white70)),
+              Text('Planos vinculados:', style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -204,13 +204,13 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
               const SizedBox(height: 16),
             ],
             if (c.dataCriacao != null)
-              Text('Criado em: ${_formatDate(c.dataCriacao!)}', style: AppTypography.bodySmall.copyWith(color: Colors.grey)),
+              Text('Criado em: ${_formatDate(c.dataCriacao!)}', style: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Fechar', style: TextStyle(color: Colors.white)),
+            child: Text('Fechar', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
           ),
         ],
       ),
@@ -229,13 +229,13 @@ class _PersonalCategoriasPageState extends State<PersonalCategoriasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).appBarTheme.foregroundColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Categorias'),
@@ -288,11 +288,11 @@ class _EmptyStateCategorias extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.category, color: Colors.grey, size: 48),
+          Icon(Icons.category, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), size: 48),
           const SizedBox(height: 8),
-          Text('Sem categorias por enquanto', style: AppTypography.bodyLarge),
+          Text('Sem categorias por enquanto', style: AppTypography.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 8),
-          Text('Clique em “Nova Categoria” para criar a primeira.', style: AppTypography.caption),
+          Text('Clique em "Nova Categoria" para criar a primeira.', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onCreate,
@@ -346,20 +346,22 @@ class _NovaCategoriaSheetState extends State<_NovaCategoriaSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(widget.initialNome == null ? 'Nova Categoria' : 'Editar Categoria', style: AppTypography.titleLarge),
+            Text(widget.initialNome == null ? 'Nova Categoria' : 'Editar Categoria', style: AppTypography.titleLarge.copyWith(color: Theme.of(context).colorScheme.onSurface)),
             const SizedBox(height: 16),
             TextField(
               controller: _nomeController,
-              style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-              cursorColor: Colors.white,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              cursorColor: const Color(0xFFFF312E),
               decoration: InputDecoration(
                 labelText: 'Nome',
-                labelStyle: AppTypography.bodySmall.copyWith(color: Colors.white70),
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                 filled: true,
-                fillColor: Colors.black.withOpacity(0.3),
+                fillColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
               ),
             ),
@@ -390,8 +392,8 @@ class _NovaCategoriaSheetState extends State<_NovaCategoriaSheet> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey[700]!),
-                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text('Cancelar'),
@@ -433,8 +435,8 @@ class _CategoriaCard extends StatelessWidget {
 
   const _CategoriaCard({required this.categoria, required this.onEdit, required this.onDelete, required this.onTap});
 
-  Color get _cardColor => const Color(0xFF121212);
-  Color get _borderColor => const Color(0xFF1E1E1E);
+  Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
+  Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
   Color get _accent => const Color(0xFFFF312E);
 
   @override
@@ -445,10 +447,10 @@ class _CategoriaCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _cardColor,
+        color: _cardColor(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: hasPlanos ? _accent : _borderColor,
+          color: hasPlanos ? _accent : _borderColor(context),
           width: 1,
         ),
       ),
@@ -465,6 +467,7 @@ class _CategoriaCard extends StatelessWidget {
                     style: AppTypography.titleMedium.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -489,7 +492,7 @@ class _CategoriaCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (hasPlanos) ...[
-            Text('Planos vinculados:', style: AppTypography.caption.copyWith(color: Colors.white54)),
+            Text('Planos vinculados:', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -511,7 +514,7 @@ class _CategoriaCard extends StatelessWidget {
           ] else ...[
             Text(
               'Nenhum plano vinculado',
-              style: AppTypography.bodySmall.copyWith(color: Colors.white38),
+              style: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
             ),
             const SizedBox(height: 12),
           ],

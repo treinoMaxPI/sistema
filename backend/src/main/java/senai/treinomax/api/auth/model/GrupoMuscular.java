@@ -3,7 +3,6 @@ package senai.treinomax.api.auth.model;
 public enum GrupoMuscular {
     PEITO,
     OMBRO,
-    BRAÇO,
     COSTAS,
     PERNA,
     GLUTEOS,
