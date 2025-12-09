@@ -7,7 +7,7 @@ import 'package:gym_management/pages/admin/admin_dashboard_page.dart';
 import 'package:gym_management/pages/admin/admin_clientes_page.dart';
 import 'package:gym_management/pages/personal/exercicios_page.dart';
 import 'package:gym_management/pages/personal/treinos_page.dart';
-import 'package:gym_management/pages/personal/meus_treinos_page.dart';
+import 'package:gym_management/pages/personal/meus_treinos_page.dart' as personal;
 import 'package:gym_management/pages/personal/personal_categorias_page.dart';
 import 'package:gym_management/pages/personal/personal_mural_page.dart';
 import 'screens/login_screen.dart';
@@ -16,7 +16,7 @@ import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
 import 'package:gym_management/pages/customer/minhas_cobrancas_page.dart';
 import 'package:gym_management/pages/customer/mural_page.dart';
-import 'package:gym_management/pages/customer/meus_treinos_page.dart';
+import 'package:gym_management/pages/customer/meus_treinos_page.dart' as customer;
 import 'package:gym_management/pages/customer/customer_aulas_page.dart';
 import 'pages/customer/buy_plan_page.dart';
 import 'notifiers/theme_mode_notifier.dart';
@@ -86,7 +86,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         '/personal/categorias': (context) => const PersonalCategoriasPage(),
         '/personal/exercicios': (context) => const ExerciciosPage(),
         // Customer routes
-        '/customer/treinos': (context) => const MeusTreinosPage(),
+        '/customer/treinos': (context) => const customer.MeusTreinosPage(),
         '/customer/comprar-plano': (context) => const BuyPlanPage(),
         '/customer/cobrancas': (context) => const MinhasCobrancasPage(),
         '/customer/mural': (context) => const CustomerMuralPage(),

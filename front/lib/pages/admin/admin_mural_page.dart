@@ -542,7 +542,7 @@ class _ImagePickerRow extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Tamanho máximo: 5MB',
-          style: AppTypography.caption.copyWith(color: Colors.white54),
+          style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
         ),
         const SizedBox(height: 8),
         if (pickedBytes != null) _ResponsiveImagePreview(bytes: pickedBytes!),

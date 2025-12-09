@@ -364,20 +364,20 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).appBarTheme.foregroundColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
           children: [
-            const Text(
+            Text(
               'Meus Treinos',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).appBarTheme.foregroundColor,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -404,7 +404,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
         actions: [
           if (_isOfflineMode)
             IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
+              icon: Icon(Icons.refresh, color: Theme.of(context).appBarTheme.foregroundColor),
               onPressed: () async {
                 // Tenta reconectar
                 setState(() {
@@ -459,14 +459,14 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                   _searchQuery = value;
                 });
               },
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Buscar treinos...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
                         onPressed: () {
                           setState(() {
                             _searchQuery = '';
@@ -475,14 +475,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFF1A1A1A),
+                fillColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.surfaceVariant,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[800]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -515,8 +517,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                             const SizedBox(height: 16),
                             Text(
                               _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -545,25 +547,25 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                       ? Icons.search_off
                                       : Icons.fitness_center,
                                   size: 64,
-                                  color: Colors.grey,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   _searchQuery.isNotEmpty
                                       ? 'Nenhum treino encontrado'
                                       : 'Nenhum treino cadastrado',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 if (_searchQuery.isEmpty) ...[
                                   const SizedBox(height: 8),
-                                  const Text(
+                                  Text(
                                     'Seu personal trainer ainda não criou treinos para você.',
                                     style: TextStyle(
-                                      color: Colors.grey,
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                       fontSize: 14,
                                     ),
                                     textAlign: TextAlign.center,
@@ -729,7 +731,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      color: const Color(0xFF1A1A1A),
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: isUltimoTreino
@@ -739,7 +741,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                     : const Color(0xFF4CAF50),
                 width: 2,
               )
-            : BorderSide.none,
+            : BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -747,7 +749,7 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
         backgroundColor: Colors.transparent,
         collapsedBackgroundColor: Colors.transparent,
         iconColor: const Color(0xFFFF312E),
-        collapsedIconColor: Colors.grey,
+        collapsedIconColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         title: Row(
           children: [
             Expanded(
@@ -759,8 +761,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       Expanded(
                         child: Text(
                           treino.nome,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -847,8 +849,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         treino.tipoTreino!,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           fontSize: 13,
                         ),
                       ),
@@ -857,16 +859,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.history,
                           size: 14,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Última vez: ${_formatarData(ultimaExecucao)}',
-                          style: const TextStyle(
-                            color: Colors.grey,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -874,18 +876,18 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                     ),
                   ] else if (!isProximoTreino && !isUltimoTreino) ...[
                     const SizedBox(height: 4),
-                    const Row(
+                    Row(
                       children: [
                         Icon(
                           Icons.info_outline,
                           size: 14,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           'Nunca executado',
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -917,8 +919,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               const SizedBox(height: 4),
               Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontSize: 13,
                 ),
                 maxLines: 2,
@@ -947,16 +949,16 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.fitness_center,
                     size: 16,
-                    color: Colors.grey,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${treino.itens.length} ${treino.itens.length == 1 ? 'exercício' : 'exercícios'}',
-                    style: const TextStyle(
-                      color: Colors.grey,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       fontSize: 12,
                     ),
                   ),
@@ -971,20 +973,20 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 treino.descricao!,
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
                 ),
               ),
             ),
           ],
           if (treino.itens.isNotEmpty) ...[
-            const Divider(color: Colors.grey),
+            Divider(color: Theme.of(context).colorScheme.outline),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Exercícios:',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -1023,8 +1025,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                                 Expanded(
                                   child: Text(
                                     item.exercicioNome ?? 'Exercício',
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -1048,8 +1050,8 @@ class _MeusTreinosPageState extends State<MeusTreinosPage> {
                             const SizedBox(height: 4),
                             Text(
                               '${item.series} séries x ${item.repeticoes}',
-                              style: const TextStyle(
-                                color: Colors.grey,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 fontSize: 13,
                               ),
                             ),

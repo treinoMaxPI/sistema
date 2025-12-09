@@ -45,13 +45,13 @@ class _CustomerAulasPageState extends State<CustomerAulasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).appBarTheme.foregroundColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Aulas Disponíveis'),
@@ -105,9 +105,9 @@ class _EmptyStateAulas extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.school, color: Colors.grey, size: 48),
+          Icon(Icons.school, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), size: 48),
           const SizedBox(height: 8),
-          Text('Sem aulas disponíveis', style: AppTypography.bodyLarge),
+          Text('Sem aulas disponíveis', style: AppTypography.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurface)),
         ],
       ),
     );
@@ -120,17 +120,17 @@ class _AulaCard extends StatelessWidget {
 
   const _AulaCard({required this.aula, required this.formatDate});
 
-  Color get _cardColor => const Color(0xFF121212);
-  Color get _borderColor => const Color(0xFF1E1E1E);
+  Color _cardColor(BuildContext context) => Theme.of(context).colorScheme.surface;
+  Color _borderColor(BuildContext context) => Theme.of(context).colorScheme.outline;
   Color get _accent => const Color(0xFFFF312E);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardColor,
+        color: _cardColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _borderColor),
+        border: Border.all(color: _borderColor(context)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -144,9 +144,9 @@ class _AulaCard extends StatelessWidget {
               children: [
                 _buildHeader(context),
                 const SizedBox(height: 8),
-                Text(aula.descricao, style: AppTypography.bodyMedium.copyWith(color: Colors.white70), maxLines: 3, overflow: TextOverflow.ellipsis),
+                Text(aula.descricao, style: AppTypography.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)), maxLines: 3, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 16),
-                _buildInfoRow(),
+                _buildInfoRow(context),
               ],
             ),
           ),
@@ -171,13 +171,17 @@ class _AulaCard extends StatelessWidget {
         fit: BoxFit.cover,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
-          return Container(color: Colors.black, child: const Center(child: CircularProgressIndicator()));
+          return Container(color: Theme.of(context).colorScheme.surface, child: const Center(child: CircularProgressIndicator()));
         },
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.surface,
             child: Center(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.broken_image, color: Colors.white54, size: 36), const SizedBox(height: 8), Text('Erro ao carregar imagem', style: AppTypography.caption)]),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.broken_image, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), size: 36),
+                const SizedBox(height: 8),
+                Text('Erro ao carregar imagem', style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)))
+              ]),
             ),
           );
         },
@@ -191,7 +195,7 @@ class _AulaCard extends StatelessWidget {
         Expanded(
           child: Text(
             aula.titulo,
-            style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+            style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
         ),
         if (aula.categoria != null)
@@ -211,22 +215,22 @@ class _AulaCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow() {
+  Widget _buildInfoRow(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildIconText(Icons.timer, '${aula.duracao} min'),
+        _buildIconText(context, Icons.timer, '${aula.duracao} min'),
         const SizedBox(height: 4),
         if (aula.agendamento != null) ...[
           if (aula.agendamento!.recorrente)
-            _buildIconText(Icons.repeat, _formatRecurrence(aula.agendamento!))
+            _buildIconText(context, Icons.repeat, _formatRecurrence(aula.agendamento!))
           else if (aula.agendamento!.dataExata != null)
-            _buildIconText(Icons.calendar_today, _formatExactDate(aula.agendamento!.dataExata!)),
-          
+            _buildIconText(context, Icons.calendar_today, _formatExactDate(aula.agendamento!.dataExata!)),
+
           if (aula.agendamento!.horarioRecorrente != null)
-             _buildIconText(Icons.access_time, _formatTime(aula.agendamento!.horarioRecorrente!))
+             _buildIconText(context, Icons.access_time, _formatTime(aula.agendamento!.horarioRecorrente!))
           else if (aula.agendamento!.dataExata != null)
-             _buildIconText(Icons.access_time, _formatTimeFromDate(aula.agendamento!.dataExata!)),
+             _buildIconText(context, Icons.access_time, _formatTimeFromDate(aula.agendamento!.dataExata!)),
         ],
       ],
     );
@@ -234,13 +238,13 @@ class _AulaCard extends StatelessWidget {
 
 
 
-  Widget _buildIconText(IconData icon, String text) {
+  Widget _buildIconText(BuildContext context, IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: Colors.white54),
+        Icon(icon, size: 16, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
         const SizedBox(width: 8),
-        Text(text, style: AppTypography.bodySmall.copyWith(color: Colors.white70)),
+        Text(text, style: AppTypography.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7))),
       ],
     );
   }
