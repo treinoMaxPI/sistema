@@ -25,7 +25,6 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
   final _descricaoController = TextEditingController();
-  final _nivelController = TextEditingController();
   bool _isLoading = false;
   List<ItemTreino> _itens = [];
 
@@ -34,12 +33,6 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   bool _isLoadingExercicios = true;
 
   List<String> _tiposTreinoSelecionados = [];
-
-  final List<String> _niveis = [
-    'Iniciante',
-    'Intermediário',
-    'Avançado',
-  ];
 
   // Usa o enum GrupoMuscular do backend para garantir consistência
   List<String> get _tiposTreino => GrupoMuscular.allAsString;
@@ -68,7 +61,6 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
   void dispose() {
     _nomeController.dispose();
     _descricaoController.dispose();
-    _nivelController.dispose();
     super.dispose();
   }
 
@@ -202,7 +194,6 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
           : _tiposTreinoSelecionados.join(', '),
       descricao:
           _descricaoController.text.isEmpty ? null : _descricaoController.text,
-      nivel: _nivelController.text.isEmpty ? null : _nivelController.text,
       itens: _itens,
       usuarioId: widget.usuarioId,
     );
@@ -359,44 +350,6 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
                 ),
               ),
               style: TextStyle(color: colorScheme.onSurface),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value:
-                  _nivelController.text.isEmpty ? null : _nivelController.text,
-              decoration: InputDecoration(
-                labelText: 'Nível',
-                labelStyle:
-                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
-                filled: true,
-                fillColor: theme.brightness == Brightness.light
-                    ? Colors.white
-                    : colorScheme.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: colorScheme.outline),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFFFF312E)),
-                ),
-              ),
-              dropdownColor: colorScheme.surface,
-              style: TextStyle(color: colorScheme.onSurface),
-              items: _niveis.map((nivel) {
-                return DropdownMenuItem<String>(
-                  value: nivel,
-                  child: Text(nivel),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _nivelController.text = value ?? '';
-                });
-              },
             ),
             const SizedBox(height: 24),
             Row(
@@ -791,7 +744,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nomeController;
   late final TextEditingController _descricaoController;
-  late final TextEditingController _nivelController;
   bool _isLoading = false;
   List<ItemTreino> _itens = [];
 
@@ -800,12 +752,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   bool _isLoadingExercicios = true;
 
   List<String> _tiposTreinoSelecionados = [];
-
-  final List<String> _niveis = [
-    'Iniciante',
-    'Intermediário',
-    'Avançado',
-  ];
 
   // Usa o enum GrupoMuscular do backend para garantir consistência
   List<String> get _tiposTreino => GrupoMuscular.allAsString;
@@ -827,7 +773,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
 
     _descricaoController =
         TextEditingController(text: widget.treino.descricao ?? '');
-    _nivelController = TextEditingController(text: widget.treino.nivel ?? '');
     _itens = List.from(widget.treino.itens);
     _carregarExercicios();
   }
@@ -882,7 +827,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
   void dispose() {
     _nomeController.dispose();
     _descricaoController.dispose();
-    _nivelController.dispose();
     super.dispose();
   }
 
@@ -953,7 +897,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
           : _tiposTreinoSelecionados.join(', '),
       descricao:
           _descricaoController.text.isEmpty ? null : _descricaoController.text,
-      nivel: _nivelController.text.isEmpty ? null : _nivelController.text,
       itens: _itens,
     );
 
@@ -1110,44 +1053,6 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
                 ),
               ),
               style: TextStyle(color: colorScheme.onSurface),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value:
-                  _nivelController.text.isEmpty ? null : _nivelController.text,
-              decoration: InputDecoration(
-                labelText: 'Nível',
-                labelStyle:
-                    TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
-                filled: true,
-                fillColor: theme.brightness == Brightness.light
-                    ? Colors.white
-                    : colorScheme.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: colorScheme.outline),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFFFF312E)),
-                ),
-              ),
-              dropdownColor: colorScheme.surface,
-              style: TextStyle(color: colorScheme.onSurface),
-              items: _niveis.map((nivel) {
-                return DropdownMenuItem<String>(
-                  value: nivel,
-                  child: Text(nivel),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _nivelController.text = value ?? '';
-                });
-              },
             ),
             const SizedBox(height: 24),
             Row(

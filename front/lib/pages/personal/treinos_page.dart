@@ -238,11 +238,9 @@ class _TreinosPageState extends State<TreinosPage> {
     return _treinos.where((treino) {
       final nome = treino.nome.toLowerCase();
       final descricao = treino.descricao?.toLowerCase() ?? '';
-      final nivel = treino.nivel?.toLowerCase() ?? '';
       final query = _searchQuery.toLowerCase();
       return nome.contains(query) ||
-          descricao.contains(query) ||
-          nivel.contains(query);
+          descricao.contains(query);
     }).toList();
   }
 
@@ -760,24 +758,6 @@ class _TreinosPageState extends State<TreinosPage> {
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            if (treino.nivel != null && treino.nivel!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF312E).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  treino.nivel!,
-                  style: const TextStyle(
-                    color: Color(0xFFFF312E),
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               ),
             ],
             if (treino.itens.isNotEmpty) ...[

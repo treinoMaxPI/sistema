@@ -99,7 +99,6 @@ public class TreinoService {
                     treino.setNome(treinoAtualizado.getNome());
                     treino.setTipoTreino(treinoAtualizado.getTipoTreino());
                     treino.setDescricao(treinoAtualizado.getDescricao());
-                    treino.setNivel(treinoAtualizado.getNivel());
 
                     // Processar novos itens
                     // IMPORTANTE: Com orphanRemoval = true, nunca substituir a referência da coleção

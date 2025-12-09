@@ -39,7 +39,6 @@ public class TreinoController {
             treino.setNome((String) request.get("nome"));
             treino.setTipoTreino((String) request.get("tipoTreino"));
             treino.setDescricao(request.get("descricao") != null ? (String) request.get("descricao") : null);
-            treino.setNivel(request.get("nivel") != null ? (String) request.get("nivel") : null);
 
             if (request.get("usuarioId") == null) {
                 return ResponseEntity.badRequest().body(Map.of("message", "usuarioId é obrigatório"));
@@ -129,7 +128,6 @@ public class TreinoController {
             treino.setNome((String) request.get("nome"));
             treino.setTipoTreino((String) request.get("tipoTreino"));
             treino.setDescricao(request.get("descricao") != null ? (String) request.get("descricao") : null);
-            treino.setNivel(request.get("nivel") != null ? (String) request.get("nivel") : null);
 
             // Extrair itens do request
             @SuppressWarnings("unchecked")

@@ -36,10 +36,6 @@ public class Treino {
     @Column(length = 500)
     private String descricao;
 
-    @Size(max = 50, message = "O nível deve ter no máximo 50 caracteres.")
-    @Column(length = 50)
-    private String nivel; // Ex: "Iniciante", "Intermediário", "Avançado"
-
     @OneToMany(mappedBy = "treino", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("ordem ASC")
     private List<ItemTreino> itens = new ArrayList<>();
