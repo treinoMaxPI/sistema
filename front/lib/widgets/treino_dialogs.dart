@@ -135,7 +135,7 @@ class _CriarTreinoDialogState extends State<CriarTreinoDialog> {
               (e) => e.id == exercicioId,
               orElse: () => _exerciciosDisponiveis.isNotEmpty
                   ? _exerciciosDisponiveis.first
-                  : Exercicio(id: '', nome: '', grupoMuscular: []),
+                  : Exercicio(id: '', nome: '', ativacaoMuscular: []),
             );
 
             _itens.add(ItemTreino(
@@ -1214,7 +1214,7 @@ class _EditarTreinoDialogState extends State<EditarTreinoDialog> {
             : Exercicio(
                 id: '',
                 nome: '',
-                grupoMuscular: [],
+                ativacaoMuscular: [],
               ),
       );
     }

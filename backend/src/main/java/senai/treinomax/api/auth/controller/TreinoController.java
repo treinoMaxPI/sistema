@@ -220,7 +220,7 @@ public class TreinoController {
         try {
             log.info("Gerando treino para tipos: {}", request.getTiposTreino());
 
-            Collection<UUID> exercicioIds = this.geradorTreino.gerarTreino(request.getTiposTreino());
+            List<UUID> exercicioIds = this.geradorTreino.gerarTreino(request.getTiposTreino());
 
             return ResponseEntity.ok(exercicioIds);
         } catch (Exception e) {

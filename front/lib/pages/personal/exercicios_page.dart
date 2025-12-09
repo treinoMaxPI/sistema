@@ -617,7 +617,7 @@ class _ExercicioCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  exercicio.grupoMuscularDisplay.toUpperCase(),
+                  exercicio.grupoMuscularDisplayWithScore.toUpperCase(),
                   style: TextStyle(
                     color: _getGrupoMuscularColor(exercicio.grupoMuscular),
                     fontSize: 12,
